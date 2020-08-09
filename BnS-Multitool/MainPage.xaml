@@ -1,0 +1,30 @@
+﻿<Page x:Class="BnS_Multitool.MainPage"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+      xmlns:local="clr-namespace:BnS_Multitool"
+      mc:Ignorable="d" 
+      d:DesignHeight="490" d:DesignWidth="660"
+      Title="MainPage" KeepAlive="True" Loaded="Page_Loaded">
+
+    <Grid>
+        <Border BorderBrush="#FF343E4B" Margin="-2,-3,284,341" BorderThickness="0,2,2,2" />
+        <Label Content="Made by Tonic#1356" FontFamily="Arial" FontWeight="Bold" FontSize="18" Margin="0,0,417,462" Foreground="#FF99B4D1"/>
+        <TextBlock Foreground="#FFDAE1EA" TextWrapping="WrapWithOverflow" FontFamily="Arial" FontWeight="Bold" Margin="4,33,287,388">
+            Made for myself and clan members as a drop in replacement for BnS Buddy but releasing to everyone to enjoy
+            the peepos and worry's. If you want to support me in cheese burgers there's a button. This is only possible because of pilao and Hora so please share the love with them.
+        </TextBlock>
+        <Image x:Name="PictureBox" gif:AnimationBehavior.SourceUri="Resources/peepoLaptopHappy.gif" Margin="-2,84,586,341"/>
+        <Label Content="Changelog" Background="{x:Null}" Foreground="White" Margin="10,182,467,275" FontFamily="Arial" FontWeight="Bold" FontSize="20"/>
+        <RichTextBox IsReadOnly="True" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
+        <Grid Margin="226,65,284,339">
+            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Width="142" Height="94"
+                Background="{x:Null}" Click="Button_Click" Margin="26,10,-18,-18">
+                <Image Source="paypalbutton.png"  Width="97" Height="59"/>
+            </Button>
+        </Grid>
+        <Label x:Name="PingLabel" Content="Ping Offline" HorizontalAlignment="Left" Margin="474,10,0,0" VerticalAlignment="Top" Width="176" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+    </Grid>
+</Page>

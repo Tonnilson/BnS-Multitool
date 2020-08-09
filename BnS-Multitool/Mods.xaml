@@ -1,0 +1,54 @@
+﻿<Page x:Class="BnS_Multitool.Mods"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:BnS_Multitool"
+      mc:Ignorable="d" 
+      d:DesignHeight="490" d:DesignWidth="660"
+      Title="Mods">
+    <Page.Resources>
+        
+    </Page.Resources>
+    <Grid>
+        <Image Visibility="Hidden" x:Name="successStatePicture" Source="poggies.png" Margin="412,250,104,80" RenderTransformOrigin="0.5,0.5">
+            <Image.RenderTransform>
+                <TransformGroup>
+                    <ScaleTransform ScaleX="-1"/>
+                    <SkewTransform/>
+                    <RotateTransform Angle="81.881"/>
+                    <TranslateTransform/>
+                </TransformGroup>
+            </Image.RenderTransform>
+        </Image>
+        <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"  x:Name="ModsListBox" Margin="10,10,237,90" Background="#FF1E2021" BorderBrush="{x:Null}" MouseDoubleClick="AddonsListBox_MouseDoubleClick" KeyUp="AddonsListBox_KeyUp">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel  Orientation="Horizontal">
+                        <CheckBox IsChecked="{Binding isChecked, Mode=TwoWay}" />
+                        <TextBlock Text="{Binding Path=Name}"
+                           Foreground="White" FontFamily="Arial" FontSize="14" FontWeight="Normal" />
+                    </StackPanel>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <Label Margin="483,19,51,443" Content="Language:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="16"/>
+        <ComboBox x:Name="LANGUAGE_BOX" Margin="483,48,51,420" SelectionChanged="launchInfoSelectionChanged" FontFamily="Arial" FontWeight="Bold">
+            <ComboBoxItem>ENGLISH</ComboBoxItem>
+            <ComboBoxItem>PORTUGUESE</ComboBoxItem>
+            <ComboBoxItem>GERMAN</ComboBoxItem>
+            <ComboBoxItem>FRENCH</ComboBoxItem>
+        </ComboBox>
+
+        <Button Content="Apply" Margin="483,86,51,377" FontFamily="Arial Black" FontSize="16" Click="applyMods">
+           
+        </Button>
+        <Button Content="Refresh" Margin="483,120,51,343" FontFamily="Arial Black" FontSize="16" Click="refreshMods">
+          
+        </Button>
+        <Button Content="Mod Folder" Margin="483,154,51,309" FontFamily="Arial Black" FontSize="16" Click="openModFolder">
+          
+        </Button>
+
+    </Grid>
+</Page>

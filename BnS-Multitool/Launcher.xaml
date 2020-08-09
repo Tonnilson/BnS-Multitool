@@ -1,0 +1,88 @@
+﻿<Page
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:BnS_Multitool"
+      xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls" x:Class="BnS_Multitool.Launcher"
+      mc:Ignorable="d" 
+      d:DesignHeight="490" d:DesignWidth="660"
+      Title="Launcher" Loaded="Page_Loaded" KeepAlive="True">
+    <Grid>
+        <Grid x:Name="ProgressGrid" Visibility="Hidden">
+            <StackPanel x:Name="ProgressPanel">
+
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="MainGrid">
+            <GroupBox Header="Saved Accounts" BorderThickness="0.2" HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="309" Margin="10,215,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+                <Grid>
+                    <ComboBox HorizontalAlignment="Left" VerticalAlignment="Top" Width="252" Margin="20,10,0,0"/>
+                    <Button x:Name="LAUNCH_BTN" Content="Launch" Margin="49,35,157,10" Click="launchGameClientClick">
+                      
+                    </Button>
+                    <ComboBox x:Name="ACCOUNT_LIST_BOX" HorizontalAlignment="Left" VerticalAlignment="Top" Width="252" Margin="20,10,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" SelectionChanged="ACCOUNT_LIST_BOX_SelectionChanged" MouseEnter="MouseEnterSetFocus"/>
+                    <Button x:Name="KILL_BTN" Content="Kill" Margin="145,35,61,10" Click="killGameProcess">
+                      
+                    </Button>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Login Helper" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="10,315,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+                <Grid>
+                    <TextBlock TextWrapping="WrapWithOverflow">What is loginhelper? Login helper is used to automatically log in and submit a pin. This is required to use the launcher</TextBlock>
+                    <TextBlock x:Name="LoginHelper_Lbl" Margin="0,53,0,21" Foreground="Red" FontSize="14">Installed: No</TextBlock>
+                    <Button x:Name="LOGINHELPER_INSTALL" Width="76" Content="Install" Margin="4,76,217,21" Click="installLoginHelperClick">
+                      
+                    </Button>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="252" Margin="10,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+                <Grid>
+                    <TextBox x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,29,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="187" Grid.ColumnSpan="2" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <PasswordBox x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,76,0,0" VerticalAlignment="Top" Width="187" Grid.ColumnSpan="2" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <TextBox x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,123,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="187" Grid.ColumnSpan="2" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <Label Content="Email" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,5,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold" Grid.ColumnSpan="2"/>
+                    <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,52,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold" Grid.ColumnSpan="2"/>
+                    <Label Content="Pin Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="24,99,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold" Grid.ColumnSpan="2"/>
+                    <Button x:Name="MultiTool_UPDATE" Margin="75,152,89,7" Width="76" Content="Save" Click="saveAccount">
+                      
+                    </Button>
+                </Grid>
+            </GroupBox>
+            <GroupBox Header="Active Processes" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="341,315,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+                <Grid>
+                    <ListBox Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" x:Name="ProcessInfo" Margin="4,6,5,5" MouseDoubleClick="ActiveProcessesDblClick"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Header="Launch Info" BorderThickness="0.2" HorizontalAlignment="Left" Height="146" VerticalAlignment="Top" Width="180" Margin="470,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+                <Grid>
+                    <ComboBox x:Name="BIT_BOX" Margin="116,0,0,104" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
+                        <ComboBoxItem>32</ComboBoxItem>
+                        <ComboBoxItem>64</ComboBoxItem>
+                    </ComboBox>
+                    <ComboBox x:Name="REGION_BOX" Margin="116,25,0,79" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
+                        <ComboBoxItem>NA</ComboBoxItem>
+                        <ComboBoxItem>EU</ComboBoxItem>
+                    </ComboBox>
+                    <ComboBox x:Name="LANGUAGE_BOX" Margin="116,51,0,54" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
+                        <ComboBoxItem>EN</ComboBoxItem>
+                        <ComboBoxItem>PT</ComboBoxItem>
+                        <ComboBoxItem>DE</ComboBoxItem>
+                        <ComboBoxItem>FR</ComboBoxItem>
+                    </ComboBox>
+
+                    <Label Content="BIT:" Foreground="White" FontSize="16" Margin="77,-3,52,60"/>
+                    <Label Content="REGION:" Foreground="White" FontSize="16" Margin="37,21,51,79" />
+                    <Label Content="LANGUAGE:" Foreground="White" FontSize="16" Margin="8,48,54,52" />
+
+
+                    <CheckBox x:Name="NOTEXTURE_STREAMING" Content="No Texture Streaming" Margin="15,78,-15,28" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="USE_ALL_CORES" Content="Use All Cores" Background="White" Foreground="White" Margin="15,102,-15,0" Click="launchInfoCheckStateChanged" />
+                </Grid>
+            </GroupBox>
+        </Grid>
+        <Image Visibility="Hidden" x:Name="successStatePicture" Source="peepoWtf.png" Margin="144,89,317,186"/>
+        <TextBlock Visibility="Hidden" TextWrapping="WrapWithOverflow" x:Name="classLabel" Margin="343,180,42,195" Foreground="White" FontFamily="Arial" FontWeight="Bold" RenderTransformOrigin="0.5,0.5" FontSize="12"/>
+    </Grid>
+</Page>

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?include .\patches\*.xml?>
+<patches>
+  <patch file="system.config2.xml">
+    <select-node query="/config">
+      <!-- don't show eula -->
+      <select-node query="./option[@name='show-clause']/@value">
+        <set-value value="false" />
+      </select-node>
+      <!-- disable nagle algorithm in arena -->
+      <select-node query="./option[@name='use-nagle-arena']/@value">
+        <set-value value="false" />
+      </select-node>
+      <!-- simple mode at lv. 1 -->
+      <select-node query="./option[@name='use-context-simple-mode-player-character-level']/@value">
+        <set-value value="1" />
+      </select-node>
+      <!-- don't minimize other windows -->
+      <select-node query="./option[@name='minimize-window']/@value">
+        <set-value value="false" />
+      </select-node>
+    </select-node>
+  </patch>
+  <patch file="client.config2.xml">
+    <select-node query="/config">
+      <!-- always show dps meter -->
+      <select-node query="./group[@name='damage-meter']">
+        <select-node query="./option[@name='show-effect-only-info']/@value">
+          <set-value value="y" />
+        </select-node>
+        <select-nodes query="./option[starts-with(@name,'showtype-')]/@value">
+          <set-value value="2" />
+        </select-nodes>
+      </select-node>
+      <select-node query="./group[@name='inventory']">
+        <!-- instantly open chests -->
+        <select-node query="./option[@name='self-restraint-gauge-time']/@value">
+          <set-value value="0" />
+        </select-node>
+        <!-- instant salvaging -->
+        <select-node query="./option[@name='rapid-decompose-duration']/@value">
+          <set-value value="0" />
+        </select-node>
+      </select-node>
+      <!-- pvp: show names of silver and bronze players -->
+      <select-node query="./group[@name='duel']/option[@name='hidden-pc-name-rating']/@value">
+        <set-value value="130000" />
+      </select-node>
+      <!-- pvp: show average team rating -->
+      <select-node query="./group[@name='arena']/option[@name='use-team-average-score']/@value">
+        <set-value value="true" />
+      </select-node>
+      <!-- instant transmutation, instant jewel usage, etc. -->
+      <select-nodes query="./group[@name='particle']/option[contains(@name,'-particle-duration')]/@value">
+        <set-value value="0.0001" />
+      </select-nodes>
+      <!-- disable breast physics -->
+      <select-node query="./group[@name='uncategorized']/option[@name='no-use-breast-physics']/@value">
+        <set-value value="yes" />
+      </select-node>
+      <!-- no retry cooldown in skill training room -->
+      <select-node query="./group[@name='skill-training-room']/option[@name='retry-button-cool-time']/@value">
+        <set-value value="0" />
+      </select-node>
+      <!-- show server delay period for 3 minutes -->
+      <select-node query="./group[@name='latency']/option[@name='show-duration']/@value">
+        <set-value value="180" />
+      </select-node>
+      <!-- show enrage timer for 30 minutes -->
+      <select-node query="./group[@name='hud']/group[@name='boss']/option[@name='breaker-warning-countdown-start-time']/@value">
+        <set-value value="1800" />
+      </select-node>
+      <!-- set auto-kick disconnected party member to 15 minutes -->
+      <select-node query="./group[@name='party']/option[@name='clear-logout-member-second']/@value">
+        <set-value value="900" />
+      </select-node>
+    </select-node>
+  </patch>
+</patches>

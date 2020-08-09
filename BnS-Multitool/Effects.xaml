@@ -1,0 +1,78 @@
+﻿<Page x:Class="BnS_Multitool.Effects"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+      xmlns:toggle="clr-namespace:ToggleSwitch;assembly=ToggleSwitch"
+      xmlns:local="clr-namespace:BnS_Multitool"
+      mc:Ignorable="d" 
+      d:DesignHeight="490" d:DesignWidth="660"
+      Title="Effects" Loaded="Page_Loaded" KeepAlive="True">
+    <Grid>
+        <Grid x:Name="ProgressGrid" Visibility="Hidden">
+            <StackPanel x:Name="ProgressPanel">
+
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="MainGrid">
+            <Label Content="Blade and Soul Location:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="20" Margin="8,2,-8,429"/>
+            <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="501" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="updateLocationsOnChange"/>
+            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="516,35,47,430" Content="Browse" FontFamily="Arial" FontWeight="Bold" Click="Button_Click">
+
+            </Button>
+
+            <Label Content="UPK Backup Location:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="20" Margin="10,73,-10,367"/>
+            <TextBox x:Name="BNS_UPK_BOX" HorizontalAlignment="Left" Height="26" Margin="10,105,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="501" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="updateLocationsOnChange"/>
+            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="516,105,47,361" Content="Browse" FontFamily="Arial" FontWeight="Bold" Click="Button_Click_1">
+
+            </Button>
+
+
+            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="414,141,149,325" Content="Disable" FontFamily="Arial" FontWeight="Bold" Click="DisableEffectsClick">
+            </Button>
+
+            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="305,141,258,325" Content="Enable" FontFamily="Arial" FontWeight="Bold" Click="EnableEffectsClick">
+            </Button>
+
+            <CheckBox x:Name="ADDITIONAL_EFFECTS_BOX" Content="Remove Additional Effects" Margin="10,147,416,322" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" Click="ADDITIONAL_EFFECTS_BOX_Click"/>
+
+            <GroupBox Header="Class Animations" BorderThickness="0.2" HorizontalAlignment="Left" Height="206" VerticalAlignment="Top" Width="640" Margin="10,256,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="44*"/>
+                        <ColumnDefinition Width="113*"/>
+                    </Grid.ColumnDefinitions>
+                    <toggle:HorizontalToggleSwitch x:Name="sin_toggle" Margin="10,10,116,143" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D3F5D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <toggle:HorizontalToggleSwitch x:Name="sum_toggle" Margin="10,40,116,113" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <toggle:HorizontalToggleSwitch x:Name="gs_toggle" Margin="10,100,116,53" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <toggle:HorizontalToggleSwitch x:Name="kfm_toggle" Margin="10,70,116,83" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Unchecked="toggleUnchecked" Checked="toggleChecked"/>
+                    <toggle:HorizontalToggleSwitch x:Name="des_toggle" Margin="10,130,116,23" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Assassin" Margin="65,7,2,143" Foreground="White"/>
+                    <Label Content="Gun Slinger" Margin="65,97,442,51" Foreground="White" Grid.ColumnSpan="2"/>
+                    <Label Content="Summoner" Margin="65,37,2,113" Foreground="White"/>
+                    <Label Content="Kung Fu Master" Margin="65,67,413,81" Foreground="White" Grid.ColumnSpan="2"/>
+                    <Label Content="Destroyer" Margin="65,127,442,21" Foreground="White" Grid.ColumnSpan="2"/>
+                    <toggle:HorizontalToggleSwitch x:Name="fm_toggle" Margin="58,10,344,143" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Force Master" Margin="113,7,205,143" Foreground="White" Grid.Column="1"/>
+                    <toggle:HorizontalToggleSwitch x:Name="sf_toggle" Margin="58,40,344,113" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Soul Fighter" Margin="113,37,215,111" Foreground="White" Grid.Column="1"/>
+                    <toggle:HorizontalToggleSwitch x:Name="arc_toggle" Margin="58,70,344,83" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Archer" Margin="113,67,215,81" Foreground="White" Grid.Column="1"/>
+                    <toggle:HorizontalToggleSwitch x:Name="bm_toggle" Margin="58,100,344,53" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Blade Master" Margin="113,97,205,53" Foreground="White" Grid.Column="1"/>
+                    <toggle:HorizontalToggleSwitch x:Name="bd_toggle" Margin="58,130,344,23" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Blade Dancer" Margin="113,127,215,23" Foreground="White" Grid.Column="1"/>
+                    <toggle:HorizontalToggleSwitch x:Name="wl_toggle" Margin="253,10,149,143" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Warlock" Margin="308,7,10,143" Foreground="White" Grid.Column="1"/>
+                    <Image Visibility="Hidden" x:Name="successStatePicture" Source="467303591695089664.png" Grid.Column="1" Margin="394,117,-1,-3"/>
+                    <Label Visibility="Hidden" HorizontalContentAlignment="Right" x:Name="classLabel" Content="Addons Applied!" Margin="202,155,58,-3" Foreground="White" FontFamily="Arial" FontWeight="Bold" RenderTransformOrigin="0.5,0.5" Grid.Column="1" FontSize="12">
+                    </Label>
+                    <toggle:HorizontalToggleSwitch x:Name="wd_toggle" Margin="253,40,149,113" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Grid.Column="1" Checked="toggleChecked" Unchecked="toggleUnchecked"/>
+                    <Label Content="Warden" Margin="308,37,10,111" Foreground="White" Grid.Column="1"/>
+                </Grid>
+            </GroupBox>
+            <toggle:HorizontalToggleSwitch x:Name="all_toggle" Margin="600,234,10,231" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="50" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="allChecked" Unchecked="allUnchecked"/>
+            <Label Content="All:" Margin="559,231,62,228" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18"/>
+        </Grid>
+    </Grid>
+</Page>

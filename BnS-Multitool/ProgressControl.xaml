@@ -1,0 +1,21 @@
+﻿<UserControl x:Class="BnS_Multitool.ProgressControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+             xmlns:local="clr-namespace:BnS_Multitool"
+             mc:Ignorable="d" 
+             d:DesignHeight="490" d:DesignWidth="660" Loaded="UserControl_Loaded">
+    <Grid>
+        <Grid>
+            <Grid x:Name="HappyPeepo">
+                <Image x:Name="PictureBox" gif:AnimationBehavior.SourceUri="Images/peepoHappy.gif" Margin="0,0,0,128"/>
+            </Grid>
+            <Grid x:Name="SadPeepo" Visibility="Hidden">
+                <Image gif:AnimationBehavior.SourceUri="Images/peepoSadLean.gif" Margin="0,0,0,128"/>
+            </Grid>
+            <TextBlock x:Name="ProgressLabel" TextAlignment="Center" TextWrapping="WrapWithOverflow" HorizontalAlignment="Center" Text="Doing the stuf..." Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="10,385,10,10" Width="640"/>
+        </Grid>
+    </Grid>
+</UserControl>

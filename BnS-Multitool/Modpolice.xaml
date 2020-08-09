@@ -1,0 +1,30 @@
+﻿<Page x:Class="BnS_Multitool.Modpolice"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:BnS_Multitool"
+      mc:Ignorable="d" 
+      d:DesignHeight="490" d:DesignWidth="660"
+      Title="Modpolice" Loaded="Page_Loaded">
+
+    <Grid>
+        <Grid x:Name="ProgressGrid" Visibility="Hidden">
+            <StackPanel x:Name="ProgressPanel">
+
+            </StackPanel>
+        </Grid>
+        <Grid x:Name="MainGrid">
+            <Label x:Name="pluginloaderLabel" Content="Plugin Loader: Installed" Margin="10,73,385,389" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label Content="Blade and Soul Location:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="20" Margin="8,2,-8,429"/>
+            <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="501" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="updateLocationsOnChange"/>
+            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="516,35,47,430" Content="Browse" FontFamily="Arial" FontWeight="Bold" Click="browseBnSLocation">
+            </Button>
+            <Button Visibility="Hidden" x:Name="downloadBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="414,66,149,399" Content="Download" FontFamily="Arial" FontWeight="Bold" Click="downloadClick">
+            </Button>
+            <Button Visibility="Hidden" x:Name="installBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="305,66,258,399" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installModPolice">
+            </Button>
+            <Label x:Name="bnspatchLabel" Content="BNS Patch: Installed" Margin="10,96,385,366" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+        </Grid>
+    </Grid>
+</Page>
