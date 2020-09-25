@@ -81,6 +81,26 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] BnS_ToS_x64 {
+            get {
+                object obj = ResourceManager.GetObject("BnS_ToS_x64", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] BnS_ToS_x86 {
+            get {
+                object obj = ResourceManager.GetObject("BnS_ToS_x86", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;?include .\patches\*.xml?&gt;
         ///&lt;patches&gt;

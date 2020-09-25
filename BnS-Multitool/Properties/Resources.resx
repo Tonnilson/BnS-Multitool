@@ -124,6 +124,12 @@
   <data name="BnS_Multi_Tool_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\BnS-Multi-Tool-Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="BnS_ToS_x64" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\BnS-ToS-x64.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="BnS_ToS_x86" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\BnS-ToS-x86.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="patches" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\patches.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>

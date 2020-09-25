@@ -195,7 +195,11 @@ namespace BnS_Multitool
                 AddonsListBox.SelectedItem = AddonEntry;
                 CollectionViewSource.GetDefaultView(AddonsListBox.DataContext).Refresh();
                 AddonsListBox.SelectedIndex = lastSelectedAddon;
-            } catch (Exception ex) { Debug.WriteLine(ex.Message); }
+            } catch (Exception ex)
+            {
+                var dialog = new ErrorPrompt(ex.Message);
+                dialog.ShowDialog();
+            }
         }
 
         private void AddonsListBox_KeyUp(object sender, KeyEventArgs e)
@@ -231,7 +235,10 @@ namespace BnS_Multitool
                 PatchesListBox.SelectedItem = AddonEntry;
                 CollectionViewSource.GetDefaultView(PatchesListBox.DataContext).Refresh();
                 PatchesListBox.SelectedIndex = lastSelectedPatch;
-            } catch (Exception ex) { Debug.WriteLine(ex.Message); }
+            } catch (Exception ex) {
+                var dialog = new ErrorPrompt(ex.Message);
+                dialog.ShowDialog();
+            }
         }
 
         private void PatchesListBox_KeyUp(object sender, KeyEventArgs e)

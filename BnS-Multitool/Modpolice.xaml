@@ -20,11 +20,12 @@
             <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="501" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="updateLocationsOnChange"/>
             <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="516,35,47,430" Content="Browse" FontFamily="Arial" FontWeight="Bold" Click="browseBnSLocation">
             </Button>
-            <Button Visibility="Hidden" x:Name="downloadBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="414,66,149,399" Content="Download" FontFamily="Arial" FontWeight="Bold" Click="downloadClick">
+            <Button x:Name="downloadBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="383,66,180,399" Content="Download" FontFamily="Arial" FontWeight="Bold" Click="downloadClick">
             </Button>
-            <Button Visibility="Hidden" x:Name="installBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="305,66,258,399" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installModPolice">
+            <Button x:Name="installBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="279,66,284,399" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installModPolice">
             </Button>
             <Label x:Name="bnspatchLabel" Content="BNS Patch: Installed" Margin="10,96,385,366" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Button x:Name="downloadBtn_Copy" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="487,66,47,399" Content="Check For update?" FontFamily="Arial" FontWeight="Bold" Click="checkForUpdate"/>
         </Grid>
     </Grid>
 </Page>

@@ -140,7 +140,8 @@ namespace BnS_Multitool
                 ModsListBox.SelectedIndex = lastSelectedMod;
             } catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                var dialog = new ErrorPrompt(ex.Message);
+                dialog.ShowDialog();
             }
         }
 

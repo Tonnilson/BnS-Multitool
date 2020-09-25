@@ -49,11 +49,11 @@ namespace BnS_Multitool
             if (SystemConfig.SYS.ADDITIONAL_EFFECTS == 1)
                 ADDITIONAL_EFFECTS_BOX.IsChecked = true;
 
-            foreach(var classData in SystemConfig.SYS.ANIMATION_UPKS)
+            foreach (var classData in SystemConfig.SYS.ANIMATION_UPKS)
             {
-                if(checkAnimationFiles(classData.CLASS))
+                if (checkAnimationFiles(classData.CLASS))
                 {
-                    switch(classData.CLASS)
+                    switch (classData.CLASS)
                     {
                         case "Assassin":
                             sin_toggle.IsChecked = true;
@@ -91,6 +91,9 @@ namespace BnS_Multitool
                         case "Warden":
                             wd_toggle.IsChecked = true;
                             break;
+                        case "Astromancer":
+                            astro_toggle.IsChecked = true;
+                            break;
                     }
                 }
             }
@@ -103,7 +106,7 @@ namespace BnS_Multitool
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            
+
         }
 
         private void EnableEffects(object sender, DoWorkEventArgs e)
@@ -250,6 +253,14 @@ namespace BnS_Multitool
 
         private void DisableEffectsClick(object sender, RoutedEventArgs e)
         {
+            if(Process.GetProcessesByName("Client").Length >= 1)
+            {
+                wtfLbl.Text = "You can't do that when BnS is already running!";
+                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
+                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                return;
+            }
+
             _progressControl = new ProgressControl();
             MainWindow.mainWindowFrame.RemoveBackEntry();
             ProgressGrid.Visibility = Visibility.Visible;
@@ -269,6 +280,14 @@ namespace BnS_Multitool
 
         private void EnableEffectsClick(object sender, RoutedEventArgs e)
         {
+            if (Process.GetProcessesByName("Client").Length >= 1)
+            {
+                wtfLbl.Text = "You can't do that when BnS is already running!";
+                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
+                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                return;
+            }
+
             _progressControl = new ProgressControl();
             MainWindow.mainWindowFrame.RemoveBackEntry();
             ProgressGrid.Visibility = Visibility.Visible;
@@ -341,8 +360,17 @@ namespace BnS_Multitool
             //Page is not fully initialized yet so get us out
             if (!_isInitialized)
                 return;
+
             if (SystemConfig.SYS.UPK_DIR == "") return;
             if (!Directory.Exists(SystemConfig.SYS.UPK_DIR)) return;
+
+            if (Process.GetProcessesByName("Client").Length >= 1)
+            {
+                wtfLbl.Text = "You can't do that when BnS is already running!";
+                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
+                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                return;
+            }
 
             ToggleSwitch.HorizontalToggleSwitch currentBox = (ToggleSwitch.HorizontalToggleSwitch)sender;
 
@@ -389,6 +417,9 @@ namespace BnS_Multitool
                 case "wd_toggle":
                     className = "Warden";
                     break;
+                case "astro_toggle":
+                    className = "Astromancer";
+                    break;
             }
 
             if (className != "" && !checkAnimationFiles(className))
@@ -433,6 +464,7 @@ namespace BnS_Multitool
             bd_toggle.IsChecked = !state;
             wl_toggle.IsChecked = !state;
             wd_toggle.IsChecked = !state;
+            astro_toggle.IsChecked = !state;
 
             ((Storyboard)FindResource("animate")).Begin(classLabel);
             ((Storyboard)FindResource("animate")).Begin(successStatePicture);
@@ -457,7 +489,8 @@ namespace BnS_Multitool
                             File.Move(directory + file, SystemConfig.SYS.UPK_DIR + @"\" + file);
                         } catch (Exception ex)
                         {
-                            Debug.WriteLine(ex.Message);
+                            var dialog = new ErrorPrompt(ex.Message);
+                            dialog.ShowDialog();
                         }
                     }
                 } else
@@ -473,7 +506,8 @@ namespace BnS_Multitool
                                 File.Move(SystemConfig.SYS.UPK_DIR + @"\" + file, directory + file);
                         } catch (Exception ex)
                         {
-                            Debug.WriteLine(ex.Message);
+                            var dialog = new ErrorPrompt(ex.Message);
+                            dialog.ShowDialog();
                         }
                     }
                 }
@@ -496,6 +530,14 @@ namespace BnS_Multitool
 
             if (SystemConfig.SYS.UPK_DIR == "") return;
             if (!Directory.Exists(SystemConfig.SYS.UPK_DIR)) return;
+
+            if (Process.GetProcessesByName("Client").Length >= 1)
+            {
+                wtfLbl.Text = "You can't do that when BnS is already running!";
+                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
+                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                return;
+            }
 
             ToggleSwitch.HorizontalToggleSwitch currentBox = (ToggleSwitch.HorizontalToggleSwitch)sender;
 
@@ -542,6 +584,9 @@ namespace BnS_Multitool
                 case "wd_toggle":
                     className = "Warden";
                     break;
+                case "astro_toggle":
+                    className = "Astromancer";
+                    break;
             }
 
             if (className != "" && checkAnimationFiles(className))
@@ -557,6 +602,14 @@ namespace BnS_Multitool
             if (SystemConfig.SYS.UPK_DIR == "") return;
             if (!Directory.Exists(SystemConfig.SYS.UPK_DIR)) return;
 
+            if (Process.GetProcessesByName("Client").Length >= 1)
+            {
+                wtfLbl.Text = "You can't do that when BnS is already running!";
+                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
+                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                return;
+            }
+
             _isInitialized = false;
             handleAllClassAnimations(false);
             _isInitialized = true;
@@ -570,6 +623,14 @@ namespace BnS_Multitool
 
             if (SystemConfig.SYS.UPK_DIR == "") return;
             if (!Directory.Exists(SystemConfig.SYS.UPK_DIR)) return;
+
+            if (Process.GetProcessesByName("Client").Length >= 1)
+            {
+                wtfLbl.Text = "You can't do that when BnS is already running!";
+                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
+                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                return;
+            }
 
             _isInitialized = false;
             handleAllClassAnimations(true);

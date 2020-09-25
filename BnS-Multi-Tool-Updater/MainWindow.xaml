@@ -6,7 +6,7 @@
         xmlns:xrpb="http://XamlRadialProgressBar/DotNet"
         xmlns:local="clr-namespace:BnS_Multi_Tool_Updater"
         mc:Ignorable="d"
-        Title="MainWindow" Height="322.618" Width="491.666" WindowStyle="None" Opacity="0.95" Background="#FF151617" ResizeMode="CanMinimize">
+        Title="Updater" Height="322.618" Width="491.666" WindowStyle="None" Opacity="0.95" Background="#FF151617" ResizeMode="NoResize" Topmost="True" WindowStartupLocation="CenterScreen">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>

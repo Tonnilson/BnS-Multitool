@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BnS_Multitool"
         mc:Ignorable="d"
-        Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="True" Opacity="0.95" Background="#FF151617" Loaded="Window_Loaded" StateChanged="Window_StateChanged" WindowStartupLocation="CenterScreen">
+        Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="True" Opacity="0.95" Background="#FF151617" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Grid>
         <DockPanel LastChildFill="False">
             <StackPanel DockPanel.Dock="Left" Width="200" Background="#161a1f">

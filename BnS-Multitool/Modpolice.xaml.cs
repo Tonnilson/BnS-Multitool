@@ -70,12 +70,60 @@ namespace BnS_Multitool
             refreshSomeShit();
         }
 
+        private async void checkForUpdate( object sender, RoutedEventArgs e)
+        {
+            bool _bnspatchUpdate = false;
+            bool _pluginloaderUpdate = false;
+
+            await Task.Run(async () =>
+            {
+                if (!Directory.Exists("modpolice")) return;
+
+                try
+                {
+                    var client = new MegaApiClient();
+                    await client.LoginAnonymousAsync();
+
+                    IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                    INode bnspatch_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("bnspatch")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                    INode pluginloader_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("pluginloader")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+
+                    if (pluginloader_node == null) return;
+                    if (bnspatch_node == null) return;
+
+                    string _BNSPATCH_VERSION = Directory.EnumerateFiles(Environment.CurrentDirectory + @"\modpolice\").Select(x => Path.GetFileName(x))
+                           .Where(Name => Path.GetExtension(Name) == ".zip" && Name.Contains("bnspatch"))
+                                .OrderByDescending(d => new FileInfo(d).Name)
+                                    .Select(Name => Path.GetFileName(Name)).First().ToString();
+
+                    string _PLUGINLOADER_VERSION = Directory.EnumerateFiles(Environment.CurrentDirectory + @"\modpolice\").Select(x => Path.GetFileName(x))
+                               .Where(Name => Path.GetExtension(Name) == ".zip" && Name.Contains("pluginloader"))
+                                   .OrderByDescending(d => new FileInfo(d).Name)
+                                        .Select(Name => Path.GetFileName(Name)).First().ToString();
+
+                    if(bnspatch_node.Name != _BNSPATCH_VERSION)
+                        _bnspatchUpdate = true;
+
+                    if (pluginloader_node.Name != _PLUGINLOADER_VERSION)
+                        _pluginloaderUpdate = true;
+
+                } catch (Exception)
+                { }
+            });
+
+            if (_bnspatchUpdate)
+                bnspatchLabel.Content = "BNS Patch: UPDATE AVAILABLE";
+            if (_pluginloaderUpdate)
+                pluginloaderLabel.Content = "Plugin Loader: UPDATE AVAILABLE";
+        }
+
         private async void downloadClick(object sender, RoutedEventArgs e)
         {
             _progressControl = new ProgressControl();
             ProgressGrid.Visibility = Visibility.Visible;
             MainGrid.Visibility = Visibility.Collapsed;
             ProgressPanel.Children.Add(_progressControl);
+
             await Task.Run(async () =>
             {
                 try
@@ -144,9 +192,6 @@ namespace BnS_Multitool
             MainGrid.Visibility = Visibility.Visible;
             ProgressPanel.Children.Clear();
             _progressControl = null;
-
-            if (!is_winnmm_installed || !is_plugins_installed)
-                installBtn.Visibility = Visibility.Visible;
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -164,38 +209,6 @@ namespace BnS_Multitool
 
             if (!is_plugins_installed)
                 bnspatchLabel.Content = "BNS Patch: Not installed";
-
-
-            if (!is_winnmm_installed || !is_plugins_installed)
-            {
-                downloadBtn.Visibility = Visibility.Visible;
-
-                if (Directory.Exists(Environment.CurrentDirectory + @"\modpolice\"))
-                {
-                    string _BNSPATCH_VERSION = "";
-                    string _PLUGINLOADER_VERSION = "";
-                    try
-                    {
-                        _BNSPATCH_VERSION = Directory.EnumerateFiles(Environment.CurrentDirectory + @"\modpolice\").Select(x => Path.GetFileName(x))
-                           .Where(Name => Path.GetExtension(Name) == ".zip" && Name.Contains("bnspatch"))
-                                .OrderByDescending(d => new FileInfo(d).CreationTime)
-                                    .Select(Name => Path.GetFileNameWithoutExtension(Name)).First().ToString();
-                    }
-                    catch (Exception ex) { }
-
-                    try
-                    {
-                        _PLUGINLOADER_VERSION = Directory.EnumerateFiles(Environment.CurrentDirectory + @"\modpolice\").Select(x => Path.GetFileName(x))
-                           .Where(Name => Path.GetExtension(Name) == ".zip" && Name.Contains("pluginloader"))
-                               .OrderByDescending(d => new FileInfo(d).CreationTime)
-                                    .Select(Name => Path.GetFileNameWithoutExtension(Name)).First().ToString();
-                    }
-                    catch (Exception ex) { }
-
-                    if (_BNSPATCH_VERSION != "" && _PLUGINLOADER_VERSION != "")
-                        installBtn.Visibility = Visibility.Visible;
-                }
-            }
         }
 
         private async void installModPolice(object sender, RoutedEventArgs e)
@@ -209,12 +222,12 @@ namespace BnS_Multitool
             {
                 string _BNSPATCH_VERSION = Directory.EnumerateFiles(Environment.CurrentDirectory + @"\modpolice\").Select(x => Path.GetFileName(x))
                            .Where(Name => Path.GetExtension(Name) == ".zip" && Name.Contains("bnspatch"))
-                                .OrderByDescending(d => new FileInfo(d).CreationTime)
+                                .OrderByDescending(d => new FileInfo(d).Name)
                                     .Select(Name => Path.GetFileNameWithoutExtension(Name)).First().ToString();
 
                 string _PLUGINLOADER_VERSION = Directory.EnumerateFiles(Environment.CurrentDirectory + @"\modpolice\").Select(x => Path.GetFileName(x))
                            .Where(Name => Path.GetExtension(Name) == ".zip" && Name.Contains("pluginloader"))
-                               .OrderByDescending(d => new FileInfo(d).CreationTime)
+                               .OrderByDescending(d => new FileInfo(d).Name)
                                     .Select(Name => Path.GetFileNameWithoutExtension(Name)).First().ToString();
 
                 await Task.Run(() =>
@@ -295,8 +308,6 @@ namespace BnS_Multitool
             ProgressPanel.Children.Clear();
             _progressControl = null;
 
-            downloadBtn.Visibility = Visibility.Hidden;
-            installBtn.Visibility = Visibility.Hidden;
             pluginloaderLabel.Content = "Plugin Loader: Installed";
             bnspatchLabel.Content = "BNS Patch: Installed";
 

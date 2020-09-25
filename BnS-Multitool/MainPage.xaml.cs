@@ -43,11 +43,11 @@ namespace BnS_Multitool
 
         private void monitorPing(object sender, DoWorkEventArgs e)
         {
-            string regionIP = (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "64.25.37.235" : "18.194.180.254";
+            string regionIP = (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "184.73.104.101" : "18.194.180.254";
 
             while (!pingWorker.CancellationPending && MainWindow.currentPageText == "MainPage")
             {
-                regionIP = (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "64.25.37.235" : "18.194.180.254";
+                regionIP = (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "184.73.104.101" : "18.194.180.254";
                 try
                 {
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -55,7 +55,7 @@ namespace BnS_Multitool
                     Stopwatch stopwatch = new Stopwatch();
                     stopwatch.Start();
 
-                    socket.Connect(regionIP, 10100);
+                    socket.Connect(regionIP,10100);
                     stopwatch.Stop();
 
                     currentPing = Convert.ToInt32(stopwatch.Elapsed.TotalMilliseconds);

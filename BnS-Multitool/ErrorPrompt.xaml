@@ -1,0 +1,17 @@
+﻿<Window x:Class="BnS_Multitool.ErrorPrompt"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BnS_Multitool"
+        mc:Ignorable="d" Height="134" Width="496" Foreground="Black" Background="#FF161A1F" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="88*"/>
+            <ColumnDefinition Width="15*"/>
+        </Grid.ColumnDefinitions>
+        <Image Source="Images/feelsworry.png" Margin="-4,0,294,0"/>
+        <TextBlock x:Name="ErrorLabel" TextWrapping="WrapWithOverflow" Text="Error Message" Foreground="White" FontFamily="Arial" Margin="135,10,10,32" Grid.ColumnSpan="2"/>
+        <Button Margin="286,107,69,4" Content="OK" Click="Button_Click"/>
+    </Grid>
+</Window>

@@ -82,7 +82,7 @@
             </ObjectAnimationUsingKeyFrames>
             <DoubleAnimation BeginTime="0:0:0.0" Storyboard.TargetProperty="Opacity" From="0" To="1" Duration="0:0:0.5"/>
             <DoubleAnimation BeginTime="0:0:2.0" Storyboard.TargetProperty="Opacity" From="1" To="0" Duration="0:0:0.3"/>
-            <ObjectAnimationUsingKeyFrames BeginTime="0:0:2.5" Storyboard.TargetProperty="Visibility">
+            <ObjectAnimationUsingKeyFrames BeginTime="0:0:3" Storyboard.TargetProperty="Visibility">
                 <DiscreteObjectKeyFrame KeyTime="0">
                     <DiscreteObjectKeyFrame.Value>
                         <Visibility>Hidden</Visibility>
@@ -299,7 +299,7 @@
             </Setter>
         </Style>
 
-        <Style TargetType="{x:Type Button}">
+        <Style  TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#FF2D3F5D"/>
             <Setter Property="BorderBrush" Value="#FF3F6AA6"/>
             <Setter Property="Foreground" Value="White"/>
@@ -307,7 +307,7 @@
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type Button}">
                         <Border Background="{TemplateBinding Background}">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            <TextBlock Text="{TemplateBinding Content}" FontSize="{TemplateBinding FontSize}" HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"/>
                         </Border>
                     </ControlTemplate>
                 </Setter.Value>
@@ -316,6 +316,23 @@
                 <Trigger Property="IsMouseOver" Value="True">
                     <Setter Property="Background" Value="#FF4176BF"/>
                     <Setter Property="BorderBrush" Value="#FF2D415D"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="PayPalButton" TargetType="{x:Type Button}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Button}">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid Height="50" Width="110" Background="{TemplateBinding Background}"/>
+                            <TextBlock Text="{TemplateBinding Content}"  TextAlignment="Center" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Cursor" Value="Hand"/>
                 </Trigger>
             </Style.Triggers>
         </Style>

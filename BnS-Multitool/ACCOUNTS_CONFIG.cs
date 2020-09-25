@@ -25,6 +25,7 @@ namespace BnS_Multitool
                     REGION = 0,
                     CLIENT_BIT = 0,
                     LANGUAGE = 0,
+                    MEMORY_CLEANER = 0,
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
                 };
 
@@ -50,6 +51,9 @@ namespace BnS_Multitool
 
                 if (!DoesPropertyExist(ACCOUNTS, "LANGUAGE"))
                     ACCOUNTS.LANGUAGE = 0;
+
+                if (!DoesPropertyExist(ACCOUNTS, "MEMORY_CLEANER"))
+                    ACCOUNTS.MEMORY_CLEANER = 0;
 
                 appendChangesToConfig();
             }
@@ -77,6 +81,7 @@ namespace BnS_Multitool
             public int REGION { get; set; }
             public int CLIENT_BIT { get; set; }
             public int LANGUAGE { get; set; }
+            public int MEMORY_CLEANER { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
         }
 

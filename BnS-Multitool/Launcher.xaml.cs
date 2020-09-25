@@ -14,6 +14,8 @@ using System.Drawing;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
 using CG.Web.MegaApiClient;
+using System.Runtime.InteropServices;
+using System.Windows.Threading;
 
 namespace BnS_Multitool
 {
@@ -28,13 +30,17 @@ namespace BnS_Multitool
 
         public static List<SESSION_LIST> ACTIVE_SESSIONS = new List<SESSION_LIST>();
         public static int ACCOUNT_SELECTED_INDEX = -1;
-
+        private static string bin_x86 = SystemConfig.SYS.BNS_DIR + @"\bin\";
+        private static string bin_x64 = SystemConfig.SYS.BNS_DIR + @"\bin64\";
         private static string plugins_x86 = SystemConfig.SYS.BNS_DIR + @"\bin\plugins\";
         private static string plugins_x64 = SystemConfig.SYS.BNS_DIR + @"\bin64\plugins\";
         public bool loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
+        private bool modpolice_installed = false;
         private static string login_xml = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches\use-ingame-login.xml";
         private ProgressControl _progressControl;
         private static BackgroundWorker monitorProcesses = new BackgroundWorker();
+        private static bool removalInProgress = false;
+        private static DispatcherTimer memoryTimer = new DispatcherTimer();
 
         public Launcher()
         {
@@ -50,10 +56,20 @@ namespace BnS_Multitool
             BIT_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.CLIENT_BIT;
             REGION_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.REGION;
             LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
+            MemoryCleanerBox.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER;
+
+            memoryTimer.IsEnabled = false;
+            memoryTimer.Tick += new EventHandler(dispatchTimer_tick);
+
+            if (ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER != 0)
+            {
+                memoryTimer.Interval = TimeSpan.FromMinutes(timerFromSelection());
+                memoryTimer.IsEnabled = true;
+                memoryTimer.Start();
+            }
 
             foreach (var account in ACCOUNT_CONFIG.ACCOUNTS.Saved)
                 ACCOUNT_LIST_BOX.Items.Add(account.EMAIL);
-
 
             if (ACCOUNT_SELECTED_INDEX != -1)
                 ACCOUNT_LIST_BOX.SelectedIndex = ACCOUNT_SELECTED_INDEX;
@@ -77,11 +93,14 @@ namespace BnS_Multitool
                         Thread.Sleep(500);
                     }
                 } catch (Exception ex)
-                { Debug.WriteLine(ex.Message); };
+                {
+                    var dialog = new ErrorPrompt(ex.Message);
+                    dialog.ShowDialog();
+                }
             } while (ACTIVE_SESSIONS.Count > 0);
 
             if (MainWindow.isMinimized)
-                MainWindow.changeWindowState(WindowState.Normal);
+                MainWindow.changeWindowState(true);
         }
 
         private void removeFromActiveInvoke(int i)
@@ -96,11 +115,13 @@ namespace BnS_Multitool
         {
             //Check if loginhelper is installed
             loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
-            if(loginHelper_installed)
+            modpolice_installed = (File.Exists(bin_x86 + "winmm.dll") && File.Exists(bin_x64 + "winmm.dll") && File.Exists(plugins_x86 + "bnspatch.dll") && File.Exists(plugins_x64 + "bnspatch.dll"));
+
+            if (loginHelper_installed)
             {
                 LoginHelper_Lbl.Text = "Installed: Yes";
                 LoginHelper_Lbl.Foreground = System.Windows.Media.Brushes.Green;
-                LOGINHELPER_INSTALL.IsEnabled = false;
+                //LOGINHELPER_INSTALL.IsEnabled = false;
             }
         }
 
@@ -109,14 +130,12 @@ namespace BnS_Multitool
             if(BNS_USERNAME_BOX.Text == "")
             {
                 classLabel.Text = "Email field cannot be left blank";
-                ((Storyboard)FindResource("animate")).Begin(classLabel);
-                ((Storyboard)FindResource("animate")).Begin(successStatePicture);
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
                 return;
             } else if (BNS_PASSWORD_BOX.Password == "")
             {
                 classLabel.Text = "Password field cannot be left blank";
-                ((Storyboard)FindResource("animate")).Begin(classLabel);
-                ((Storyboard)FindResource("animate")).Begin(successStatePicture);
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
                 return;
             }
 
@@ -150,11 +169,9 @@ namespace BnS_Multitool
 
         private string languageFromSelection()
         {
-            string lang = "English";
+            string lang;
             switch(LANGUAGE_BOX.SelectedIndex)
             {
-                case 0:
-                    break;
                 case 1:
                     lang = "BPORTUGUESE";
                     break;
@@ -163,6 +180,9 @@ namespace BnS_Multitool
                     break;
                 case 3:
                     lang = "FRENCH";
+                    break;
+                default:
+                    lang = "English";
                     break;
             }
             return lang;
@@ -192,9 +212,32 @@ namespace BnS_Multitool
                     proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_USERNAME", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].EMAIL);
                     proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_PASSWORD", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD);
                     proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE);
+                    proc.StartInfo.EnvironmentVariables.Add("AUTO_BAIT", ((bool)BaitBasketToS.IsChecked) ? "1" : "0");
+                    proc.StartInfo.EnvironmentVariables.Add("RAISE_LIMIT", ((bool)RaiseCapToS.IsChecked) ? "1" : "0");
                     proc.StartInfo.UseShellExecute = false; //Required for setting environment variables to processes
                     //proc.StartInfo.Verb = "runas"; //Launching as admin.. Do I really need this? Or am I dumb?
                     proc.Start();
+
+                    if((bool) BaitBasketToS.IsChecked || (bool)RaiseCapToS.IsChecked)
+                    {
+                        if (is_x86)
+                        {
+                            File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x86.exe", Properties.Resources.BnS_ToS_x86);
+
+                            ProcessStartInfo tosproc = new ProcessStartInfo();
+                            tosproc.FileName = Path.GetTempPath() + @"\BnS-ToS-x86.exe";
+                            tosproc.Verb = "runas";
+                            Process.Start(tosproc);
+                        } else
+                        {
+                            File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x64.exe", Properties.Resources.BnS_ToS_x64);
+
+                            ProcessStartInfo tosproc = new ProcessStartInfo();
+                            tosproc.FileName = Path.GetTempPath() + @"\BnS-ToS-x64.exe";
+                            tosproc.Verb = "runas";
+                            Process.Start(tosproc);
+                        }
+                    }
 
                     ACTIVE_SESSIONS.Add(new SESSION_LIST() { EMAIL = EMAIL, REGION = REGION_BOX.SelectedIndex, PROCESS = proc });
 
@@ -204,7 +247,8 @@ namespace BnS_Multitool
                 }
             } catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message + " \n");
+                var dialog = new ErrorPrompt(ex.Message);
+                dialog.ShowDialog();
             }
         }
 
@@ -214,14 +258,18 @@ namespace BnS_Multitool
             if(!loginHelper_installed)
             {
                 classLabel.Text = "Loginhelper is not installed on either 32-bit or 64-bit. Both need to be installed before launching a new client";
-                ((Storyboard)FindResource("animate")).Begin(classLabel);
-                ((Storyboard)FindResource("animate")).Begin(successStatePicture);
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
                 return;
             } else if (ACCOUNT_LIST_BOX.SelectedIndex == -1)
             {
                 classLabel.Text = "No account selected, select an account before attemping to launch a new client";
-                ((Storyboard)FindResource("animate")).Begin(classLabel);
-                ((Storyboard)FindResource("animate")).Begin(successStatePicture);
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                return;
+            }
+            else if (!modpolice_installed)
+            {
+                var dialog = new ErrorPrompt("Pluginloader / BNSPatch is missing from either 32 or 64-bit clients. Install these before launching a new client.");
+                dialog.ShowDialog();
                 return;
             }
 
@@ -240,8 +288,7 @@ namespace BnS_Multitool
                 else
                 {
                     classLabel.Text = "An instance for this account and region is already running, close the instance before trying to launch a new one";
-                    ((Storyboard)FindResource("animate")).Begin(classLabel);
-                    ((Storyboard)FindResource("animate")).Begin(successStatePicture);
+                    ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
                 }
             }
         }
@@ -268,7 +315,8 @@ namespace BnS_Multitool
                         }
                         catch (Exception ex)
                         {
-                            Debug.WriteLine(ex.Message + "\n");
+                            var dialog = new ErrorPrompt(ex.Message);
+                            dialog.ShowDialog();
                         }
                     } else
                     {
@@ -278,7 +326,8 @@ namespace BnS_Multitool
                 }
             } catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message + "\n");
+                var dialog = new ErrorPrompt(ex.Message);
+                dialog.ShowDialog();
             }
         }
 
@@ -315,11 +364,6 @@ namespace BnS_Multitool
                 ACCOUNT_CONFIG.ACCOUNTS.USE_ALL_CORES = currentState;
 
             ACCOUNT_CONFIG.appendChangesToConfig();
-        }
-
-        private void minimizeToTray(object sender, RoutedEventArgs e)
-        {
-
         }
 
         TaskCompletionSource<bool> downloadComplete = new TaskCompletionSource<bool>();
@@ -402,6 +446,9 @@ namespace BnS_Multitool
                     if (!File.Exists(login_xml))
                     {
                         ProgressControl.updateProgressLabel("patches.xml not found, installing...");
+                        if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches"))
+                            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches");
+
                         File.WriteAllText(login_xml, Properties.Resources.use_ingame_login);
                     }
 
@@ -426,7 +473,7 @@ namespace BnS_Multitool
             {
                 LoginHelper_Lbl.Text = "Installed: Yes";
                 LoginHelper_Lbl.Foreground = System.Windows.Media.Brushes.Green;
-                LOGINHELPER_INSTALL.IsEnabled = false;
+                //LOGINHELPER_INSTALL.IsEnabled = false;
             }
         }
 
@@ -444,11 +491,14 @@ namespace BnS_Multitool
         private void ActiveProcessesDblClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (ProcessInfo.SelectedIndex == -1) return;
-            
+            if (removalInProgress) return;
+
+            removalInProgress = true;
             if(!ACTIVE_SESSIONS[ProcessInfo.SelectedIndex].PROCESS.HasExited)
                 ACTIVE_SESSIONS[ProcessInfo.SelectedIndex].PROCESS.Kill();
             ACTIVE_SESSIONS.RemoveAt(ProcessInfo.SelectedIndex);
             ProcessInfo.Items.RemoveAt(ProcessInfo.SelectedIndex);
+            removalInProgress = false;
         }
 
         private void MouseEnterSetFocus(object sender, System.Windows.Input.MouseEventArgs e)
@@ -457,6 +507,130 @@ namespace BnS_Multitool
             {
                 ((ComboBox)sender).Focus();
             } catch  (Exception) { }
+        }
+
+        private int timerFromSelection()
+        {
+            int interval;
+            switch (ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER)
+            {
+                case 1:
+                    interval = 1;
+                    break;
+                case 2:
+                    interval = 5;
+                    break;
+                case 3:
+                    interval = 10;
+                    break;
+                case 4:
+                    interval = 15;
+                    break;
+                case 5:
+                    interval = 20;
+                    break;
+                case 6:
+                    interval = 25;
+                    break;
+                case 7:
+                    interval = 30;
+                    break;
+                case 8:
+                    interval = 35;
+                    break;
+                case 9:
+                    interval = 40;
+                    break;
+                case 10:
+                    interval = 45;
+                    break;
+                case 11:
+                    interval = 50;
+                    break;
+                case 12:
+                    interval = 55;
+                    break;
+                case 13:
+                    interval = 60;
+                    break;
+                default:
+                    interval = 10;
+                    break;
+            }
+            return interval;
+        }
+
+        private void MemoryCleanerBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER = ((ComboBox)sender).SelectedIndex;
+            ACCOUNT_CONFIG.appendChangesToConfig();
+
+            if (((ComboBox)sender).SelectedIndex == 0)
+            {
+                if (memoryTimer.IsEnabled)
+                {
+                    memoryTimer.IsEnabled = false;
+                    memoryTimer.Stop();
+                }
+                return;
+            }
+
+            if (memoryTimer.IsEnabled)
+                memoryTimer.Stop();
+
+            memoryTimer.Interval = TimeSpan.FromMinutes(timerFromSelection());
+            memoryTimer.IsEnabled = true;
+            memoryTimer.Start();
+        }
+
+        private void dispatchTimer_tick(object sender, EventArgs e)
+        {
+            DispatcherTimer timer = (DispatcherTimer)sender;
+            Debug.WriteLine("Cleaning Memory...");
+            Process[] allProcesses = Process.GetProcessesByName("Client");
+            if (allProcesses.Count() >= 0)
+            {
+                foreach (var process in allProcesses)
+                {
+                    try
+                    {
+                        EmptyWorkingSet(process.Handle);
+                    }
+                    catch (Exception) { }
+                }
+            }
+        }
+
+        [DllImport("psapi.dll")]
+        static extern int EmptyWorkingSet(IntPtr hwProc);
+
+        private void removeAccount(object sender, RoutedEventArgs e)
+        {
+            //Some error checking for retards
+            if (ACCOUNT_LIST_BOX.SelectedIndex == -1)
+            {
+                classLabel.Text = "No account selected, select an account before attemping to delete it!";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                return;
+            }
+
+            List<ACCOUNT_CONFIG.BNS_SAVED_ACCOUNTS_STRUCT> SAVED_ACCOUNTS = ACCOUNT_CONFIG.ACCOUNTS.Saved;
+            int HAS_INDEX = SAVED_ACCOUNTS.FindIndex(x => x.EMAIL == ACCOUNT_LIST_BOX.Text);
+            if (HAS_INDEX == -1) return;
+
+            SAVED_ACCOUNTS.RemoveAt(HAS_INDEX);
+            ACCOUNT_CONFIG.ACCOUNTS.Saved = SAVED_ACCOUNTS;
+            ACCOUNT_CONFIG.appendChangesToConfig();
+
+            ACCOUNT_LIST_BOX.Items.Clear();
+            foreach (var account in ACCOUNT_CONFIG.ACCOUNTS.Saved)
+                ACCOUNT_LIST_BOX.Items.Add(account.EMAIL);
+        }
+
+        private void ToSBtn(object sender, RoutedEventArgs e)
+        {
+            ToS_Button.Visibility = Visibility.Hidden;
+            ToSPicture.Visibility = Visibility.Hidden;
         }
     }
 }

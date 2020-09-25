@@ -38,14 +38,17 @@ namespace BnS_Multi_Tool_Updater
         {
             public string VERSION { get; set; }
             public int ADDITIONAL_EFFECTS { get; set; }
-
             public string BNS_DIR { get; set; }
-
             public string UPK_DIR { get; set; }
-
             public string[] MAIN_UPKS { get; set; }
-
             public string[] ADDITIONAL_UPKS { get; set; }
+            public List<ANIMATION_UPKS_STRUCT> ANIMATION_UPKS { get; set; }
+        }
+
+        public class ANIMATION_UPKS_STRUCT
+        {
+            public string CLASS { get; set; }
+            public string[] UPK_FILES { get; set; }
         }
 
         private static string WEB_VERSION = "";
@@ -56,6 +59,16 @@ namespace BnS_Multi_Tool_Updater
         {
             InitializeComponent();
             this.MouseDown += delegate { try { DragMove(); } catch (Exception ex) { } };
+
+            //Find all instances of BnS-Multi-Tool and close.
+            try
+            {
+                Process[] processes = Process.GetProcessesByName("BnS-Multi-Tool");
+
+                foreach (Process proc in processes)
+                    proc.Kill();
+            }
+            catch (Exception) { }
 
             try
             {

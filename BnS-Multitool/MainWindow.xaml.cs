@@ -19,6 +19,7 @@ using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
+using System.Threading;
 
 namespace BnS_Multitool
 {
@@ -57,7 +58,8 @@ namespace BnS_Multitool
         public MainWindow()
         {
             InitializeComponent();
-            this.MouseDown += delegate { try { DragMove(); } catch (Exception ex) { } };
+
+            this.MouseDown += delegate { try { DragMove(); } catch (Exception) { } };
 
             if (File.Exists("BnS-Multi-Tool-Updater.exe"))
                 File.Delete("BnS-Multi-Tool-Updater.exe");
@@ -150,6 +152,11 @@ namespace BnS_Multitool
             taskBar.Visibility = Visibility.Collapsed;
         }
 
+        private void CloseMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
+        }
+
         private static void checkOnlineVersion(object sender, DoWorkEventArgs e)
         {
             Debug.Write("Retrieving online version \n");
@@ -177,7 +184,8 @@ namespace BnS_Multitool
 
             if (ONLINE_VERSION == "")
             {
-                Debug.WriteLine("Online version is null \n");
+                var dialog = new ErrorPrompt("Could not fetch online version..?");
+                dialog.ShowDialog();
                 return;
             }
 
@@ -189,7 +197,7 @@ namespace BnS_Multitool
 
         private void OnNotifyDoubleClick(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Normal;
+            changeWindowState(true);
         }
 
         private void MAIN_CLICK(object sender, RoutedEventArgs e)
@@ -202,24 +210,24 @@ namespace BnS_Multitool
             setCurrentPage("Launcher");
         }
 
-        private void Window_StateChanged(object sender, EventArgs e)
+        public static void changeWindowState(bool state)
         {
-            if(this.WindowState == WindowState.Minimized)
-            {
-                taskBar.Visibility = Visibility.Visible;
-                this.ShowInTaskbar = false;
-                isMinimized = true;
-            } else if (this.WindowState == WindowState.Normal)
-            {
-                taskBar.Visibility = Visibility.Collapsed;
-                this.ShowInTaskbar = true;
-                isMinimized = true;
-            }
-        }
-
-        public static void changeWindowState(WindowState state)
-        {
-            mainWindow.Dispatcher.Invoke(new Action(() => { mainWindow.WindowState = state; }));
+            mainWindow.Dispatcher.Invoke(new Action(() => {
+                if(state)
+                {
+                    mainWindow.ShowInTaskbar = true;
+                    mainWindow.Visibility = Visibility.Visible;
+                    isMinimized = false;
+                    Thread.Sleep(150);
+                    taskBar.Visibility = Visibility.Collapsed;
+                } else
+                {
+                    taskBar.Visibility = Visibility.Visible;
+                    Application.Current.MainWindow.ShowInTaskbar = false;
+                    Application.Current.MainWindow.Visibility = Visibility.Hidden;
+                    isMinimized = true;
+                }
+            }));
         }
 
         private void UPDATE_BTN_CLICK(object sender, RoutedEventArgs e)
@@ -252,7 +260,7 @@ namespace BnS_Multitool
 
         private void Button_Click_3(object sender, RoutedEventArgs e)
         {
-            this.WindowState = WindowState.Minimized;
+            changeWindowState(false);
         }
 
         private void Button_Click_2(object sender, RoutedEventArgs e)

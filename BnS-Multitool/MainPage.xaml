@@ -20,9 +20,11 @@
         <Label Content="Changelog" Background="{x:Null}" Foreground="White" Margin="10,182,467,275" FontFamily="Arial" FontWeight="Bold" FontSize="20"/>
         <RichTextBox IsReadOnly="True" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
         <Grid Margin="226,65,284,339">
-            <Button HorizontalAlignment="Left" VerticalAlignment="Top" Width="142" Height="94"
-                Background="{x:Null}" Click="Button_Click" Margin="26,10,-18,-18">
-                <Image Source="paypalbutton.png"  Width="97" Height="59"/>
+            <Button HorizontalAlignment="Left" Style="{StaticResource PayPalButton}" VerticalAlignment="Top" Width="112" Height="55"
+                Click="Button_Click" Margin="35,27,0,0">
+                <Button.Background>
+                    <ImageBrush ImageSource="PayPal.png"/>
+                </Button.Background>
             </Button>
         </Grid>
         <Label x:Name="PingLabel" Content="Ping Offline" HorizontalAlignment="Left" Margin="474,10,0,0" VerticalAlignment="Top" Width="176" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
