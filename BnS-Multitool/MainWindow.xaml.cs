@@ -4,34 +4,25 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
 using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Threading;
+using System.Reflection;
+using System.Security.Principal;
 
 namespace BnS_Multitool
 {
     public partial class MainWindow : Window
     {
-        public static BackgroundWorker versionWorker = new BackgroundWorker();
-        public static string ONLINE_VERSION = "";
         public static TaskbarIcon taskBar = new TaskbarIcon();
         public static Frame mainWindowFrame;
-
+        public static Button UpdateButtonObj;
         public static MainWindow mainWindow { get; private set; }
-
         public static List<Page_Navigation> navigationPages = new List<Page_Navigation>();
         public static Page currentPage = null;
         public static string currentPageText = "";
@@ -57,7 +48,35 @@ namespace BnS_Multitool
 
         public MainWindow()
         {
+            var wi = WindowsIdentity.GetCurrent();
+            var wp = new WindowsPrincipal(wi);
+
+            bool runAsAdmin = wp.IsInRole(WindowsBuiltInRole.Administrator);
+
+            if(!runAsAdmin)
+            {
+                var processInfo =new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase);
+
+                processInfo.UseShellExecute = true;
+                processInfo.Verb = "runas";
+
+                // Start the new process
+                try
+                {
+                    Process.Start(processInfo);
+                }
+                catch (Exception)
+                {
+                    var dialog = new ErrorPrompt("Failed to auto start as admin, please launch with administrator rights.");
+                    dialog.ShowDialog();
+                }
+
+                // Shut down the current process
+                Environment.Exit(0);
+            }
+            
             InitializeComponent();
+            UpdateButtonObj = MultiTool_UPDATE;
 
             this.MouseDown += delegate { try { DragMove(); } catch (Exception) { } };
 
@@ -72,8 +91,11 @@ namespace BnS_Multitool
                     RegistryKey BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\NCWest\BnS");
                     SystemConfig.SYS.BNS_DIR = BNS_REGISTRY.GetValue("BaseDir").ToString();
                     SystemConfig.appendChangesToConfig();
+
+                    if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\"))
+                        throw new Exception("Directory doesn't eixst");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     MessageBox.Show("The path for Blade and Soul is not valid, please set the proper path for your game installation", "INVALID PATH");
                     using (var FOLDER = new System.Windows.Forms.FolderBrowserDialog())
@@ -129,6 +151,7 @@ namespace BnS_Multitool
 
             MainFrame.Content = cachedPage.PageSource;
             currentPageText = pageName;
+            GC.WaitForPendingFinalizers();
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -139,11 +162,6 @@ namespace BnS_Multitool
             setCurrentPage("MainPage");
 
             VERSION_LABEL.Text = String.Format("BnS Multi Tool Version: {0}", SystemConfig.SYS.VERSION);
-
-            //Launch our version checker worker
-            versionWorker.DoWork += new DoWorkEventHandler(checkOnlineVersion);
-            versionWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(versionCheckFinished);
-            versionWorker.RunWorkerAsync();
 
             //Construct our taskbar icon
             taskBar.Icon = Properties.Resources.AppIcon;
@@ -157,42 +175,9 @@ namespace BnS_Multitool
             Environment.Exit(0);
         }
 
-        private static void checkOnlineVersion(object sender, DoWorkEventArgs e)
+        public static string FileVersion()
         {
-            Debug.Write("Retrieving online version \n");
-            WebClient client = new WebClient();
-            try
-            {
-                var json = client.DownloadString("http://tonic.pw/files/bnsmultitool/version.json");
-                var dummyData = JsonConvert.DeserializeObject<ONLINE_VERSION_STRUCT>(json);
-                ONLINE_VERSION = dummyData.VERSION;
-                ONLINE_CHANGELOG = dummyData.CHANGELOG;
-
-            } catch (WebException ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
-            finally
-            {
-                client.Dispose();
-            }
-        }
-
-        private void versionCheckFinished(object sender, RunWorkerCompletedEventArgs e)
-        {
-            Debug.WriteLine(String.Format("Online Version: {0} \n", ONLINE_VERSION));
-
-            if (ONLINE_VERSION == "")
-            {
-                var dialog = new ErrorPrompt("Could not fetch online version..?");
-                dialog.ShowDialog();
-                return;
-            }
-
-            if (ONLINE_VERSION == SystemConfig.SYS.VERSION)
-                MultiTool_UPDATE.Visibility = Visibility.Hidden;
-            else
-                MultiTool_UPDATE.Visibility = Visibility.Visible;
+            return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
         }
 
         private void OnNotifyDoubleClick(object sender, RoutedEventArgs e)
@@ -202,11 +187,13 @@ namespace BnS_Multitool
 
         private void MAIN_CLICK(object sender, RoutedEventArgs e)
         {
+            //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("MainPage");
         }
 
         private void LAUNCHER_CLICK(object sender, RoutedEventArgs e)
         {
+            PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("Launcher");
         }
 
@@ -244,11 +231,13 @@ namespace BnS_Multitool
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
+            //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("Patches");
         }
 
         private void Button_Click_1(object sender, RoutedEventArgs e)
         {
+            //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("Effects");
         }
 
@@ -265,11 +254,13 @@ namespace BnS_Multitool
 
         private void Button_Click_2(object sender, RoutedEventArgs e)
         {
+            //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("Mods");
         }
 
         private void Button_Click_4(object sender, RoutedEventArgs e)
         {
+            //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("Modpolice");
         }
     }

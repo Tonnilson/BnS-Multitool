@@ -61,12 +61,14 @@
                     <ComboBox x:Name="REGION_BOX" Margin="116,25,0,79" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
                         <ComboBoxItem>NA</ComboBoxItem>
                         <ComboBoxItem>EU</ComboBoxItem>
+                        <ComboBoxItem>TW</ComboBoxItem>
                     </ComboBox>
                     <ComboBox x:Name="LANGUAGE_BOX" Margin="116,51,0,54" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
                         <ComboBoxItem>EN</ComboBoxItem>
                         <ComboBoxItem>PT</ComboBoxItem>
                         <ComboBoxItem>DE</ComboBoxItem>
                         <ComboBoxItem>FR</ComboBoxItem>
+                        <ComboBoxItem>TW</ComboBoxItem>
                     </ComboBox>
 
                     <Label Content="BIT:" Foreground="White" FontSize="16" Margin="77,-3,52,60"/>
@@ -99,12 +101,13 @@
                     </ComboBox>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="ToS Things" BorderThickness="0.2" HorizontalAlignment="Left" Height="146" VerticalAlignment="Top" Width="180" Margin="276,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+            <GroupBox Header="Quality of Life" BorderThickness="0.2" HorizontalAlignment="Left" Height="146" VerticalAlignment="Top" Width="194" Margin="269,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <CheckBox x:Name="BaitBasketToS" Content="Bait Basket to Auto" Margin="0,5,0,101" Foreground="White" />
-                    <CheckBox x:Name="RaiseCapToS" Content="10k Received Items" Margin="0,29,0,77" Foreground="White" />
-                    <Button x:Name="ToS_Button" Content="Using these options is against NCSoft ToS.              USE AT YOUR OWN RISK" Click="ToSBtn"/>
-                    <Image x:Name="ToSPicture" gif:AnimationBehavior.SourceUri="Images/peepoToS.gif" Margin="-3,67,109,-3"/>
+                    <CheckBox x:Name="BaitBasketToS" Content="Convert all bait to Auto" Margin="0,5,0,101" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="RaiseCapToS" Content="Raise Received Items Cap" Margin="0,29,0,75" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="marketplace_TOS" Content="Marketplace in F8" Margin="0,55,0,49" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <Button x:Name="ToS_Button" Content="These options modify the game and go against NCSoft ToS but everything about this is ToS..      USE AT YOUR OWN RISK" Click="ToSBtn"/>
+                    <Image x:Name="ToSPicture" gif:AnimationBehavior.SourceUri="Images/peepoToS.gif" Margin="-8,67,114,-3"/>
                 </Grid>
             </GroupBox>
         </Grid>

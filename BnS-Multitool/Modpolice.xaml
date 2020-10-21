@@ -1,31 +1,63 @@
-﻿<Page x:Class="BnS_Multitool.Modpolice"
+﻿<Page
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:BnS_Multitool"
+      xmlns:ToggleSwitch="clr-namespace:ToggleSwitch;assembly=ToggleSwitch" x:Class="BnS_Multitool.Modpolice"
       mc:Ignorable="d" 
       d:DesignHeight="490" d:DesignWidth="660"
       Title="Modpolice" Loaded="Page_Loaded">
 
     <Grid>
         <Grid x:Name="ProgressGrid" Visibility="Hidden">
-            <StackPanel x:Name="ProgressPanel">
-
-            </StackPanel>
+            <StackPanel x:Name="ProgressPanel"/>
         </Grid>
         <Grid x:Name="MainGrid">
-            <Label x:Name="pluginloaderLabel" Content="Plugin Loader: Installed" Margin="10,73,385,389" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label x:Name="pluginloaderLabel" Content="Current: Not Installed" Margin="348,210,47,252" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
             <Label Content="Blade and Soul Location:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="20" Margin="8,2,-8,429"/>
             <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="10,35,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="501" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="updateLocationsOnChange"/>
-            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="516,35,47,430" Content="Browse" FontFamily="Arial" FontWeight="Bold" Click="browseBnSLocation">
-            </Button>
-            <Button x:Name="downloadBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="383,66,180,399" Content="Download" FontFamily="Arial" FontWeight="Bold" Click="downloadClick">
-            </Button>
-            <Button x:Name="installBtn" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="279,66,284,399" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installModPolice">
-            </Button>
-            <Label x:Name="bnspatchLabel" Content="BNS Patch: Installed" Margin="10,96,385,366" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Button x:Name="downloadBtn_Copy" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="487,66,47,399" Content="Check For update?" FontFamily="Arial" FontWeight="Bold" Click="checkForUpdate"/>
+            <Button HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="516,35,47,430" Content="Browse" FontFamily="Arial" FontWeight="Bold" Click="browseBnSLocation"/>
+            <Button x:Name="installOnline" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="550,371,13,94" Content="Install Online" FontFamily="Arial" FontWeight="Bold" Click="installModPolice"/>
+            <Button x:Name="installLocal" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="550,439,13,26" Content="Install Local" FontFamily="Arial" FontWeight="Bold" Click="installModPolice"/>
+            <Label x:Name="bnspatchLabel" Content="Current: Not Installed" Margin="348,299,47,163" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label x:Name="LessLoadingscreensLabel" Content="Less Loading Screens" Margin="10,138,377,312" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24" Background="{x:Null}"/>
+            <Button x:Name="lessloadingInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,219,367,246" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="10,163,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D"/>
+            <Label x:Name="lessloadingCurrentLbl" Content="Current: " Margin="18,183,444,279" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label x:Name="lessloadingOnlineLbl" Content="Online: Fetching....." Margin="18,216,444,246" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label Content="Simplemode Training Room" Margin="10,254,314,196" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="10,279,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D"/>
+            <Label x:Name="SimplemodeCurrentLbl" Content="Current: Not Installed" Margin="18,296,438,166" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label x:Name="SimplemodeOnlineLbl" Content="Online: Fetching....." Margin="18,329,438,133" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Button x:Name="simplemodeInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,332,367,133" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional"/>
+            <ToggleSwitch:HorizontalToggleSwitch x:Name="lessloadingToggle" Margin="230,182,366,283" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="64" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="togglePlugin" Unchecked="togglePlugin"/>
+            <ToggleSwitch:HorizontalToggleSwitch x:Name="simplemodeToggle" Margin="230,297,366,168" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="64" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="togglePlugin" Unchecked="togglePlugin"/>
+            <Label Content="High Priority" Margin="10,363,314,87" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="10,388,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D"/>
+            <Label x:Name="HighpriorityCurrentLbl" Content="Current: Not Installed" Margin="18,405,438,57" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Label x:Name="HighpriorityOnlineLbl" Content="Online: Fetching....." Margin="18,438,438,24" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Button x:Name="HighpriorityInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,441,367,24" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional"/>
+            <ToggleSwitch:HorizontalToggleSwitch x:Name="HighpriorityToggle" Margin="230,406,366,59" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="64" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="togglePlugin" Unchecked="togglePlugin"/>
+            <Button x:Name="openbin86" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="10,66,553,399" Content="Bin Folder" FontFamily="Arial" FontWeight="Bold" Click="openBinLocation"/>
+            <Button x:Name="openbin64" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="114,66,449,399" Content="Bin64 Folder" FontFamily="Arial" FontWeight="Bold" Click="openBinLocation"/>
+            <Label x:Name="LessLoadingscreensLabel_Copy" Content="Modpolice Core" Margin="409,138,44,312" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24" Background="{x:Null}"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="340,163,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
+            <Label x:Name="pluginloaderLabel_Copy" Content="Pluginloader" Margin="441,177,44,280" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="340,194,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
+            <Label x:Name="pluginloaderOnlineLbl" Content="Online: Fetching...." Margin="348,236,47,226" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="340,254,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
+            <Label x:Name="pluginloaderLabel_Copy1" Content="BNSPatch" Margin="450,266,44,191" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="339,283,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
+            <Label x:Name="bnspatchOnlineLbl" Content="Online: Fetching...." Margin="348,327,47,135" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="340,343,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
+            <TextBlock TextWrapping="WrapWithOverflow" x:Name="textBlock" HorizontalAlignment="Left" Height="43" Margin="348,365,0,0" Text="Install online will download latest version from online and install." VerticalAlignment="Top" Width="191" Foreground="#FF68D349" FontWeight="Bold"/>
+            <TextBlock TextWrapping="WrapWithOverflow" x:Name="textBlock_Copy" HorizontalAlignment="Left" Height="43" Margin="349,431,0,0" Text="Install local will use zip files from modpolice folder and install." VerticalAlignment="Top" Width="197" Foreground="#FFE8DA54" FontWeight="Bold"/>
+            <StackPanel Orientation="Horizontal" Margin="337,139,316,0">
+                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="#FF2D415D" Width="2" Margin="2,34,2,0"/>
+            </StackPanel>
+            <Separator HorizontalAlignment="Left" Height="20" Margin="341,405,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
+            <TextBlock x:Name="textBlock1" HorizontalAlignment="Left" Height="64" Margin="227,69,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="420" Foreground="White" FontWeight="Bold"><Run Text="If your stuff works fine before updating the tool then you don't have to"/><LineBreak/><Run Text="update anything in this section, only use this section if doing a fresh install or if you know 1000% there was an update. The dates don't match on BNSPatch but  I assure you 10-07-20 is the same as 10-08-20"/></TextBlock>
         </Grid>
     </Grid>
 </Page>

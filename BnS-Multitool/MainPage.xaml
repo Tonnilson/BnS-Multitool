@@ -27,6 +27,7 @@
                 </Button.Background>
             </Button>
         </Grid>
-        <Label x:Name="PingLabel" Content="Ping Offline" HorizontalAlignment="Left" Margin="474,10,0,0" VerticalAlignment="Top" Width="176" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+        <Label x:Name="PingLabel" Content="Ping Offline" HorizontalAlignment="Left" Margin="391,10,0,0" VerticalAlignment="Top" Width="176" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+        <Label x:Name="usersOnlineLbl" Content="Users Online:" HorizontalAlignment="Left" Margin="391,41,0,0" VerticalAlignment="Top" Width="259" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
     </Grid>
 </Page>

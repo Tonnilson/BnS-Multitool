@@ -263,5 +263,25 @@ namespace BnS_Multitool
         {
             Process.Start(MANAGER_DIR);
         }
+
+        private void handleToggle(object sender, RoutedEventArgs e)
+        {
+            bool state = ((Button)sender).Name.Contains("_on_");
+            if(((Button)sender).Name.Contains("addons_"))
+            {
+                foreach (var b in Addons)
+                    b.isChecked = state;
+
+                CollectionViewSource.GetDefaultView(AddonsListBox.DataContext).Refresh();
+            } else
+            {
+                foreach (var b in PatchesXML)
+                    b.isChecked = state;
+
+                CollectionViewSource.GetDefaultView(PatchesListBox.DataContext).Refresh();
+            }
+
+            applyPatchesAndAddons(sender, e);
+        }
     }
 }

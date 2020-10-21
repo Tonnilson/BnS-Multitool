@@ -15,7 +15,7 @@
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
-        <Grid x:Name="VersionGrid">
+        <Grid x:Name="VersionGrid" Margin="0,-1,0,1">
             <Label HorizontalContentAlignment="Center" x:Name="LocalVersion" Content="Local: 1.0.5.0" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="16" Margin="156,10,152,283"/>
             <Label HorizontalContentAlignment="Center" x:Name="OnlineVersion" Content="Online: 1.0.5.0" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="16" Margin="156,32,152,261"/>
         </Grid>
@@ -29,9 +29,10 @@
 							0%
             </TextBlock>
 
-            <Label Content="Downloading..." Foreground="{DynamicResource ProgressBarRadialGradientBrush}" Margin="196,254,49,3" FontFamily="Arial" FontSize="24"/>
+            <Label x:Name="downloadingLbl" Content="Downloading..." Foreground="{DynamicResource ProgressBarRadialGradientBrush}" Margin="196,254,49,3" FontFamily="Arial" FontSize="24"/>
         </Grid>
 
         <Button x:Name="downloadBtn" Margin="182,279,184,10" FontFamily="Arial" FontWeight="Bold" FontSize="14" Content="Download" Click="downloadClick"/>
+        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="457,-1,1,293" Click="close"/>
     </Grid>
 </Window>

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -19,6 +20,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace BnS_Multitool
 {
@@ -30,6 +32,8 @@ namespace BnS_Multitool
         private static BackgroundWorker pingWorker = new BackgroundWorker();
         private static int currentPing = -1;
         private static string loginServer = "updater.nclauncher.ncsoft.com";
+        private static DispatcherTimer onlineUsersTimer = new DispatcherTimer();
+        private static MainWindow.ONLINE_VERSION_STRUCT onlineJson;
 
         public MainPage()
         {
@@ -39,15 +43,94 @@ namespace BnS_Multitool
             pingWorker.WorkerReportsProgress = true;
             pingWorker.DoWork += new DoWorkEventHandler(monitorPing);
             pingWorker.ProgressChanged += new ProgressChangedEventHandler(pingProgress);
+
+            //Tick Timer for getting Online Users
+            onlineUsersTimer.IsEnabled = true;
+            onlineUsersTimer.Tick += new EventHandler(onlineUsers_Tick);
+            onlineUsersTimer.Interval = TimeSpan.FromMinutes(10);
+            onlineUsersTimer.Start();
+
+            //MainWindow.versionWorker.RunWorkerAsync();
+        }
+
+        private static void checkForUpdate()
+        {
+            WebClient client = new WebClient();
+            try
+            {
+                var json = client.DownloadString("http://tonic.pw/files/bnsmultitool/version.json");
+                onlineJson = JsonConvert.DeserializeObject<MainWindow.ONLINE_VERSION_STRUCT>(json);
+
+                if (onlineJson.VERSION != MainWindow.FileVersion())
+                {
+                    Application.Current.Dispatcher.BeginInvoke((Action)delegate
+                    {
+                        var dialog = new ErrorPrompt("Update available, please be sure to read the change log for any critical changes.\r\rOnline Version: " + onlineJson.VERSION + "\rLocal: " + SystemConfig.SYS.VERSION, true);
+                        dialog.Owner = MainWindow.mainWindow;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        dialog.ShowDialog();
+                    });
+
+                    SystemConfig.SYS.VERSION = MainWindow.FileVersion();
+                    SystemConfig.appendChangesToConfig();
+
+                    MainWindow.UpdateButtonObj.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        MainWindow.UpdateButtonObj.Visibility = Visibility.Visible;
+                    }));
+                }
+
+            } catch (WebException)
+            {
+
+            }
+            finally
+            {
+                client.Dispose();
+            }
+        }
+
+        private void onlineUsers_Tick(object sender, EventArgs e)
+        {
+            WebClient client = new WebClient();
+            int usersOnline = 0;
+            try
+            {
+                string stringnumber = client.DownloadString("http://tonic.pw/files/bnsmultitool/usersOnline.php");
+                if (!(int.TryParse(stringnumber, out usersOnline)))
+                    usersOnline = 0;
+
+            }
+            catch (WebException ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
+            finally
+            {
+                client.Dispose();
+            }
+
+            Dispatchers.labelContent(usersOnlineLbl, String.Format("Users Online: {0}", (usersOnline != 0) ? usersOnline.ToString() : "Error"));
         }
 
         private void monitorPing(object sender, DoWorkEventArgs e)
         {
-            string regionIP = (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "184.73.104.101" : "18.194.180.254";
+            string regionIP;
+            switch(ACCOUNT_CONFIG.ACCOUNTS.REGION)
+            {
+                case 1:
+                    regionIP = "18.194.180.254";
+                    break;
+                case 2:
+                    regionIP = "203.67.68.227";
+                    break;
+                default:
+                    regionIP = "184.73.104.101";
+                    break;
+            }
 
             while (!pingWorker.CancellationPending && MainWindow.currentPageText == "MainPage")
             {
-                regionIP = (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "184.73.104.101" : "18.194.180.254";
                 try
                 {
                     Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
@@ -75,8 +158,22 @@ namespace BnS_Multitool
 
         private void pingProgress(object sender, ProgressChangedEventArgs e)
         {
+            string regionID;
+            switch (ACCOUNT_CONFIG.ACCOUNTS.REGION)
+            {
+                case 1:
+                    regionID = "EU";
+                    break;
+                case 2:
+                    regionID = "TW";
+                    break;
+                default:
+                    regionID = "NA";
+                    break;
+            }
+
             if (currentPing != -1)
-                PingLabel.Content = String.Format("Ping ({0}): {1}ms", (ACCOUNT_CONFIG.ACCOUNTS.REGION == 0) ? "NA" : "EU", currentPing);
+                PingLabel.Content = String.Format("Ping ({0}): {1}ms", regionID, currentPing);
             else
                 PingLabel.Content = "Ping: Offline";
         }
@@ -141,9 +238,11 @@ namespace BnS_Multitool
             ChangeLog.Document.Blocks.Clear();
             await Task.Run(() =>
             {
-                while (MainWindow.ONLINE_CHANGELOG == null) { Thread.Sleep(50); }
+                checkForUpdate();
 
-                foreach (var version in MainWindow.ONLINE_CHANGELOG)
+                while (onlineJson.CHANGELOG == null) { Thread.Sleep(50); }
+
+                foreach (var version in onlineJson.CHANGELOG)
                     appendToChangelog(String.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));
             });
         }

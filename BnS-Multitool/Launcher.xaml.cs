@@ -19,6 +19,13 @@ using System.Windows.Threading;
 
 namespace BnS_Multitool
 {
+    public static class StringExt
+    {
+        public static string Truncate(this string value, int maxLength)
+        {
+            return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+        }
+    }
     public partial class Launcher : Page
     {
         public class SESSION_LIST
@@ -46,35 +53,57 @@ namespace BnS_Multitool
         {
             InitializeComponent();
 
-                        //Set our default selections if saved and other misc stuff
-            if (ACCOUNT_CONFIG.ACCOUNTS.USE_ALL_CORES == 1)
-                USE_ALL_CORES.IsChecked = true;
-
-            if (ACCOUNT_CONFIG.ACCOUNTS.USE_TEXTURE_STREAMING == 1)
-                NOTEXTURE_STREAMING.IsChecked = true;
-
-            BIT_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.CLIENT_BIT;
-            REGION_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.REGION;
-            LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
-            MemoryCleanerBox.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER;
-
-            memoryTimer.IsEnabled = false;
-            memoryTimer.Tick += new EventHandler(dispatchTimer_tick);
-
-            if (ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER != 0)
+            //Set our default selections if saved and other misc stuff
+            try
             {
-                memoryTimer.Interval = TimeSpan.FromMinutes(timerFromSelection());
-                memoryTimer.IsEnabled = true;
-                memoryTimer.Start();
+                if (ACCOUNT_CONFIG.ACCOUNTS.USE_ALL_CORES == 1)
+                    USE_ALL_CORES.IsChecked = true;
+
+                if (ACCOUNT_CONFIG.ACCOUNTS.USE_TEXTURE_STREAMING == 1)
+                    NOTEXTURE_STREAMING.IsChecked = true;
+
+                if(ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTO_BAIT == 1)
+                {
+                    BaitBasketToS.IsChecked = true;
+                    ToS_Button.Visibility = Visibility.Hidden;
+                    ToSPicture.Visibility = Visibility.Hidden;
+                }
+
+                if (ACCOUNT_CONFIG.ACCOUNTS.TOS_RAISE_CAP == 1)
+                {
+                    RaiseCapToS.IsChecked = true;
+                    ToS_Button.Visibility = Visibility.Hidden;
+                    ToSPicture.Visibility = Visibility.Hidden;
+                }
+
+                BIT_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.CLIENT_BIT;
+                REGION_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.REGION;
+                LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
+                MemoryCleanerBox.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER;
+
+                memoryTimer.IsEnabled = false;
+                memoryTimer.Tick += new EventHandler(dispatchTimer_tick);
+
+                if (ACCOUNT_CONFIG.ACCOUNTS.MEMORY_CLEANER != 0)
+                {
+                    memoryTimer.Interval = TimeSpan.FromMinutes(timerFromSelection());
+                    memoryTimer.IsEnabled = true;
+                    memoryTimer.Start();
+                }
+
+                foreach (var account in ACCOUNT_CONFIG.ACCOUNTS.Saved)
+                    ACCOUNT_LIST_BOX.Items.Add(account.EMAIL);
+
+                if (ACCOUNT_SELECTED_INDEX != -1)
+                    ACCOUNT_LIST_BOX.SelectedIndex = ACCOUNT_SELECTED_INDEX;
+
+                monitorProcesses.DoWork += new DoWorkEventHandler(monitorActiveProcesses);
+            } catch (Exception ex)
+            {
+                var dialog = new ErrorPrompt("Something went wrong, accounts.json is probably corrupted. Check for syntax errors in accounts.json or delete entirely.\r\rAddition information: \r" + ex.Message);
+                dialog.ShowDialog();
+                Environment.Exit(0);
             }
-
-            foreach (var account in ACCOUNT_CONFIG.ACCOUNTS.Saved)
-                ACCOUNT_LIST_BOX.Items.Add(account.EMAIL);
-
-            if (ACCOUNT_SELECTED_INDEX != -1)
-                ACCOUNT_LIST_BOX.SelectedIndex = ACCOUNT_SELECTED_INDEX;
-
-            monitorProcesses.DoWork += new DoWorkEventHandler(monitorActiveProcesses);
         }
 
         private void monitorActiveProcesses(object sender, DoWorkEventArgs e)
@@ -181,6 +210,9 @@ namespace BnS_Multitool
                 case 3:
                     lang = "FRENCH";
                     break;
+                case 4:
+                    lang = "CHINESET";
+                    break;
                 default:
                     lang = "English";
                     break;
@@ -196,60 +228,123 @@ namespace BnS_Multitool
                 int HAS_INDEX = ACTIVE_SESSIONS.FindIndex(x => x.EMAIL == EMAIL && x.REGION == REGION_BOX.SelectedIndex);
                 bool is_x86 = (BIT_BOX.SelectedIndex == 0) ? true : false;
 
-                if (HAS_INDEX == -1)
+                Process proc = new Process();
+                if (is_x86)
+                    proc.StartInfo.FileName = SystemConfig.SYS.BNS_DIR + @"\bin\Client.exe";
+                else
+                    proc.StartInfo.FileName = SystemConfig.SYS.BNS_DIR + @"\bin64\Client.exe";
+
+                //Arugments passed to Client.exe
+                if (REGION_BOX.SelectedIndex == 2)
                 {
-                    Process proc = new Process();
-                    if (is_x86)
-                        proc.StartInfo.FileName = SystemConfig.SYS.BNS_DIR + @"\bin\Client.exe";
-                    else
-                        proc.StartInfo.FileName = SystemConfig.SYS.BNS_DIR + @"\bin64\Client.exe";
-
-                    //Arugments passed to Client.exe
-                    proc.StartInfo.Arguments = String.Format(@"/sesskey /launchbylauncher -lang:{0} -region:{1} -unattended {2} {3}",
+                    //TW version, This shit is a mess I'll clean it up if i add more regions
+                    proc.StartInfo.Arguments = String.Format(@"/sesskey /LaunchByLauncher -unattended {0} {1}",
+                       (((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMIN " : ""), (((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORE " : ""));
+                } else
+                {
+                    //NA & EU Region
+                    proc.StartInfo.Arguments = String.Format(@"/sesskey /LaunchByLauncher -lang:{0} -region:{1} -unattended {2} {3}",
                         languageFromSelection(), REGION_BOX.SelectedIndex, (((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMIN " : ""), (((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORE " : ""));
+                }
 
-                    //Setup environment variables for loginhelper
-                    proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_USERNAME", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].EMAIL);
-                    proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_PASSWORD", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD);
-                    proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE);
-                    proc.StartInfo.EnvironmentVariables.Add("AUTO_BAIT", ((bool)BaitBasketToS.IsChecked) ? "1" : "0");
-                    proc.StartInfo.EnvironmentVariables.Add("RAISE_LIMIT", ((bool)RaiseCapToS.IsChecked) ? "1" : "0");
-                    proc.StartInfo.UseShellExecute = false; //Required for setting environment variables to processes
-                    //proc.StartInfo.Verb = "runas"; //Launching as admin.. Do I really need this? Or am I dumb?
-                    proc.Start();
+                //We need to limit the password down to 16 characters as NCSoft password limit is technically 16 and trims off everything after 16, only know of it being a problem in NA/EU not sure about TW
+                string pw = REGION_BOX.SelectedIndex != 2 ? ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD.Truncate(16) : ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD;
 
-                    if((bool) BaitBasketToS.IsChecked || (bool)RaiseCapToS.IsChecked)
+                //Setup environment variables for loginhelper
+                proc.StartInfo.UseShellExecute = false; //Required for setting environment variables to processes
+                proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_USERNAME", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].EMAIL);
+                proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_PASSWORD", pw);
+                proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE);
+                proc.StartInfo.EnvironmentVariables.Add("AUTO_BAIT", ((bool)BaitBasketToS.IsChecked) ? "1" : "0");
+                proc.StartInfo.EnvironmentVariables.Add("RAISE_LIMIT", ((bool)RaiseCapToS.IsChecked) ? "1" : "0");
+                proc.StartInfo.EnvironmentVariables.Add("MP_CROSS", ((bool)marketplace_TOS.IsChecked) ? "1" : "0");
+                proc.Start();
+
+                if ((bool)BaitBasketToS.IsChecked || (bool)RaiseCapToS.IsChecked || (bool)marketplace_TOS.IsChecked)
+                {
+                    //We need this check for TW because it has GameGuard, need to make sure they have bnsnogg plugin by Pilao
+                    if (REGION_BOX.SelectedIndex == 2 && (!File.Exists(plugins_x86 + @"bnsnogg.dll") && !File.Exists(plugins_x64 + "bnsnogg.dll")))
+                    {
+                        var dialog = new ErrorPrompt("You have the TW version selected and we cannot detect bnsnogg.dll, install bnsnogg before using the QoL options");
+                        dialog.ShowDialog();
+                    }
+                    else
                     {
                         if (is_x86)
                         {
-                            File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x86.exe", Properties.Resources.BnS_ToS_x86);
+                            try
+                            {
+                                File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x86.exe", Properties.Resources.BnS_ToS_x86);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
 
                             ProcessStartInfo tosproc = new ProcessStartInfo();
                             tosproc.FileName = Path.GetTempPath() + @"\BnS-ToS-x86.exe";
+                            tosproc.Arguments = proc.Id.ToString();
                             tosproc.Verb = "runas";
                             Process.Start(tosproc);
-                        } else
+                        }
+                        else
                         {
-                            File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x64.exe", Properties.Resources.BnS_ToS_x64);
+                            try
+                            {
+                                File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x64.exe", Properties.Resources.BnS_ToS_x64);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
 
                             ProcessStartInfo tosproc = new ProcessStartInfo();
                             tosproc.FileName = Path.GetTempPath() + @"\BnS-ToS-x64.exe";
+                            tosproc.Arguments = proc.Id.ToString();
                             tosproc.Verb = "runas";
                             Process.Start(tosproc);
                         }
                     }
+                }
 
+                if (HAS_INDEX == -1)
+                {
                     ACTIVE_SESSIONS.Add(new SESSION_LIST() { EMAIL = EMAIL, REGION = REGION_BOX.SelectedIndex, PROCESS = proc });
 
-                    if (ACTIVE_SESSIONS.Count == 1)
+                    if (ACTIVE_SESSIONS.Count == 1 && !monitorProcesses.IsBusy)
                         monitorProcesses.RunWorkerAsync(); //Start our worker thread.
-                    ProcessInfo.Items.Add(String.Format("{0} - {1}", EMAIL, (REGION_BOX.SelectedIndex == 0) ? "NA" : "EU"));
+
+                    ProcessInfo.Items.Add(String.Format("{0} - {1}", EMAIL, getSelectedRegion(REGION_BOX.SelectedIndex)));
+                } else
+                {
+                    ACTIVE_SESSIONS[HAS_INDEX].PROCESS = proc;
                 }
             } catch (Exception ex)
             {
                 var dialog = new ErrorPrompt(ex.Message);
                 dialog.ShowDialog();
             }
+
+            GC.Collect();
+        }
+
+        private static string getSelectedRegion(int id)
+        {
+            string region;
+            switch(id)
+            {
+                case 1:
+                    region = "EU";
+                    break;
+                case 2:
+                    region = "TW";
+                    break;
+                default:
+                    region = "NA";
+                    break;
+            }
+
+            return region;
         }
 
         private void launchGameClientClick(object sender, RoutedEventArgs e)
@@ -287,8 +382,8 @@ namespace BnS_Multitool
                 }
                 else
                 {
-                    classLabel.Text = "An instance for this account and region is already running, close the instance before trying to launch a new one";
-                    ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                    ACTIVE_SESSIONS[HAS_INDEX].PROCESS.Kill();
+                    launchNewGameClient();
                 }
             }
         }
@@ -360,8 +455,12 @@ namespace BnS_Multitool
 
             if (currentCheckBox.Name == "NOTEXTURE_STREAMING")
                 ACCOUNT_CONFIG.ACCOUNTS.USE_TEXTURE_STREAMING = currentState;
-            else
+            else if (currentCheckBox.Name == "USE_ALL_CORES")
                 ACCOUNT_CONFIG.ACCOUNTS.USE_ALL_CORES = currentState;
+            else if (currentCheckBox.Name == "BaitBasketToS")
+                ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTO_BAIT = currentState;
+            else
+                ACCOUNT_CONFIG.ACCOUNTS.TOS_RAISE_CAP = currentState;
 
             ACCOUNT_CONFIG.appendChangesToConfig();
         }
@@ -594,15 +693,12 @@ namespace BnS_Multitool
                 {
                     try
                     {
-                        EmptyWorkingSet(process.Handle);
+                        PoormanCleaner.EmptyWorkingSet(process.Handle);
                     }
                     catch (Exception) { }
                 }
             }
         }
-
-        [DllImport("psapi.dll")]
-        static extern int EmptyWorkingSet(IntPtr hwProc);
 
         private void removeAccount(object sender, RoutedEventArgs e)
         {

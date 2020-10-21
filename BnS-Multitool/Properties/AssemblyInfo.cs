@@ -10,7 +10,7 @@ using System.Windows;
 [assembly: AssemblyTitle("BnS Multi Tool")]
 [assembly: AssemblyDescription("A multi-tool for managing BnS related mod launching")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany("Tonic")]
 [assembly: AssemblyProduct("BnS Multi-Tool")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("Tonic")]
@@ -51,6 +51,6 @@ using System.Windows;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.1.3.0")]
-[assembly: AssemblyFileVersion("2.1.3.0")]
+[assembly: AssemblyVersion("3.0.3")]
+[assembly: AssemblyFileVersion("3.0.3")]
 [assembly: NeutralResourcesLanguage("en")]

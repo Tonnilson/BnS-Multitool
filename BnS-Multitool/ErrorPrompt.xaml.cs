@@ -19,10 +19,19 @@ namespace BnS_Multitool
     /// </summary>
     public partial class ErrorPrompt : Window
     {
-        public ErrorPrompt(string Message)
+        public ErrorPrompt(string Message, bool good = false)
         {
             InitializeComponent();
             ErrorLabel.Text = Message;
+
+            if (good)
+            {
+                PromptIcon2.Visibility = Visibility.Visible;
+                ErrorLabel.FontSize = 16;
+                ErrorLabel.FontWeight = FontWeights.Bold;
+            }
+            else
+                PromptIcon.Visibility = Visibility.Visible;
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

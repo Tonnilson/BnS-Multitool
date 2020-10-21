@@ -8,7 +8,7 @@
       d:DesignHeight="490" d:DesignWidth="660"
       Title="Mods">
     <Page.Resources>
-        
+
     </Page.Resources>
     <Grid>
         <Image Visibility="Hidden" x:Name="successStatePicture" Source="poggies.png" Margin="412,250,104,80" RenderTransformOrigin="0.5,0.5">
@@ -38,17 +38,43 @@
             <ComboBoxItem>PORTUGUESE</ComboBoxItem>
             <ComboBoxItem>GERMAN</ComboBoxItem>
             <ComboBoxItem>FRENCH</ComboBoxItem>
+            <ComboBoxItem>TW Server</ComboBoxItem>
         </ComboBox>
 
         <Button Content="Apply" Margin="483,86,51,377" FontFamily="Arial Black" FontSize="16" Click="applyMods">
-           
+
         </Button>
         <Button Content="Refresh" Margin="483,120,51,343" FontFamily="Arial Black" FontSize="16" Click="refreshMods">
-          
+
         </Button>
         <Button Content="Mod Folder" Margin="483,154,51,309" FontFamily="Arial Black" FontSize="16" Click="openModFolder">
-          
-        </Button>
 
+        </Button>
+        <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="423,47,203,412">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
+                    <TextBlock>
+                        Checks all the boxes and applies the
+                        <LineBreak/>
+                        check to all mods.
+                    </TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="423,11,203,448" Click="handleToggle">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
+                    <TextBlock>
+                        Unchecks all the boxes and applies the
+                        <LineBreak/>
+                        uncheck to all mods.
+                    </TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
     </Grid>
 </Page>

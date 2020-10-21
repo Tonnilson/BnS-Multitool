@@ -19,6 +19,7 @@ using System.IO;
 using System.CodeDom;
 using System.Threading;
 using System.Diagnostics;
+using System.Security.Cryptography;
 
 namespace BnS_Multi_Tool_Updater
 {
@@ -31,7 +32,7 @@ namespace BnS_Multi_Tool_Updater
         {
             public string VERSION { get; set; }
             public string[] MAIN_UPKS { get; set; }
-            public string[] ADDITIONAL_UPKS { get; set; }
+            public string HASH { get; set; }
         }
 
         public struct SYSConfig
@@ -41,24 +42,22 @@ namespace BnS_Multi_Tool_Updater
             public string BNS_DIR { get; set; }
             public string UPK_DIR { get; set; }
             public string[] MAIN_UPKS { get; set; }
-            public string[] ADDITIONAL_UPKS { get; set; }
-            public List<ANIMATION_UPKS_STRUCT> ANIMATION_UPKS { get; set; }
+            public List<BNS_CLASS_STRUCT> CLASSES { get; set; }
         }
 
-        public class ANIMATION_UPKS_STRUCT
+        public class BNS_CLASS_STRUCT
         {
             public string CLASS { get; set; }
-            public string[] UPK_FILES { get; set; }
+            public string[] EFFECTS { get; set; }
+            public string[] ANIMATIONS { get; set; }
         }
 
-        private static string WEB_VERSION = "";
-        private static string[] MAIN_UPKS = new string[] { };
-        private static string[] ADDITIONAL_UPKS = new string[] { };
+        private static WEB_VERSION_CLASS onlineJson;
 
         public MainWindow()
         {
             InitializeComponent();
-            this.MouseDown += delegate { try { DragMove(); } catch (Exception ex) { } };
+            this.MouseDown += delegate { try { DragMove(); } catch (Exception) { } };
 
             //Find all instances of BnS-Multi-Tool and close.
             try
@@ -79,30 +78,46 @@ namespace BnS_Multi_Tool_Updater
 
                 WebClient client = new WebClient();
                 var json = client.DownloadString("http://tonic.pw/files/bnsmultitool/version.json");
-                var tmp = JsonConvert.DeserializeObject<WEB_VERSION_CLASS>(json);
-                WEB_VERSION = tmp.VERSION;
-                MAIN_UPKS = tmp.MAIN_UPKS;
-                ADDITIONAL_UPKS = tmp.ADDITIONAL_UPKS;
+                onlineJson = JsonConvert.DeserializeObject<WEB_VERSION_CLASS>(json);
             }
-            catch (Exception ex) { }
+            catch (Exception) { }
 
-            if (WEB_VERSION == "")
+            if (onlineJson.VERSION == "")
             {
                 OnlineVersion.Content = "Online: OFFLINE";
                 downloadBtn.Visibility = Visibility.Hidden;
             }
             else
-                OnlineVersion.Content = "Online: " + WEB_VERSION;
+                OnlineVersion.Content = "Online: " + onlineJson.VERSION;
         }
 
         TaskCompletionSource<bool> downloadComplete = new TaskCompletionSource<bool>();
         private async void downloadClick(object sender, RoutedEventArgs e)
         {
+            while (Process.GetProcessesByName("BnS-Multi-Tool").Length >= 1)
+            {
+                //Find all instances of BnS-Multi-Tool and close.
+                try
+                {
+                    Process[] processes = Process.GetProcessesByName("BnS-Multi-Tool");
+
+                    foreach (Process proc in processes)
+                        proc.Kill();
+
+                    Thread.Sleep(50);
+                }
+                catch (Exception) { }
+            }
+
+            downloadComplete = new TaskCompletionSource<bool>();
+
             downloadBtn.Visibility = Visibility.Hidden;
             VersionGrid.Visibility = Visibility.Hidden;
             ProgressControl.Value = 0;
             ProgressText.Text = "0%";
+            downloadingLbl.Content = "Downloading...";
             ProgressGrid.Visibility = Visibility.Visible;
+            bool failedToUpdate = false;
 
             await Task.Run(async () =>
             {
@@ -115,52 +130,70 @@ namespace BnS_Multi_Tool_Updater
 
                     await downloadComplete.Task;
 
-                    string jsonString = File.ReadAllText("settings.json");
-                    var SYS = JsonConvert.DeserializeObject<SYSConfig>(jsonString);
-
-                    SYS.VERSION = WEB_VERSION;
-
-                    //Append new UPKs to our main list
-                    if (MAIN_UPKS.Count() > 0)
+                    //Hash check
+                    string localHash = CalculateMD5("BnS-Multi-Tool.exe");
+                    await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
                     {
-                        List<string> _MAIN_UPKS = SYS.MAIN_UPKS.ToList();
-                        foreach (string UPK in MAIN_UPKS)
+                        downloadingLbl.Content = "Verifying....";
+                    }));
+
+                    await Task.Delay(1000);
+                    if (localHash == onlineJson.HASH)
+                    {
+                        string jsonString = File.ReadAllText("settings.json");
+                        var SYS = JsonConvert.DeserializeObject<SYSConfig>(jsonString);
+
+                        SYS.VERSION = onlineJson.VERSION;
+
+                        //Append new UPKs to our main list
+                        if (onlineJson.MAIN_UPKS.Count() > 0)
                         {
-                            if (!SYS.MAIN_UPKS.Contains(UPK))
-                                _MAIN_UPKS.Add(UPK);
+                            List<string> _MAIN_UPKS = SYS.MAIN_UPKS.ToList();
+                            foreach (string UPK in onlineJson.MAIN_UPKS)
+                            {
+                                if (!SYS.MAIN_UPKS.Contains(UPK))
+                                    _MAIN_UPKS.Add(UPK);
+                            }
+
+                            SYS.MAIN_UPKS = _MAIN_UPKS.ToArray();
                         }
 
-                        SYS.MAIN_UPKS = _MAIN_UPKS.ToArray();
-                    }
-
-                    //Append new UPKs to our additional list
-                    if (ADDITIONAL_UPKS.Count() > 0)
-                    {
-                        List<string> _ADDITIONAL_UPKS = SYS.ADDITIONAL_UPKS.ToList();
-                        foreach (string UPK in ADDITIONAL_UPKS)
+                        jsonString = JsonConvert.SerializeObject(SYS, Formatting.Indented);
+                        File.WriteAllText("settings.json", jsonString);
+                        await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
                         {
-                            if (!SYS.ADDITIONAL_UPKS.Contains(UPK))
-                                _ADDITIONAL_UPKS.Add(UPK);
-                        }
-                        SYS.ADDITIONAL_UPKS = _ADDITIONAL_UPKS.ToArray();
+                            downloadingLbl.Content = "Launching....";
+                        }));
+
+                        await Task.Delay(500);
+
+                        ProcessStartInfo proc = new ProcessStartInfo();
+                        proc.Verb = "runas";
+                        proc.FileName = "BnS-Multi-Tool.exe";
+                        Process.Start(proc);
+                        Environment.Exit(0);
                     }
-
-                    jsonString = JsonConvert.SerializeObject(SYS, Formatting.Indented);
-                    File.WriteAllText("settings.json", jsonString);
-                    Thread.Sleep(1200);
-
-                    ProcessStartInfo proc = new ProcessStartInfo();
-                    proc.Verb = "runas";
-                    proc.FileName = "BnS-Multi-Tool.exe";
-                    Process.Start(proc);
-
-                    Environment.Exit(0);
+                    else
+                        failedToUpdate = true;
 
                 } catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
+                    failedToUpdate = true;
                 }
             });
+
+            //This is redundant but just in case
+            if(failedToUpdate)
+            {
+                ProgressText.Text = "FAILED";
+                downloadBtn.Visibility = Visibility.Visible;
+                //VersionGrid.Visibility = Visibility.Visible;
+                //ProgressGrid.Visibility = Visibility.Hidden;
+                ProgressControl.Value = 0;
+                downloadingLbl.Content = "Incorrect Hash";
+                MessageBox.Show("Are you sure the multi tool is closed and an anti-virus is not blocking the download? You can try again", "Failed to update");
+            }
         }
 
         private void DL_PROGRESS_CHANGED(object sender, DownloadProgressChangedEventArgs e)
@@ -175,6 +208,23 @@ namespace BnS_Multi_Tool_Updater
         private void DL_COMPLETED(object sender, AsyncCompletedEventArgs e)
         {
             downloadComplete.SetResult(true);
+        }
+
+        static string CalculateMD5(string fileName)
+        {
+            using (var md5 = MD5.Create())
+            {
+                using (var stream = File.OpenRead(fileName))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
+        }
+
+        private void close(object sender, RoutedEventArgs e)
+        {
+            Environment.Exit(0);
         }
     }
 }

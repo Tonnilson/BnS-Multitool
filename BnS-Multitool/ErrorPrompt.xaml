@@ -10,8 +10,9 @@
             <ColumnDefinition Width="88*"/>
             <ColumnDefinition Width="15*"/>
         </Grid.ColumnDefinitions>
-        <Image Source="Images/feelsworry.png" Margin="-4,0,294,0"/>
+        <Image Visibility="Hidden" Source="Images/feelsworry.png" Margin="-4,0,294,0" x:Name="PromptIcon"/>
+        <Image Visibility="Hidden" Source="poggies.png" Margin="-4,0,294,0" x:Name="PromptIcon2"/>
         <TextBlock x:Name="ErrorLabel" TextWrapping="WrapWithOverflow" Text="Error Message" Foreground="White" FontFamily="Arial" Margin="135,10,10,32" Grid.ColumnSpan="2"/>
-        <Button Margin="286,107,69,4" Content="OK" Click="Button_Click"/>
+        <Button Margin="237,107,104,4" Content="OK" Click="Button_Click"/>
     </Grid>
 </Window>

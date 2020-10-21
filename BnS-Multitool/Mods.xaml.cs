@@ -3,20 +3,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace BnS_Multitool
 {
@@ -52,8 +44,15 @@ namespace BnS_Multitool
             InitializeComponent();
             LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
 
-            modPath = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC_Mod";
-            modDestination = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC\mod";
+            if (LANGUAGE_BOX.SelectedIndex == 4)
+            {
+                modPath = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCTAIWAN\" + languageFromSelection() + @"\CookedPC_Mod";
+                modDestination = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCTAIWAN\" + languageFromSelection() + @"\CookedPC\mod";
+            } else
+            {
+                modPath = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC_Mod";
+                modDestination = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC\mod";
+            }
 
             //These are custom so we need to check if they exist, if not create them for the language.
             if (!Directory.Exists(modPath))
@@ -106,8 +105,16 @@ namespace BnS_Multitool
 
         private void launchInfoSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            modPath = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC_Mod";
-            modDestination = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC\mod";
+            if (LANGUAGE_BOX.SelectedIndex == 4)
+            {
+                modPath = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCTAIWAN\" + languageFromSelection() + @"\CookedPC_Mod";
+                modDestination = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCTAIWAN\" + languageFromSelection() + @"\CookedPC\mod";
+            }
+            else
+            {
+                modPath = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC_Mod";
+                modDestination = SystemConfig.SYS.BNS_DIR + @"\contents\Local\NCWEST\" + languageFromSelection() + @"\CookedPC\mod";
+            }
 
             if (!Directory.Exists(modPath))
                 Directory.CreateDirectory(modPath);
@@ -119,6 +126,8 @@ namespace BnS_Multitool
             int currentIndex = currentComboBox.SelectedIndex;
             ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE = currentIndex;
             ACCOUNT_CONFIG.appendChangesToConfig();
+
+            refreshModList(sender, new DoWorkEventArgs(sender));
         }
 
         private void AddonsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -208,8 +217,21 @@ namespace BnS_Multitool
                 case 3:
                     lang = "FRENCH";
                     break;
+                case 4:
+                    lang = "CHINESET";
+                    break;
             }
             return lang;
+        }
+
+        private void handleToggle(object sender, RoutedEventArgs e)
+        {
+            bool state = ((Button)sender).Name.Contains("_on_");
+            foreach (var b in userMods)
+                b.isChecked = state;
+
+            CollectionViewSource.GetDefaultView(ModsListBox.DataContext).Refresh();
+            applyMods(sender, e);
         }
     }
 }

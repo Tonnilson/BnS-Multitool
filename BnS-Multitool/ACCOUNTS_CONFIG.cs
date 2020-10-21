@@ -25,6 +25,8 @@ namespace BnS_Multitool
                     REGION = 0,
                     CLIENT_BIT = 0,
                     LANGUAGE = 0,
+                    TOS_AUTO_BAIT = 0,
+                    TOS_RAISE_CAP = 0,
                     MEMORY_CLEANER = 0,
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
                 };
@@ -34,28 +36,42 @@ namespace BnS_Multitool
             }
             else
             {
-                string _JSON = File.ReadAllText(CONFIG_FILE);
-                ACCOUNTS = JsonConvert.DeserializeObject<ACCOUNTS_CONFIG>(_JSON);
+                try
+                {
+                    string _JSON = File.ReadAllText(CONFIG_FILE);
+                    ACCOUNTS = JsonConvert.DeserializeObject<ACCOUNTS_CONFIG>(_JSON);
 
-                if (!DoesPropertyExist(ACCOUNTS, "USE_ALL_CORES"))
-                    ACCOUNTS.USE_ALL_CORES = 0;
+                    if (!DoesPropertyExist(ACCOUNTS, "USE_ALL_CORES"))
+                        ACCOUNTS.USE_ALL_CORES = 0;
 
-                if (!DoesPropertyExist(ACCOUNTS, "USE_TEXTURE_STREAMING"))
-                    ACCOUNTS.USE_TEXTURE_STREAMING = 0;
+                    if (!DoesPropertyExist(ACCOUNTS, "USE_TEXTURE_STREAMING"))
+                        ACCOUNTS.USE_TEXTURE_STREAMING = 0;
 
-                if (!DoesPropertyExist(ACCOUNTS, "REGION"))
-                    ACCOUNTS.REGION = 0;
+                    if (!DoesPropertyExist(ACCOUNTS, "REGION"))
+                        ACCOUNTS.REGION = 0;
 
-                if (!DoesPropertyExist(ACCOUNTS, "CLIENT_BIT"))
-                    ACCOUNTS.CLIENT_BIT = 0;
+                    if (!DoesPropertyExist(ACCOUNTS, "CLIENT_BIT"))
+                        ACCOUNTS.CLIENT_BIT = 0;
 
-                if (!DoesPropertyExist(ACCOUNTS, "LANGUAGE"))
-                    ACCOUNTS.LANGUAGE = 0;
+                    if (!DoesPropertyExist(ACCOUNTS, "LANGUAGE"))
+                        ACCOUNTS.LANGUAGE = 0;
 
-                if (!DoesPropertyExist(ACCOUNTS, "MEMORY_CLEANER"))
-                    ACCOUNTS.MEMORY_CLEANER = 0;
+                    if (!DoesPropertyExist(ACCOUNTS, "MEMORY_CLEANER"))
+                        ACCOUNTS.MEMORY_CLEANER = 0;
 
-                appendChangesToConfig();
+                    if (!DoesPropertyExist(ACCOUNTS, "TOS_AUTO_BAIT"))
+                        ACCOUNTS.TOS_AUTO_BAIT = 0;
+
+                    if (!DoesPropertyExist(ACCOUNTS, "TOS_RAISE_CAP"))
+                        ACCOUNTS.TOS_RAISE_CAP = 0;
+
+                    appendChangesToConfig();
+                } catch (Exception)
+                {
+                    var dialog = new ErrorPrompt("There was an error reading the config file: accounts.json\rIf error persists delete accounts.json or check for syntax errors.");
+                    dialog.ShowDialog();
+                    Environment.Exit(0);
+                }
             }
         }
 
@@ -81,6 +97,8 @@ namespace BnS_Multitool
             public int REGION { get; set; }
             public int CLIENT_BIT { get; set; }
             public int LANGUAGE { get; set; }
+            public int TOS_AUTO_BAIT { get; set; }
+            public int TOS_RAISE_CAP { get; set; }
             public int MEMORY_CLEANER { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
         }
