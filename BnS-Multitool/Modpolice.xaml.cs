@@ -51,7 +51,7 @@ namespace BnS_Multitool
         private static pluginFileInfo bnspatchPlugin = null;
         private static bool toggleControl = false;
 
-        private class pluginFileInfo
+        public class pluginFileInfo
         {
             public DateTime creationTime { get; set; }
             public DateTime modificationTime { get; set; }

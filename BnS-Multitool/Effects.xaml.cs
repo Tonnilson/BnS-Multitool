@@ -102,14 +102,6 @@ namespace BnS_Multitool
                     curClass.animToggle.IsChecked = true;
             }
 
-            //Check if any effects are present, if so toggle on.
-            if (SystemConfig.SYS.CLASSES.SelectMany(classInfo => classInfo.EFFECTS).Any(file => File.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\" + file)))
-                allEffectsToggle.IsChecked = true;
-
-            //Check if any animations are present, if so toggle on.
-            if (SystemConfig.SYS.CLASSES.SelectMany(classInfo => classInfo.ANIMATIONS).Any(file => File.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\" + file)))
-                allAnimationsToggle.IsChecked = true;
-
             //Check if any of the other effects are present, if so toggle on.
             if (SystemConfig.SYS.MAIN_UPKS.Any(file => File.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\" + file)))
                 otherEffectsToggle.IsChecked = true;
@@ -126,9 +118,8 @@ namespace BnS_Multitool
 
             if (Process.GetProcessesByName("Client").Length >= 1)
             {
-                wtfLbl.Text = "You can't do that when BnS is already running!";
-                ((Storyboard)FindResource("animate")).Begin(wtfLbl);
-                ((Storyboard)FindResource("animate")).Begin(wtfError);
+                peepoWtfText.Text = "You can't do that when Blade & Soul is already running!";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
                 return;
             }
 
@@ -187,29 +178,11 @@ namespace BnS_Multitool
                 Dispatchers.labelContent(classLabel, String.Format("{0} {1}", sysToggle.className, (currentToggle.IsChecked) ? "Restored" : "Removed"));
                 ((Storyboard)FindResource("animate")).Begin(classLabel);
                 ((Storyboard)FindResource("animate")).Begin(successStatePicture);
-            } 
+            }
                 else
             {
                 string[] upkFiles;
-
-                if (currentToggle.Name == "otherEffectsToggle")
-                    upkFiles = SystemConfig.SYS.MAIN_UPKS;
-                else if (currentToggle.Name == "allAnimationsToggle")
-                {
-                    _isInitialized = false;
-                    upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.ANIMATIONS).ToArray();
-                    foreach (var fuckass in systemToggles)
-                        fuckass.animToggle.IsChecked = currentToggle.IsChecked;
-                    _isInitialized = true;
-                }
-                else
-                {
-                    _isInitialized = false;
-                    upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.EFFECTS).ToArray();
-                    foreach (var fuckass in systemToggles)
-                        fuckass.fxToggle.IsChecked = currentToggle.IsChecked;
-                    _isInitialized = true;
-                }
+                upkFiles = SystemConfig.SYS.MAIN_UPKS;
 
                 _progressControl = new ProgressControl();
                 MainWindow.mainWindowFrame.RemoveBackEntry();
@@ -223,14 +196,14 @@ namespace BnS_Multitool
                 {
                     ProgressControl.errorSadPeepo(Visibility.Hidden);
                     ProgressControl.updateProgressLabel("Restoring files");
-                    await Task.Delay(250);
+                    await Task.Delay(150);
                     sourceDirectory = backupLocation;
                     destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
                 } else
                 {
                     ProgressControl.errorSadPeepo(Visibility.Hidden);
                     ProgressControl.updateProgressLabel("Removing files");
-                    await Task.Delay(250);
+                    await Task.Delay(150);
                     sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
                     destinationDirectory = backupLocation;
                 }
@@ -266,6 +239,118 @@ namespace BnS_Multitool
             }
 
             GC.WaitForPendingFinalizers();
+        }
+
+        private async void handleToggle(object sender, RoutedEventArgs e)
+        {
+            if (!_isInitialized)
+                return;
+
+            if (Process.GetProcessesByName("Client").Length >= 1)
+            {
+                peepoWtfText.Text = "You can't do that when Blade & Soul is already running!";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                return;
+            }
+
+            Button currentToggle = (Button)sender;
+            string[] upkFiles;
+            string sourceDirectory;
+            string destinationDirectory;
+
+            bool currentState = currentToggle.Name.Contains("_on") ? true : false;
+
+            if (currentToggle.Name.Contains("animation"))
+            {
+                Debug.WriteLine("Animation Toggle");
+                _isInitialized = false;
+                upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.ANIMATIONS).ToArray();
+                foreach (var fuckass in systemToggles)
+                    fuckass.animToggle.IsChecked = currentState;
+                _isInitialized = true;
+            }
+            else if (currentToggle.Name.Contains("effect"))
+            {
+                Debug.WriteLine("effect Toggle");
+                _isInitialized = false;
+                upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.EFFECTS).ToArray();
+                foreach (var fuckass in systemToggles)
+                    fuckass.fxToggle.IsChecked = currentState;
+                _isInitialized = true;
+            }
+            else
+            {
+                _isInitialized = false;
+
+                //Put all animations and stuff into one big array, I'm sure there is a better way to do this but it's 6am and I can't be bothered to think efficient.
+                upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.ANIMATIONS).ToArray();
+                upkFiles = upkFiles.Concat(SystemConfig.SYS.CLASSES.SelectMany(entries => entries.EFFECTS)).ToArray();
+                upkFiles =  upkFiles.Concat(SystemConfig.SYS.MAIN_UPKS).ToArray();
+
+                foreach (var fuckass in systemToggles)
+                {
+                    fuckass.animToggle.IsChecked = currentState;
+                    fuckass.fxToggle.IsChecked = currentState;
+                }
+
+                otherEffectsToggle.IsChecked = currentState;
+                _isInitialized = true;
+            }
+
+            _progressControl = new ProgressControl();
+            MainWindow.mainWindowFrame.RemoveBackEntry();
+            ProgressGrid.Visibility = Visibility.Visible;
+            MainGrid.Visibility = Visibility.Collapsed;
+
+            ProgressPanel.Children.Add(_progressControl);
+
+            //Turning whatever the fuck it is on
+            if (currentState)
+            {
+                ProgressControl.errorSadPeepo(Visibility.Hidden);
+                ProgressControl.updateProgressLabel("Restoring files");
+                await Task.Delay(150);
+                sourceDirectory = backupLocation;
+                destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
+            }
+            else
+            {
+                ProgressControl.errorSadPeepo(Visibility.Hidden);
+                ProgressControl.updateProgressLabel("Removing files");
+                await Task.Delay(150);
+                sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
+                destinationDirectory = backupLocation;
+            }
+
+            foreach (string file in upkFiles)
+            {
+                try
+                {
+                    ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
+                    await Task.Delay(25);
+                    //Move our target file to our new destination
+                    if (File.Exists(sourceDirectory + file))
+                    {
+                        ProgressControl.updateProgressLabel(String.Format("{0} {1}", currentState ? "Restoring" : "Removing", file));
+                        if (!File.Exists(destinationDirectory + file))
+                            File.Move(sourceDirectory + file, destinationDirectory + file);
+                        else
+                            File.Delete(sourceDirectory + file);
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    ProgressControl.updateProgressLabel(ex.Message);
+                    await Task.Delay(500);
+                }
+                await Task.Delay(50);
+            }
+
+            ProgressGrid.Visibility = Visibility.Hidden;
+            MainGrid.Visibility = Visibility.Visible;
+            ProgressPanel.Children.Clear();
+            _progressControl = null;
         }
     }
 }

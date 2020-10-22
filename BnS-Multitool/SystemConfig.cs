@@ -19,7 +19,7 @@ namespace BnS_Multitool
             {
                 SYS = new SYSConfig
                 {
-                    VERSION = "3.0.3",
+                    VERSION = "3.0.4",
                     ADDITIONAL_EFFECTS = 0,
                     PATCH_EFFECTS = 0,
                     BNS_DIR = @"C:\Program Files (x86)\NCSOFT\BNS\",
@@ -124,7 +124,6 @@ namespace BnS_Multitool
 
                     if (!ACCOUNT_CONFIG.DoesPropertyExist(SYS, "PATCH_EFFECTS"))
                         SYS.PATCH_EFFECTS = 0;
-
 
                     if (SYS.PATCH_EFFECTS == 0)
                     {

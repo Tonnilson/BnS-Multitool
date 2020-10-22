@@ -48,6 +48,7 @@ namespace BnS_Multitool
         private static BackgroundWorker monitorProcesses = new BackgroundWorker();
         private static bool removalInProgress = false;
         private static DispatcherTimer memoryTimer = new DispatcherTimer();
+        private static Modpolice.pluginFileInfo loginhelperPlugin;
 
         public Launcher()
         {
@@ -62,16 +63,17 @@ namespace BnS_Multitool
                 if (ACCOUNT_CONFIG.ACCOUNTS.USE_TEXTURE_STREAMING == 1)
                     NOTEXTURE_STREAMING.IsChecked = true;
 
+                if (ACCOUNT_CONFIG.ACCOUNTS.TOS_MARKETPLACE == 1)
+                    marketplace_TOS.IsChecked = true;
+
                 if(ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTO_BAIT == 1)
-                {
                     BaitBasketToS.IsChecked = true;
-                    ToS_Button.Visibility = Visibility.Hidden;
-                    ToSPicture.Visibility = Visibility.Hidden;
-                }
 
                 if (ACCOUNT_CONFIG.ACCOUNTS.TOS_RAISE_CAP == 1)
-                {
                     RaiseCapToS.IsChecked = true;
+
+                if((bool)RaiseCapToS.IsChecked || (bool)BaitBasketToS.IsChecked || (bool)marketplace_TOS.IsChecked)
+                {
                     ToS_Button.Visibility = Visibility.Hidden;
                     ToSPicture.Visibility = Visibility.Hidden;
                 }
@@ -140,18 +142,13 @@ namespace BnS_Multitool
             }));
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             //Check if loginhelper is installed
             loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
             modpolice_installed = (File.Exists(bin_x86 + "winmm.dll") && File.Exists(bin_x64 + "winmm.dll") && File.Exists(plugins_x86 + "bnspatch.dll") && File.Exists(plugins_x64 + "bnspatch.dll"));
 
-            if (loginHelper_installed)
-            {
-                LoginHelper_Lbl.Text = "Installed: Yes";
-                LoginHelper_Lbl.Foreground = System.Windows.Media.Brushes.Green;
-                //LOGINHELPER_INSTALL.IsEnabled = false;
-            }
+            await Task.Run(async () => await checkOnlineVersion());
         }
 
         private void saveAccount(object sender, RoutedEventArgs e)
@@ -239,12 +236,12 @@ namespace BnS_Multitool
                 {
                     //TW version, This shit is a mess I'll clean it up if i add more regions
                     proc.StartInfo.Arguments = String.Format(@"/sesskey /LaunchByLauncher -unattended {0} {1}",
-                       (((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMIN " : ""), (((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORE " : ""));
+                       (((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMING " : ""), (((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORES " : ""));
                 } else
                 {
                     //NA & EU Region
                     proc.StartInfo.Arguments = String.Format(@"/sesskey /LaunchByLauncher -lang:{0} -region:{1} -unattended {2} {3}",
-                        languageFromSelection(), REGION_BOX.SelectedIndex, (((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMIN " : ""), (((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORE " : ""));
+                        languageFromSelection(), REGION_BOX.SelectedIndex, (((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMING " : ""), (((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORES " : ""));
                 }
 
                 //We need to limit the password down to 16 characters as NCSoft password limit is technically 16 and trims off everything after 16, only know of it being a problem in NA/EU not sure about TW
@@ -459,6 +456,8 @@ namespace BnS_Multitool
                 ACCOUNT_CONFIG.ACCOUNTS.USE_ALL_CORES = currentState;
             else if (currentCheckBox.Name == "BaitBasketToS")
                 ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTO_BAIT = currentState;
+            else if (currentCheckBox.Name == "marketplace_TOS")
+                ACCOUNT_CONFIG.ACCOUNTS.TOS_MARKETPLACE = currentState;
             else
                 ACCOUNT_CONFIG.ACCOUNTS.TOS_RAISE_CAP = currentState;
 
@@ -568,12 +567,7 @@ namespace BnS_Multitool
 
             //Check if loginhelper is installed
             loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
-            if (loginHelper_installed)
-            {
-                LoginHelper_Lbl.Text = "Installed: Yes";
-                LoginHelper_Lbl.Foreground = System.Windows.Media.Brushes.Green;
-                //LOGINHELPER_INSTALL.IsEnabled = false;
-            }
+            await Task.Run(async () => await checkOnlineVersion());
         }
 
         private void DownloadProgressChanged(object sender, DownloadProgressChangedEventArgs e)
@@ -727,6 +721,32 @@ namespace BnS_Multitool
         {
             ToS_Button.Visibility = Visibility.Hidden;
             ToSPicture.Visibility = Visibility.Hidden;
+        }
+
+        private async Task checkOnlineVersion()
+        {
+            if (loginHelper_installed)
+                loginhelperPlugin = new Modpolice.pluginFileInfo(plugins_x86 + "loginhelper.dll");
+            else
+                loginhelperPlugin = null;
+
+            Dispatchers.labelContent(loginhelperLocalLbl, String.Format("Current: {0}", (loginhelperPlugin != null) ? loginhelperPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+
+            try
+            {
+                var client = new MegaApiClient();
+                await client.LoginAnonymousAsync();
+
+                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
+                INode loginhelper_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("loginhelper")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+
+                if(loginhelper_node != null)
+                    Dispatchers.labelContent(loginhelperOnlineLbl, String.Format("Online: {0}", loginhelper_node.ModificationDate.Value.ToString("MM-dd-yy")));
+            }
+            catch (Exception)
+            {
+                Dispatchers.labelContent(loginhelperOnlineLbl, "Online: Error!");
+            }
         }
     }
 }

@@ -161,13 +161,20 @@ namespace BnS_Multitool
             //Load our main page.
             setCurrentPage("MainPage");
 
-            VERSION_LABEL.Text = String.Format("BnS Multi Tool Version: {0}", SystemConfig.SYS.VERSION);
+            VERSION_LABEL.Text = String.Format("BnS Multi Tool Version: {0}", FileVersion());
+
+            //Check version in settings.json and overwrite if they don't match, means they probably updated manually...
+            if(SystemConfig.SYS.VERSION != FileVersion())
+            {
+                SystemConfig.SYS.VERSION = FileVersion();
+                SystemConfig.appendChangesToConfig();
+            }
 
             //Construct our taskbar icon
             taskBar.Icon = Properties.Resources.AppIcon;
             taskBar.ToolTipText = "BnS Multi Tool";
             taskBar.TrayMouseDoubleClick += new RoutedEventHandler(OnNotifyDoubleClick);
-            taskBar.Visibility = Visibility.Collapsed;
+            taskBar.Visibility = Visibility.Hidden;
         }
 
         private void CloseMenuItem_Click(object sender, RoutedEventArgs e)
@@ -206,7 +213,7 @@ namespace BnS_Multitool
                     mainWindow.Visibility = Visibility.Visible;
                     isMinimized = false;
                     Thread.Sleep(150);
-                    taskBar.Visibility = Visibility.Collapsed;
+                    taskBar.Visibility = Visibility.Hidden;
                 } else
                 {
                     taskBar.Visibility = Visibility.Visible;

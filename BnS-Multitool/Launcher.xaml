@@ -26,11 +26,10 @@
             </GroupBox>
             <GroupBox Header="Login Helper" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="10,315,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <TextBlock TextWrapping="WrapWithOverflow">What is loginhelper? Login helper is used to automatically log in and submit a pin. This is required to use the launcher</TextBlock>
-                    <TextBlock x:Name="LoginHelper_Lbl" Margin="0,53,0,21" Foreground="Red" FontSize="14">Installed: No</TextBlock>
-                    <Button x:Name="LOGINHELPER_INSTALL" Width="76" Content="Install" Margin="4,76,217,21" Click="installLoginHelperClick">
-
-                    </Button>
+                    <TextBlock TextWrapping="WrapWithOverflow" Text="What is loginhelper? Login helper is used to automatically log in and submit a pin. This is required to use the launcher." Foreground="#FF68D349"/>
+                    <Button x:Name="LOGINHELPER_INSTALL" FontFamily="Segoe UI Symbol" Width="76" Content="Install &#xE118;" Margin="211,58,10,24" Click="installLoginHelperClick"/>
+                    <Label x:Name="loginhelperLocalLbl" Content="Current: Not Installed" Margin="4,50,91,45" Background="{x:Null}" Foreground="White" FontSize="16" />
+                    <Label x:Name="loginhelperOnlineLbl" Content="Online: Fetching...." Margin="4,76,91,17" Background="{x:Null}" Foreground="White" FontSize="16" />
                 </Grid>
             </GroupBox>
             <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="252" Margin="10,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">

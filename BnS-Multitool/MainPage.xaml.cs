@@ -74,10 +74,7 @@ namespace BnS_Multitool
                     SystemConfig.SYS.VERSION = MainWindow.FileVersion();
                     SystemConfig.appendChangesToConfig();
 
-                    MainWindow.UpdateButtonObj.Dispatcher.BeginInvoke(new Action(() =>
-                    {
-                        MainWindow.UpdateButtonObj.Visibility = Visibility.Visible;
-                    }));
+                    Dispatchers.buttonVisibility(MainWindow.UpdateButtonObj, Visibility.Visible);
                 }
 
             } catch (WebException)
