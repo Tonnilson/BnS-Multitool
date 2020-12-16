@@ -62,7 +62,7 @@
                         <ComboBoxItem>EU</ComboBoxItem>
                         <ComboBoxItem>TW</ComboBoxItem>
                     </ComboBox>
-                    <ComboBox x:Name="LANGUAGE_BOX" Margin="116,51,0,54" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
+                    <ComboBox x:Name="LANGUAGE_BOX" Margin="116,50,0,55" SelectionChanged="launchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus">
                         <ComboBoxItem>EN</ComboBoxItem>
                         <ComboBoxItem>PT</ComboBoxItem>
                         <ComboBoxItem>DE</ComboBoxItem>
@@ -72,7 +72,7 @@
 
                     <Label Content="BIT:" Foreground="White" FontSize="16" Margin="77,-3,52,60"/>
                     <Label Content="REGION:" Foreground="White" FontSize="16" Margin="37,21,51,79" />
-                    <Label Content="LANGUAGE:" Foreground="White" FontSize="16" Margin="8,48,54,52" />
+                    <Label Content="LANGUAGE:" Foreground="White" FontSize="16" Margin="8,47,54,53" />
 
 
                     <CheckBox x:Name="NOTEXTURE_STREAMING" Content="No Texture Streaming" Margin="15,78,-15,28" Foreground="White" Click="launchInfoCheckStateChanged" />
@@ -81,8 +81,8 @@
             </GroupBox>
             <GroupBox Header="Memory Cleaner" BorderThickness="0.2" HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="309" Margin="341,215,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <Label Content="Cleans workingset (memory) of all BnS processes" Foreground="White"/>
-                    <ComboBox x:Name="MemoryCleanerBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="252" Margin="25,28,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" MouseEnter="MouseEnterSetFocus" SelectionChanged="MemoryCleanerBox_SelectionChanged">
+                    <Label Content="Cleans workingset (memory) of all BnS processes" Foreground="White" Margin="0,0,0,42"/>
+                    <ComboBox x:Name="MemoryCleanerBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="173" Margin="19,28,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" MouseEnter="MouseEnterSetFocus" SelectionChanged="MemoryCleanerBox_SelectionChanged">
                         <ComboBoxItem>OFF</ComboBoxItem>
                         <ComboBoxItem>1 Minute</ComboBoxItem>
                         <ComboBoxItem>5 Minutes</ComboBoxItem>
@@ -98,15 +98,20 @@
                         <ComboBoxItem>55 Minutes</ComboBoxItem>
                         <ComboBoxItem>60 Minutes</ComboBoxItem>
                     </ComboBox>
+                    <Button x:Name="LOGINHELPER_INSTALL_Copy" FontFamily="Segoe UI Symbol" Width="76" Content="Clean" Margin="205,27,16,15" Click="manualMemoryclean"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Quality of Life" BorderThickness="0.2" HorizontalAlignment="Left" Height="146" VerticalAlignment="Top" Width="194" Margin="269,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+            <GroupBox Header="Quality of Life" BorderThickness="0.2" HorizontalAlignment="Left" Height="159" VerticalAlignment="Top" Width="194" Margin="269,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <CheckBox x:Name="BaitBasketToS" Content="Convert all bait to Auto" Margin="0,5,0,101" Foreground="White" Click="launchInfoCheckStateChanged" />
-                    <CheckBox x:Name="RaiseCapToS" Content="Raise Received Items Cap" Margin="0,29,0,75" Foreground="White" Click="launchInfoCheckStateChanged" />
-                    <CheckBox x:Name="marketplace_TOS" Content="Marketplace in F8" Margin="0,55,0,49" Foreground="White" Click="launchInfoCheckStateChanged" />
-                    <Button x:Name="ToS_Button" Content="These options modify the game and go against NCSoft ToS but everything about this is ToS..      USE AT YOUR OWN RISK" Click="ToSBtn"/>
-                    <Image x:Name="ToSPicture" gif:AnimationBehavior.SourceUri="Images/peepoToS.gif" Margin="-8,67,114,-3"/>
+                    <CheckBox x:Name="BaitBasketToS" Content="Convert all bait to Auto" Margin="0,5,0,111" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="RaiseCapToS" Content="Raise Received Items Cap" Margin="0,27,0,88" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="marketplace_TOS" Content="Marketplace in F8" Margin="0,50,0,65" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="autocombat_TOS" Content="Auto Combat Everywhere" Margin="0,73,0,42" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <CheckBox x:Name="autocombatrange_TOS" Content="Auto Combat Range" Margin="0,96,0,21" Foreground="White" Click="launchInfoCheckStateChanged" />
+                    <Label Content="Custom:           m" Height="22" VerticalAlignment="Top" Margin="30,117,41,-1" Foreground="White"/>
+                    <TextBox HorizontalContentAlignment="Center" x:Name="autoCombatRange" Text="30" Margin="86,121,63,1" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" PreviewTextInput="isNumericInput" LostFocus="autoCombatRange_LostFocus"/>
+                    <Button x:Name="ToS_Button"  Content="These options modify the game and go against NCSoft ToS but everything about this is ToS..      USE AT YOUR OWN RISK" Click="ToSBtn"/>
+                    <Image x:Name="ToSPicture" gif:AnimationBehavior.SourceUri="Images/peepoToS.gif" Margin="-4,78,110,-3"/>
                 </Grid>
             </GroupBox>
         </Grid>

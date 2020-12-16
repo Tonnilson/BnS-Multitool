@@ -28,6 +28,9 @@ namespace BnS_Multitool
                     TOS_AUTO_BAIT = 0,
                     TOS_RAISE_CAP = 0,
                     TOS_MARKETPLACE = 0,
+                    TOS_AUTOCOMBAT = 0,
+                    TOS_AUTOCOMBATRANGE = 0,
+                    TOS_AUTOCOMBATRANGE_VALUE = 30,
                     MEMORY_CLEANER = 0,
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
                 };
@@ -43,14 +46,15 @@ namespace BnS_Multitool
                     ACCOUNTS = JsonConvert.DeserializeObject<ACCOUNTS_CONFIG>(_JSON);
 
                     //Check and add property if it doesn't exist, mainly used for updates.
-                    if (!DoesPropertyExist(ACCOUNTS, "TOS_AUTO_BAIT"))
-                        ACCOUNTS.TOS_AUTO_BAIT = 0;
 
-                    if (!DoesPropertyExist(ACCOUNTS, "TOS_RAISE_CAP"))
-                        ACCOUNTS.TOS_RAISE_CAP = 0;
-
-                    if (!DoesPropertyExist(ACCOUNTS, "TOS_MARKETPLACE"))
-                        ACCOUNTS.TOS_MARKETPLACE = 0;
+                    if(SystemConfig.SYS.PATCH_310 == 0)
+                    {
+                        ACCOUNTS.TOS_AUTOCOMBAT = 0;
+                        ACCOUNTS.TOS_AUTOCOMBATRANGE = 0;
+                        ACCOUNTS.TOS_AUTOCOMBATRANGE_VALUE = 30; //Default is 30m
+                        SystemConfig.SYS.PATCH_310 = 1;
+                        SystemConfig.appendChangesToConfig();
+                    }
 
                     appendChangesToConfig();
                 } catch (Exception)
@@ -87,6 +91,9 @@ namespace BnS_Multitool
             public int TOS_AUTO_BAIT { get; set; }
             public int TOS_RAISE_CAP { get; set; }
             public int TOS_MARKETPLACE { get; set; }
+            public int TOS_AUTOCOMBAT { get; set; }
+            public int TOS_AUTOCOMBATRANGE { get; set; }
+            public int TOS_AUTOCOMBATRANGE_VALUE { get; set; }
             public int MEMORY_CLEANER { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
         }

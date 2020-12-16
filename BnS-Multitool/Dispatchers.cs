@@ -15,5 +15,6 @@ namespace BnS_Multitool
         public static void labelContent(Label label, string Content) => label.Dispatcher.BeginInvoke(new Action(() => { label.Content = Content; }));
         public static void toggleIsChecked(HorizontalToggleSwitch toggle, bool isChecked) => toggle.Dispatcher.BeginInvoke(new Action(() => { toggle.IsChecked = isChecked; }));
         public static void buttonVisibility(Button button, Visibility vis) => button.Dispatcher.BeginInvoke(new Action(() => { button.Visibility = vis; }));
+        public static void textBlock(TextBlock tb, string text) => tb.Dispatcher.BeginInvoke(new Action(() => { tb.Text = text; }));
     }
 }

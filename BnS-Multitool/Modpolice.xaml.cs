@@ -205,8 +205,8 @@ namespace BnS_Multitool
 
                 if (RESULT == DialogResult.OK && !string.IsNullOrWhiteSpace(FOLDER.SelectedPath))
                 {
-                    BNS_LOCATION_BOX.Text = FOLDER.SelectedPath;
-                    SystemConfig.SYS.BNS_DIR = FOLDER.SelectedPath;
+                    BNS_LOCATION_BOX.Text = FOLDER.SelectedPath + ((FOLDER.SelectedPath.Last() != '\\') ? "\\" : "");
+                    SystemConfig.SYS.BNS_DIR = FOLDER.SelectedPath + ((FOLDER.SelectedPath.Last() != '\\') ? "\\" : "");
                     SystemConfig.appendChangesToConfig();
                 }
             }

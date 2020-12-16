@@ -16,6 +16,7 @@ using System.Windows.Media.Animation;
 using CG.Web.MegaApiClient;
 using System.Runtime.InteropServices;
 using System.Windows.Threading;
+using System.Text.RegularExpressions;
 
 namespace BnS_Multitool
 {
@@ -37,13 +38,13 @@ namespace BnS_Multitool
 
         public static List<SESSION_LIST> ACTIVE_SESSIONS = new List<SESSION_LIST>();
         public static int ACCOUNT_SELECTED_INDEX = -1;
-        private static string bin_x86 = SystemConfig.SYS.BNS_DIR + @"\bin\";
-        private static string bin_x64 = SystemConfig.SYS.BNS_DIR + @"\bin64\";
-        private static string plugins_x86 = SystemConfig.SYS.BNS_DIR + @"\bin\plugins\";
-        private static string plugins_x64 = SystemConfig.SYS.BNS_DIR + @"\bin64\plugins\";
-        public bool loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
+        private static string bin_x86 = Path.Combine(SystemConfig.SYS.BNS_DIR,"bin");
+        private static string bin_x64 = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64");
+        private static string plugins_x86 = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins");
+        private static string plugins_x64 = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64", "plugins");
+        public bool loginHelper_installed = (File.Exists(Path.Combine(plugins_x86,"loginhelper.dll")) && File.Exists(Path.Combine(plugins_x64,"loginhelper.dll")));
         private bool modpolice_installed = false;
-        private static string login_xml = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches\use-ingame-login.xml";
+        private static string login_xml = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "patches", "use-ingame-login.xml");
         private ProgressControl _progressControl;
         private static BackgroundWorker monitorProcesses = new BackgroundWorker();
         private static bool removalInProgress = false;
@@ -71,6 +72,14 @@ namespace BnS_Multitool
 
                 if (ACCOUNT_CONFIG.ACCOUNTS.TOS_RAISE_CAP == 1)
                     RaiseCapToS.IsChecked = true;
+
+                if (ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBAT == 1)
+                    autocombat_TOS.IsChecked = true;
+
+                if (ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBATRANGE == 1)
+                    autocombatrange_TOS.IsChecked = true;
+
+                autoCombatRange.Text = ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBATRANGE_VALUE.ToString();
 
                 if((bool)RaiseCapToS.IsChecked || (bool)BaitBasketToS.IsChecked || (bool)marketplace_TOS.IsChecked)
                 {
@@ -145,8 +154,27 @@ namespace BnS_Multitool
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             //Check if loginhelper is installed
-            loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
-            modpolice_installed = (File.Exists(bin_x86 + "winmm.dll") && File.Exists(bin_x64 + "winmm.dll") && File.Exists(plugins_x86 + "bnspatch.dll") && File.Exists(plugins_x64 + "bnspatch.dll"));
+            loginHelper_installed = (File.Exists(Path.Combine(plugins_x86,"loginhelper.dll")) && File.Exists(Path.Combine(plugins_x64,"loginhelper.dll")));
+            modpolice_installed = (File.Exists(Path.Combine(bin_x86,"winmm.dll")) && File.Exists(Path.Combine(bin_x64,"winmm.dll")) && File.Exists(Path.Combine(plugins_x86,"bnspatch.dll")) && File.Exists(Path.Combine(plugins_x64,"bnspatch.dll")));
+            
+            Task.Run(new Action(() =>
+            {
+                 if (ACCOUNT_CONFIG.ACCOUNTS.REGION < 2)
+                 {
+                     Globals.GameVersionCheck();
+                        Globals.isLoginAvailable();
+                     Application.Current.Dispatcher.Invoke((Action)delegate
+                     {
+                         if (Globals.localBnSVersion != Globals.onlineBnSVersion || !Globals.loginAvailable)
+                         {
+                             var dialog = new ErrorPrompt(String.Format("{0}\n{1}", (!Globals.loginAvailable) ? "The server is currently undergoing maintenance." : "", (Globals.localBnSVersion != Globals.onlineBnSVersion) ? "A game update is available" : ""));
+                             dialog.Owner = MainWindow.mainWindow;
+                             dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                             dialog.ShowDialog();
+                         }
+                     });
+                 }
+             }));
 
             await Task.Run(async () => await checkOnlineVersion());
         }
@@ -227,9 +255,9 @@ namespace BnS_Multitool
 
                 Process proc = new Process();
                 if (is_x86)
-                    proc.StartInfo.FileName = SystemConfig.SYS.BNS_DIR + @"\bin\Client.exe";
+                    proc.StartInfo.FileName = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "Client.exe");
                 else
-                    proc.StartInfo.FileName = SystemConfig.SYS.BNS_DIR + @"\bin64\Client.exe";
+                    proc.StartInfo.FileName = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64", "Client.exe");
 
                 //Arugments passed to Client.exe
                 if (REGION_BOX.SelectedIndex == 2)
@@ -255,53 +283,23 @@ namespace BnS_Multitool
                 proc.StartInfo.EnvironmentVariables.Add("AUTO_BAIT", ((bool)BaitBasketToS.IsChecked) ? "1" : "0");
                 proc.StartInfo.EnvironmentVariables.Add("RAISE_LIMIT", ((bool)RaiseCapToS.IsChecked) ? "1" : "0");
                 proc.StartInfo.EnvironmentVariables.Add("MP_CROSS", ((bool)marketplace_TOS.IsChecked) ? "1" : "0");
+                proc.StartInfo.EnvironmentVariables.Add("AUTOCOMBAT", ((bool)autocombat_TOS.IsChecked) ? "1" : "0");
+                proc.StartInfo.EnvironmentVariables.Add("AUTOCOMBAT_RANGE", ((bool)autocombatrange_TOS.IsChecked) ? "1" : "0");
+                proc.StartInfo.EnvironmentVariables.Add("AUTOCOMBAT_RANGE_C", autoCombatRange.Text);
                 proc.Start();
 
-                if ((bool)BaitBasketToS.IsChecked || (bool)RaiseCapToS.IsChecked || (bool)marketplace_TOS.IsChecked)
+                //New code for settings option.
+                switch(SystemConfig.SYS.NEW_GAME_OPTION)
                 {
-                    //We need this check for TW because it has GameGuard, need to make sure they have bnsnogg plugin by Pilao
-                    if (REGION_BOX.SelectedIndex == 2 && (!File.Exists(plugins_x86 + @"bnsnogg.dll") && !File.Exists(plugins_x64 + "bnsnogg.dll")))
-                    {
-                        var dialog = new ErrorPrompt("You have the TW version selected and we cannot detect bnsnogg.dll, install bnsnogg before using the QoL options");
-                        dialog.ShowDialog();
-                    }
-                    else
-                    {
-                        if (is_x86)
-                        {
-                            try
-                            {
-                                File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x86.exe", Properties.Resources.BnS_ToS_x86);
-                            }
-                            catch (Exception)
-                            {
-
-                            }
-
-                            ProcessStartInfo tosproc = new ProcessStartInfo();
-                            tosproc.FileName = Path.GetTempPath() + @"\BnS-ToS-x86.exe";
-                            tosproc.Arguments = proc.Id.ToString();
-                            tosproc.Verb = "runas";
-                            Process.Start(tosproc);
-                        }
-                        else
-                        {
-                            try
-                            {
-                                File.WriteAllBytes(Path.GetTempPath() + @"\BnS-ToS-x64.exe", Properties.Resources.BnS_ToS_x64);
-                            }
-                            catch (Exception)
-                            {
-
-                            }
-
-                            ProcessStartInfo tosproc = new ProcessStartInfo();
-                            tosproc.FileName = Path.GetTempPath() + @"\BnS-ToS-x64.exe";
-                            tosproc.Arguments = proc.Id.ToString();
-                            tosproc.Verb = "runas";
-                            Process.Start(tosproc);
-                        }
-                    }
+                    case 1:
+                        Application.Current.MainWindow.WindowState = WindowState.Minimized;
+                        break;
+                    case 2:
+                        MainWindow.changeWindowState(false, true);
+                        break;
+                    case 3:
+                        Environment.Exit(0);
+                        break;
                 }
 
                 if (HAS_INDEX == -1)
@@ -312,9 +310,55 @@ namespace BnS_Multitool
                         monitorProcesses.RunWorkerAsync(); //Start our worker thread.
 
                     ProcessInfo.Items.Add(String.Format("{0} - {1}", EMAIL, getSelectedRegion(REGION_BOX.SelectedIndex)));
-                } else
-                {
+                } 
+                else
                     ACTIVE_SESSIONS[HAS_INDEX].PROCESS = proc;
+
+                if ((bool)BaitBasketToS.IsChecked || (bool)RaiseCapToS.IsChecked || (bool)marketplace_TOS.IsChecked || (bool)autocombatrange_TOS.IsChecked || (bool)autocombat_TOS.IsChecked)
+                {
+                    //We need this check for TW because it has GameGuard, need to make sure they have bnsnogg plugin by Pilao
+                    if (REGION_BOX.SelectedIndex == 2 && (!File.Exists(Path.Combine(plugins_x86,"bnsnogg.dll")) && !File.Exists(Path.Combine(plugins_x64,"bnsnogg.dll"))))
+                    {
+                        var dialog = new ErrorPrompt("You have the TW version selected and we cannot detect bnsnogg.dll, install bnsnogg before using the QoL options");
+                        dialog.ShowDialog();
+                    }
+                    else
+                    {
+                        if (is_x86)
+                        {
+                            try
+                            {
+                                File.WriteAllBytes("BnS-ToS-x86.exe", Properties.Resources.BnS_ToS_x86);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+
+                            ProcessStartInfo tosproc = new ProcessStartInfo();
+                            tosproc.FileName = "BnS-ToS-x86.exe";
+                            tosproc.Arguments = proc.Id.ToString();
+                            tosproc.Verb = "runas";
+                            Process.Start(tosproc);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                File.WriteAllBytes("BnS-ToS-x64.exe", Properties.Resources.BnS_ToS_x64);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+
+                            ProcessStartInfo tosproc = new ProcessStartInfo();
+                            tosproc.FileName = "BnS-ToS-x64.exe";
+                            tosproc.Arguments = proc.Id.ToString();
+                            tosproc.Verb = "runas";
+                            Process.Start(tosproc);
+                        }
+                    }
                 }
             } catch (Exception ex)
             {
@@ -458,6 +502,13 @@ namespace BnS_Multitool
                 ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTO_BAIT = currentState;
             else if (currentCheckBox.Name == "marketplace_TOS")
                 ACCOUNT_CONFIG.ACCOUNTS.TOS_MARKETPLACE = currentState;
+            else if (currentCheckBox.Name == "autocombat_TOS")
+                ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBAT = currentState;
+            else if (currentCheckBox.Name == "autocombatrange_TOS")
+            {
+                ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBATRANGE = currentState;
+                ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBATRANGE_VALUE = int.Parse(autoCombatRange.Text);
+            }
             else
                 ACCOUNT_CONFIG.ACCOUNTS.TOS_RAISE_CAP = currentState;
 
@@ -521,10 +572,10 @@ namespace BnS_Multitool
                         Directory.CreateDirectory(plugins_x86);
 
                     ProgressControl.updateProgressLabel("Installing loginhelper x86");
-                    if (File.Exists(plugins_x86 + "loginhelper.dll"))
-                        File.Delete(plugins_x86 + "loginhelper.dll");
+                    if (File.Exists(Path.Combine(plugins_x86,"loginhelper.dll")))
+                        File.Delete(Path.Combine(plugins_x86,"loginhelper.dll"));
 
-                    File.Move(@".\modpolice\bin\plugins\loginhelper.dll", plugins_x86 + "loginhelper.dll");
+                    File.Move(@".\modpolice\bin\plugins\loginhelper.dll", Path.Combine(plugins_x86,"loginhelper.dll"));
 
                     ProgressControl.updateProgressLabel("Installing loginhelper x64");
                     await Task.Delay(750);
@@ -533,10 +584,10 @@ namespace BnS_Multitool
                         Directory.CreateDirectory(plugins_x64);
 
                     ProgressControl.updateProgressLabel("Installing loginhelper x64");
-                    if (File.Exists(plugins_x64 + "loginhelper.dll"))
-                        File.Delete(plugins_x64 + "loginhelper.dll");
+                    if (File.Exists(Path.Combine(plugins_x64,"loginhelper.dll")))
+                        File.Delete(Path.Combine(plugins_x64,"loginhelper.dll"));
 
-                    File.Move(@".\modpolice\bin64\plugins\loginhelper.dll", plugins_x64 + "loginhelper.dll");
+                    File.Move(@".\modpolice\bin64\plugins\loginhelper.dll", Path.Combine(plugins_x64,"loginhelper.dll"));
 
                     ProgressControl.updateProgressLabel("Searching for use-ingame-login.xml");
                     await Task.Delay(750);
@@ -544,8 +595,8 @@ namespace BnS_Multitool
                     if (!File.Exists(login_xml))
                     {
                         ProgressControl.updateProgressLabel("patches.xml not found, installing...");
-                        if (!Directory.Exists(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches"))
-                            Directory.CreateDirectory(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches");
+                        if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "patches")))
+                            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "patches"));
 
                         File.WriteAllText(login_xml, Properties.Resources.use_ingame_login);
                     }
@@ -566,7 +617,7 @@ namespace BnS_Multitool
             _progressControl = null;
 
             //Check if loginhelper is installed
-            loginHelper_installed = (File.Exists(plugins_x86 + "loginhelper.dll") && File.Exists(plugins_x64 + "loginhelper.dll"));
+            loginHelper_installed = (File.Exists(Path.Combine(plugins_x86,"loginhelper.dll")) && File.Exists(Path.Combine(plugins_x64,"loginhelper.dll")));
             await Task.Run(async () => await checkOnlineVersion());
         }
 
@@ -726,7 +777,7 @@ namespace BnS_Multitool
         private async Task checkOnlineVersion()
         {
             if (loginHelper_installed)
-                loginhelperPlugin = new Modpolice.pluginFileInfo(plugins_x86 + "loginhelper.dll");
+                loginhelperPlugin = new Modpolice.pluginFileInfo(Path.Combine(plugins_x86,"loginhelper.dll"));
             else
                 loginhelperPlugin = null;
 
@@ -737,16 +788,95 @@ namespace BnS_Multitool
                 var client = new MegaApiClient();
                 await client.LoginAnonymousAsync();
 
+                if (!client.IsLoggedIn)
+                    throw new Exception("Timed out"); //Throw exception for not logging in anonymously
+
                 IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
                 INode loginhelper_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("loginhelper")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
 
                 if(loginhelper_node != null)
                     Dispatchers.labelContent(loginhelperOnlineLbl, String.Format("Online: {0}", loginhelper_node.ModificationDate.Value.ToString("MM-dd-yy")));
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                Dispatchers.labelContent(loginhelperOnlineLbl, "Online: Error!");
+                Dispatchers.labelContent(loginhelperOnlineLbl, ex.Message == "Timed out" ? "Online: " + ex.Message : "Online: Error!");
             }
+        }
+
+        private void manualMemoryclean(object sender, RoutedEventArgs e)
+        {
+            Process[] allProcesses = Process.GetProcessesByName("Client");
+            if (allProcesses.Count() >= 0)
+            {
+                foreach (var process in allProcesses)
+                {
+                    try
+                    {
+                        PoormanCleaner.EmptyWorkingSet(process.Handle);
+                    }
+                    catch (Exception) { }
+                }
+            }
+        }
+
+        private void isNumericInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            Regex regex = new Regex("[^0-9]");
+            e.Handled = regex.IsMatch(e.Text);
+        }
+
+        private void autoCombatRange_TextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            Debug.WriteLine("TICKLE TICKLE");
+            TextBox currentBox = (TextBox)sender;
+            if (e.Text == "")
+            {
+                classLabel.Text = "The textbox can't be empty";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                return;
+            }
+
+            Regex regex = new Regex("[^0-9]");
+            if (!regex.IsMatch(e.Text))
+            {
+                classLabel.Text = "Only numeric values!";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                return;
+            }
+
+            if (int.Parse(e.Text) < 5)
+            {
+                classLabel.Text = "Value must be greater than 5";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                return;
+            }
+
+            Debug.WriteLine("Input: {0}", e.Text);
+            ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBATRANGE_VALUE = int.Parse(e.Text);
+            ACCOUNT_CONFIG.appendChangesToConfig();
+        }
+
+        private void autoCombatRange_LostFocus(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine("TICKLE TICKLE");
+            TextBox currentBox = (TextBox)sender;
+            if (currentBox.Text == "")
+            {
+                classLabel.Text = "The autocombat range cannot be empty! Setting default of 30m";
+                currentBox.Text = "30";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+            }
+
+            if (int.Parse(currentBox.Text) < 5)
+            {
+                classLabel.Text = "Value must be greater than 5 for auto combat range! Setting default of 30m";
+                currentBox.Text = "30";
+                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+            }
+
+            Debug.WriteLine("Input: {0}", currentBox.Text);
+            ACCOUNT_CONFIG.ACCOUNTS.TOS_AUTOCOMBATRANGE_VALUE = int.Parse(currentBox.Text);
+            ACCOUNT_CONFIG.appendChangesToConfig();
         }
     }
 }

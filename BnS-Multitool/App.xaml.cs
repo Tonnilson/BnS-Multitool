@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace BnS_Multitool
 {
@@ -13,7 +14,7 @@ namespace BnS_Multitool
     /// </summary>
     public partial class App : Application
     {
-        /*
+        
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -38,6 +39,6 @@ namespace BnS_Multitool
                 e.SetObserved();
             };
         }
-        */
+        
     }
 }

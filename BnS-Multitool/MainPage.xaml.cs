@@ -3,23 +3,12 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace BnS_Multitool
@@ -31,7 +20,7 @@ namespace BnS_Multitool
     {
         private static BackgroundWorker pingWorker = new BackgroundWorker();
         private static int currentPing = -1;
-        private static string loginServer = "updater.nclauncher.ncsoft.com";
+        //private static string loginServer = "updater.nclauncher.ncsoft.com";
         private static DispatcherTimer onlineUsersTimer = new DispatcherTimer();
         private static MainWindow.ONLINE_VERSION_STRUCT onlineJson;
 
@@ -45,11 +34,8 @@ namespace BnS_Multitool
             pingWorker.ProgressChanged += new ProgressChangedEventHandler(pingProgress);
 
             //Tick Timer for getting Online Users
-            onlineUsersTimer.IsEnabled = true;
             onlineUsersTimer.Tick += new EventHandler(onlineUsers_Tick);
             onlineUsersTimer.Interval = TimeSpan.FromMinutes(10);
-            onlineUsersTimer.Start();
-
             //MainWindow.versionWorker.RunWorkerAsync();
         }
 
@@ -77,9 +63,11 @@ namespace BnS_Multitool
                     Dispatchers.buttonVisibility(MainWindow.UpdateButtonObj, Visibility.Visible);
                 }
 
-            } catch (WebException)
+            } catch (WebException ex)
             {
-
+                onlineJson = new MainWindow.ONLINE_VERSION_STRUCT();
+                onlineJson.CHANGELOG = new List<MainWindow.CHANGELOG_STRUCT>();
+                onlineJson.CHANGELOG.Add(new MainWindow.CHANGELOG_STRUCT() { VERSION = "ERROR", NOTES =  ex.Message});
             }
             finally
             {
@@ -91,9 +79,10 @@ namespace BnS_Multitool
         {
             WebClient client = new WebClient();
             int usersOnline = 0;
+            Debug.WriteLine("Getting Tick");
             try
             {
-                string stringnumber = client.DownloadString("http://tonic.pw/files/bnsmultitool/usersOnline.php");
+                string stringnumber = client.DownloadString(String.Format("http://tonic.pw/files/bnsmultitool/usersOnline.php?UID={0}", MainWindow.Fingerprint));
                 if (!(int.TryParse(stringnumber, out usersOnline)))
                     usersOnline = 0;
 
@@ -128,24 +117,29 @@ namespace BnS_Multitool
 
             while (!pingWorker.CancellationPending && MainWindow.currentPageText == "MainPage")
             {
-                try
+                if (SystemConfig.SYS.PING_CHECK == 1)
                 {
-                    Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-                    socket.Blocking = true;
-                    Stopwatch stopwatch = new Stopwatch();
-                    stopwatch.Start();
+                    try
+                    {
+                        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        socket.Blocking = true;
+                        Stopwatch stopwatch = new Stopwatch();
+                        stopwatch.Start();
 
-                    socket.Connect(regionIP,10100);
-                    stopwatch.Stop();
+                        socket.Connect(regionIP, 10100);
+                        stopwatch.Stop();
 
-                    currentPing = Convert.ToInt32(stopwatch.Elapsed.TotalMilliseconds);
-                    socket.Close();
+                        currentPing = Convert.ToInt32(stopwatch.Elapsed.TotalMilliseconds);
+                        socket.Close();
 
+                    }
+                    catch (SocketException)
+                    {
+                        currentPing = -1;
+                    }
                 }
-                catch (SocketException)
-                {
-                    currentPing = -1;
-                }
+                else
+                    currentPing = -2;
 
                 pingWorker.ReportProgress(0);
                 Thread.Sleep(1000);
@@ -169,78 +163,44 @@ namespace BnS_Multitool
                     break;
             }
 
-            if (currentPing != -1)
+            if (currentPing == -2)
+                PingLabel.Content = "Ping: Turned Off";
+            else if (currentPing != -1)
                 PingLabel.Content = String.Format("Ping ({0}): {1}ms", regionID, currentPing);
             else
                 PingLabel.Content = "Ping: Offline";
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            Process.Start(@"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ8KL2ZDS44JC&source=url");
-        }
-
-        /*
-        public bool isLoginAvailable ()
-        {
-            try
-            {
-                MemoryStream ms = new MemoryStream();
-                BinaryWriter bw = new BinaryWriter(ms);
-                NetworkStream ns = new TcpClient(loginServer, 27500).GetStream();
-
-                bw.Write((short)0);
-                bw.Write((short)4);
-                bw.Write((byte)10);
-                bw.Write((byte)"BnS".Length);
-                bw.Write(Encoding.ASCII.GetBytes("BnS"));
-                bw.BaseStream.Position = 0L;
-                bw.Write((short)ms.Length);
-
-                ns.Write(ms.ToArray(), 0, (int)ms.Length);
-                bw.Dispose();
-                ms.Dispose();
-
-                ms = new MemoryStream();
-                BinaryReader br = new BinaryReader(ms);
-
-                byte[] byte_array = new byte[1024];
-                int num = 0;
-
-                do
-                {
-                    num = ns.Read(byte_array, 0, byte_array.Length);
-                    if (num > 0)
-                        ms.Write(byte_array, 0, num);
-                }
-                while (num == byte_array.Length);
-
-                ms.Position = 9L;
-                br.ReadBytes(br.ReadByte() + 1);
-                return br.ReadBoolean();
-
-
-            } catch (Exception ex)
-            {
-                return false;
-            }
-        }
-        */
+        private void Button_Click(object sender, RoutedEventArgs e) => Process.Start(@"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ8KL2ZDS44JC&source=url");
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            if(!pingWorker.IsBusy)
+            if (!pingWorker.IsBusy && SystemConfig.SYS.PING_CHECK == 1)
                 pingWorker.RunWorkerAsync();
+            else
+                PingLabel.Content = "Ping: Turned Off";
 
             ChangeLog.Document.Blocks.Clear();
-            await Task.Run(() =>
+            await Task.Run(async () =>
             {
                 checkForUpdate();
 
-                while (onlineJson.CHANGELOG == null) { Thread.Sleep(50); }
-
+                while (onlineJson.CHANGELOG == null) { await Task.Delay(50); }
+                
                 foreach (var version in onlineJson.CHANGELOG)
-                    appendToChangelog(String.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));
+                    appendToChangelog(string.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));
+
+                if (!onlineUsersTimer.IsEnabled)
+                {
+                    /*
+                     * Generate a unique 'Fingerprint' for our user based off hardware
+                     * Used for creating a unique total user count
+                     * Takes a hot minute to generate....
+                     */
+                    MainWindow.Fingerprint = Security.FingerPrint.Value();
+                    onlineUsersTimer.IsEnabled = true;
+                    onlineUsers_Tick(sender, new EventArgs());
+                }
             });
         }
 

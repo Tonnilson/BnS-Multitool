@@ -5,9 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BnS_Multitool"
         mc:Ignorable="d"
-        Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="True" Opacity="0.95" Background="#FF151617" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="True" Background="#FF151617" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Grid>
-        <DockPanel LastChildFill="False">
+        <DockPanel LastChildFill="False" Opacity="0.95">
             <StackPanel DockPanel.Dock="Left" Width="200" Background="#161a1f">
                 <StackPanel>
                     <Image Source="BnS_LOGO.png"/>
@@ -165,51 +165,90 @@
                             <TextBlock Margin="0,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="118"><Run Text="Modpolice"/></TextBlock>
                         </StackPanel>
                     </Button>
-                </StackPanel>
-                <StackPanel>
-                    <Separator Background="#FF282F38"></Separator>
-                    <Grid Margin="0,0,110,0">
-                        <Button x:Name="EXIT_BTN" Height="34" Margin="0,0,0,0" DockPanel.Dock="Left" Click="EXIT_BTN_Click">
-                            <Button.Style>
-                                <Style TargetType="{x:Type Button}">
-                                    <Setter Property="Background" Value="#161a1f"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type Button}">
-                                                <Border Background="{TemplateBinding Background}">
-                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                </Border>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                    <Style.Triggers>
-                                        <Trigger Property="IsMouseOver" Value="True">
-                                            <Setter Property="Background" Value="#FF242E3C"/>
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Button.Style>
-                            <StackPanel Orientation="Horizontal">
-                                <Image Source="worryBrick.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="34" Width="97" Stretch="None"/>
-                                <TextBlock Margin="-60,5,0,0" FontFamily="Arial" Height="20" FontSize="11" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="85">Exit</TextBlock>
-                            </StackPanel>
-                        </Button>
-                    </Grid>
+                    <Button Height="60" Click="GameUpdaterButton">
+                        <Button.Style>
+                            <Style TargetType="{x:Type Button}">
+                                <Setter Property="Background" Value="#161a1f"/>
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="{x:Type Button}">
+                                            <Border Background="{TemplateBinding Background}">
+                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                        <StackPanel Orientation="Horizontal">
+                            <Image Source="Images/BnSIcon.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="42" Width="54"/>
+                            <TextBlock Margin="20,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="144" Text="BnS Updater"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </StackPanel>
             <StackPanel DockPanel.Dock="Top">
                 <StackPanel Orientation="Horizontal" Height="22" HorizontalAlignment="Right">
-                    <StackPanel Width="458.763" Orientation="Horizontal">
-                        <TextBlock x:Name="VERSION_LABEL" Foreground="White" FontFamily="Arial" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center">BnS Multi Tool Version: 1.1.0</TextBlock>
-                        <Button Visibility="Hidden" x:Name="MultiTool_UPDATE" Margin="10,0,0,0" Width="38.75" Content="&#xE118;" Click="UPDATE_BTN_CLICK"
-                            FontFamily="Segoe UI Symbol" FontSize="16">
-
-                    </Button>
+                    <StackPanel Width="255" Orientation="Horizontal">
+                        <TextBlock x:Name="VERSION_LABEL" Foreground="White" FontFamily="Arial" FontSize="16" FontWeight="Bold" HorizontalAlignment="Center" Width="221">BnS Multi Tool Version: 1.1.0</TextBlock>
                     </StackPanel>
-                    <Button Width="25" FontFamily="Segoe UI Symbol" Content="&#xE16E;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="Button_Click_3"/>
+                    <Button Visibility="Hidden" BorderThickness="1" Style="{StaticResource TitleBarButtons}" x:Name="MultiTool_UPDATE" Content="&#xE118;Update Available " Click="UPDATE_BTN_CLICK" FontFamily="Segoe UI Symbol" FontSize="16"/>
+                    <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe115; " FontSize="14" Click="Settings_Click" />
+                    <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe108; " BorderBrush="{x:Null}" Click="Button_Click_3" FontSize="14"/>
+                    <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe10a; " BorderBrush="{x:Null}" Click="EXIT_BTN_Click" FontSize="14"/>
                 </StackPanel>
                 <Frame x:Name="MainFrame"  NavigationUIVisibility="Hidden" Height="492" Navigated="MainFrame_Navigated"></Frame>
             </StackPanel>
         </DockPanel>
+        <StackPanel x:Name="SettingsDarken" Visibility="Hidden" Background="Black" Opacity="0.90"/>
+        <Grid x:Name="SettingsMenu" Visibility="Hidden" Margin="170,10" Background="#FF292E38">
+            <Border BorderBrush="#FF454547" BorderThickness=".6" CornerRadius="5">
+                <Grid>
+                    <Label FontFamily="Segoe UI Symbol" Content="&#xe115; Settings" Margin="10,10,296,417" Foreground="White" FontSize="30"/>
+                    <Separator Background="#FF353D4C" Margin="0,64,0,395"/>
+                    <Label Background="#FF282C36" Margin="0,78,0,48"/>
+                    <Separator Background="#FF353D4C" Margin="3,434,-2,45"/>
+                    <Separator Background="#FF353D4C" Margin="0,203,1,276"/>
+                    <Label Content="Game Updater" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,96,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
+                    <Label Content="Updater threads" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,131,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxUpdaterThreads" Margin="176,131,285,328" FontWeight="Bold" FontSize="14">
+                        <ComboBoxItem>4</ComboBoxItem>
+                        <ComboBoxItem>5</ComboBoxItem>
+                        <ComboBoxItem>6</ComboBoxItem>
+                        <ComboBoxItem>7</ComboBoxItem>
+                        <ComboBoxItem>8</ComboBoxItem>
+                        <ComboBoxItem>9</ComboBoxItem>
+                        <ComboBoxItem>10</ComboBoxItem>
+                    </ComboBox>
+                    <Label Content="Delta Patching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,164,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
+                    <CheckBox x:Name="DeltaPatching_Checkbox" Content="" Margin="176,170,318,294" Foreground="White" />
+                    <CheckBox x:Name="PingCheckTick" Content="" Margin="176,339,318,125" Foreground="White" />
+                    <Label Content="Starting new game" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,258,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold" Height="28" Width="147"/>
+                    <ComboBox x:Name="lstBoxNewGame" Margin="172,258,144,200" FontWeight="Bold">
+                        <ComboBoxItem>Nothing</ComboBoxItem>
+                        <ComboBoxItem>Minimize launcher</ComboBoxItem>
+                        <ComboBoxItem>Minimize to system tray</ComboBoxItem>
+                        <ComboBoxItem>Close launcher</ComboBoxItem>
+                    </ComboBox>
+                    <Label Content="When clicking [ - ]" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,297,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxLauncherX" Margin="172,297,144,159" FontWeight="Bold">
+                        <ComboBoxItem>Minimize launcher</ComboBoxItem>
+                        <ComboBoxItem>Minimize to system tray</ComboBoxItem>
+                    </ComboBox>
+                    <Label Content="Enable Ping Check" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,336,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                    <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="38,402,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+                    <Button Margin="396,446,10,10" Content="Close" FontWeight="Bold" Click="SettingsCancel" />
+                    <Label Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,218,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
+                    <Button Margin="396,402,34,58" Content="Browse" FontWeight="Bold" Click="SettingsBrowse" />
+                    <Button Margin="276,446,130,10" Content="Confirm" FontWeight="Bold" Click="SaveSettings" />
+                    <Label Content="Blade &amp; Soul Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,373,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+                </Grid>
+            </Border>
+        </Grid>
     </Grid>
 </Window>

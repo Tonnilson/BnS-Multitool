@@ -13,13 +13,20 @@
   <patch file="release.config2.xml">
     <select-node query="/config">
       <!-- set np program id -->
-      <select-node query="./option[@name='np-program-id']/@value[.=302]">
+      <!-- kor -->
+      <select-node query="./option[@name='np-program-id']/@value[.='302']">
         <set-value value="301" />
       </select-node>
-      <select-node query="./option[@name='np-program-id']/@value[.=342]">
+      <!-- kor test -->
+      <select-node query="./option[@name='np-program-id']/@value[.='306']">
+        <set-value value="321" />
+      </select-node>
+      <!-- na -->
+      <select-node query="./option[@name='np-program-id']/@value[.='342']">
         <set-value value="346" />
       </select-node>
-      <select-node query="./option[@name='np-program-id-2']/@value[.=343]">
+      <!-- eu -->
+      <select-node query="./option[@name='np-program-id-2']/@value[.='343']">
         <set-value value="347" />
       </select-node>
     </select-node>

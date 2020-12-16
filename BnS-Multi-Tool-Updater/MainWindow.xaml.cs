@@ -20,6 +20,7 @@ using System.CodeDom;
 using System.Threading;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using MiscUtil.Compression.Vcdiff;
 
 namespace BnS_Multi_Tool_Updater
 {
@@ -126,12 +127,26 @@ namespace BnS_Multi_Tool_Updater
                     WebClient client = new WebClient();
                     client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DL_PROGRESS_CHANGED);
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(DL_COMPLETED);
-                    client.DownloadFileAsync(new Uri("http://tonic.pw/files/bnsmultitool/BnS-Multi-Tool.exe"), "BnS-Multi-Tool.exe");
+                    client.DownloadFileAsync(new Uri("http://tonic.pw/files/bnsmultitool/BnS-Multi-Tool.exe.dlt"), "BnS-Multi-Tool.exe.dlt");
 
                     await downloadComplete.Task;
 
+                    await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        downloadingLbl.Content = "Patching....";
+                    }));
+
+                    using (FileStream original = File.OpenRead("BnS-Multi-Tool.exe"))
+                    using (FileStream patch = File.OpenRead("BnS-Multi-Tool.exe.dlt"))
+                    using (FileStream target = File.Open("BnS-Multi-Tool-New.exe", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                    {
+                        VcdiffDecoder.Decode(original, patch, target);
+                    }
+
+                    await Task.Delay(1000);
+
                     //Hash check
-                    string localHash = CalculateMD5("BnS-Multi-Tool.exe");
+                    string localHash = CalculateMD5("BnS-Multi-Tool-New.exe");
                     await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
                     {
                         downloadingLbl.Content = "Verifying....";
@@ -166,6 +181,14 @@ namespace BnS_Multi_Tool_Updater
                         }));
 
                         await Task.Delay(500);
+
+                        if (File.Exists("BnS-Multi-Tool.exe.dlt"))
+                            File.Delete("BnS-Multi-Tool.exe.dlt");
+
+                        if (File.Exists("BnS-Multi-Tool.exe"))
+                            File.Delete("BnS-Multi-Tool.exe");
+
+                        File.Move("BnS-Multi-Tool-New.exe", "BnS-Multi-Tool.exe");
 
                         ProcessStartInfo proc = new ProcessStartInfo();
                         proc.Verb = "runas";

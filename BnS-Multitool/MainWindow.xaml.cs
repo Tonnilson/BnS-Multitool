@@ -14,12 +14,14 @@ using Microsoft.Win32;
 using System.Threading;
 using System.Reflection;
 using System.Security.Principal;
+using System.Threading.Tasks;
 
 namespace BnS_Multitool
 {
     public partial class MainWindow : Window
     {
         public static TaskbarIcon taskBar = new TaskbarIcon();
+        public static string Fingerprint;
         public static Frame mainWindowFrame;
         public static Button UpdateButtonObj;
         public static MainWindow mainWindow { get; private set; }
@@ -76,6 +78,13 @@ namespace BnS_Multitool
             }
             
             InitializeComponent();
+
+            //Construct our taskbar icon
+            taskBar.Icon = Properties.Resources.AppIcon;
+            taskBar.ToolTipText = "BnS Multi Tool";
+            taskBar.TrayMouseDoubleClick += new RoutedEventHandler(OnNotifyDoubleClick);
+            taskBar.Visibility = Visibility.Hidden;
+
             UpdateButtonObj = MultiTool_UPDATE;
 
             this.MouseDown += delegate { try { DragMove(); } catch (Exception) { } };
@@ -90,6 +99,10 @@ namespace BnS_Multitool
                 {
                     RegistryKey BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\NCWest\BnS");
                     SystemConfig.SYS.BNS_DIR = BNS_REGISTRY.GetValue("BaseDir").ToString();
+                   //This is a slight correction for some systems, for whatever reason they are not registering the path correctly so I have to force this backslash onto it.
+                    if (SystemConfig.SYS.BNS_DIR.Last() != '\\')
+                        SystemConfig.SYS.BNS_DIR += "\\";
+
                     SystemConfig.appendChangesToConfig();
 
                     if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\"))
@@ -104,13 +117,19 @@ namespace BnS_Multitool
 
                         if (RESULT == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(FOLDER.SelectedPath))
                         {
-                            //BNS_DIR_TEXTBOX.Text = FOLDER.SelectedPath;
-                            SystemConfig.SYS.BNS_DIR = FOLDER.SelectedPath;
+                            SystemConfig.SYS.BNS_DIR = FOLDER.SelectedPath + "\\";
                             SystemConfig.appendChangesToConfig();
                         }
                     }
                 }
             }
+
+            lstBoxUpdaterThreads.SelectedIndex = SystemConfig.SYS.UPDATER_THREADS;
+            lstBoxNewGame.SelectedIndex = SystemConfig.SYS.NEW_GAME_OPTION;
+            lstBoxLauncherX.SelectedIndex = SystemConfig.SYS.MINIMZE_ACTION;
+            DeltaPatching_Checkbox.IsChecked = (SystemConfig.SYS.DELTA_PATCHING == 1) ? true : false;
+            PingCheckTick.IsChecked = (SystemConfig.SYS.PING_CHECK == 1) ? true : false;
+            BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
         }
 
         private void EXIT_BTN_Click(object sender, RoutedEventArgs e)
@@ -145,6 +164,9 @@ namespace BnS_Multitool
                     case "Modpolice":
                         navigationPages.Add(new Page_Navigation() { PageName = pageName, PageSource = new Modpolice() });
                         break;
+                    case "Gameupdater":
+                        navigationPages.Add(new Page_Navigation() { PageName = pageName, PageSource = new GameUpdater() });
+                        break;
                 }
                 cachedPage = navigationPages.FirstOrDefault(x => x.PageName == pageName);
             }
@@ -170,11 +192,7 @@ namespace BnS_Multitool
                 SystemConfig.appendChangesToConfig();
             }
 
-            //Construct our taskbar icon
-            taskBar.Icon = Properties.Resources.AppIcon;
-            taskBar.ToolTipText = "BnS Multi Tool";
-            taskBar.TrayMouseDoubleClick += new RoutedEventHandler(OnNotifyDoubleClick);
-            taskBar.Visibility = Visibility.Hidden;
+           // await Task.Run(() => { });
         }
 
         private void CloseMenuItem_Click(object sender, RoutedEventArgs e)
@@ -189,7 +207,7 @@ namespace BnS_Multitool
 
         private void OnNotifyDoubleClick(object sender, RoutedEventArgs e)
         {
-            changeWindowState(true);
+            changeWindowState(true,true);
         }
 
         private void MAIN_CLICK(object sender, RoutedEventArgs e)
@@ -204,24 +222,33 @@ namespace BnS_Multitool
             setCurrentPage("Launcher");
         }
 
-        public static void changeWindowState(bool state)
+        public static void changeWindowState(bool state, bool overwrite = false)
         {
-            mainWindow.Dispatcher.Invoke(new Action(() => {
-                if(state)
+            if (SystemConfig.SYS.MINIMZE_ACTION == 0 && !overwrite)
+            {
+                mainWindow.WindowState = WindowState.Minimized;
+            }
+            else
+            {
+                mainWindow.Dispatcher.Invoke(new Action(() =>
                 {
-                    mainWindow.ShowInTaskbar = true;
-                    mainWindow.Visibility = Visibility.Visible;
-                    isMinimized = false;
-                    Thread.Sleep(150);
-                    taskBar.Visibility = Visibility.Hidden;
-                } else
-                {
-                    taskBar.Visibility = Visibility.Visible;
-                    Application.Current.MainWindow.ShowInTaskbar = false;
-                    Application.Current.MainWindow.Visibility = Visibility.Hidden;
-                    isMinimized = true;
-                }
-            }));
+                    if (state)
+                    {
+                        mainWindow.ShowInTaskbar = true;
+                        mainWindow.Visibility = Visibility.Visible;
+                        isMinimized = false;
+                        Thread.Sleep(150);
+                        taskBar.Visibility = Visibility.Hidden;
+                    }
+                    else
+                    {
+                        taskBar.Visibility = Visibility.Visible;
+                        Application.Current.MainWindow.ShowInTaskbar = false;
+                        Application.Current.MainWindow.Visibility = Visibility.Hidden;
+                        isMinimized = true;
+                    }
+                }));
+            }
         }
 
         private void UPDATE_BTN_CLICK(object sender, RoutedEventArgs e)
@@ -269,6 +296,61 @@ namespace BnS_Multitool
         {
             //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             setCurrentPage("Modpolice");
+        }
+
+        private void Settings_Click(object sender, RoutedEventArgs e)
+        {
+            SettingsDarken.Visibility = Visibility.Visible;
+            SettingsMenu.Visibility = Visibility.Visible;
+        }
+
+        public void Settings_Closed() => SettingsDarken.Dispatcher.BeginInvoke(new Action(() => { SettingsDarken.Visibility = Visibility.Hidden; SettingsMenu.Visibility = Visibility.Hidden; }));
+
+        private void SaveSettings(object sender, RoutedEventArgs e)
+        {
+            SystemConfig.SYS.UPDATER_THREADS = lstBoxUpdaterThreads.SelectedIndex;
+            SystemConfig.SYS.NEW_GAME_OPTION = lstBoxNewGame.SelectedIndex;
+            SystemConfig.SYS.MINIMZE_ACTION = lstBoxLauncherX.SelectedIndex;
+            SystemConfig.SYS.DELTA_PATCHING = ((bool)DeltaPatching_Checkbox.IsChecked) ? 1 : 0;
+            SystemConfig.SYS.PING_CHECK = ((bool)PingCheckTick.IsChecked) ? 1 : 0;
+            SystemConfig.SYS.BNS_DIR = BNS_LOCATION_BOX.Text;
+
+            SystemConfig.appendChangesToConfig();
+            Settings_Closed();
+        }
+
+        private void SettingsCancel(object sender, RoutedEventArgs e)
+        {
+            lstBoxUpdaterThreads.SelectedIndex = SystemConfig.SYS.UPDATER_THREADS;
+            lstBoxNewGame.SelectedIndex = SystemConfig.SYS.NEW_GAME_OPTION;
+            lstBoxLauncherX.SelectedIndex = SystemConfig.SYS.MINIMZE_ACTION;
+            DeltaPatching_Checkbox.IsChecked = (SystemConfig.SYS.DELTA_PATCHING == 1) ? true : false;
+            PingCheckTick.IsChecked = (SystemConfig.SYS.PING_CHECK == 1) ? true : false;
+            BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
+
+            Settings_Closed();
+        }
+
+        private void GameUpdaterButton(object sender, RoutedEventArgs e)
+        {
+            if(ACCOUNT_CONFIG.ACCOUNTS.REGION > 1)
+            {
+                var dialog = new ErrorPrompt("This feature is only available for NA and EU region.");
+                dialog.ShowDialog();
+            }
+            else
+                setCurrentPage("Gameupdater");
+        }
+
+        private void SettingsBrowse(object sender, RoutedEventArgs e)
+        {
+            using (var FOLDER = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                System.Windows.Forms.DialogResult RESULT = FOLDER.ShowDialog();
+
+                if (RESULT == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(FOLDER.SelectedPath))
+                    BNS_LOCATION_BOX.Text = FOLDER.SelectedPath + ((FOLDER.SelectedPath.Last() != '\\') ? "\\" : "");
+            }
         }
     }
 }
