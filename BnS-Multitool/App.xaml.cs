@@ -14,7 +14,7 @@ namespace BnS_Multitool
     /// </summary>
     public partial class App : Application
     {
-        
+        /*
         protected override void OnStartup(StartupEventArgs e)
         {
             base.OnStartup(e);
@@ -29,16 +29,16 @@ namespace BnS_Multitool
 
             DispatcherUnhandledException += (s, e) =>
             {
-                MessageBox.Show(e.Exception.ToString());
+                MessageBox.Show(e.Exception.Message);
                 e.Handled = true;
             };
 
             TaskScheduler.UnobservedTaskException += (s, e) =>
             {
-                MessageBox.Show(e.Exception.ToString());
+                MessageBox.Show(e.Exception.Message);
                 e.SetObserved();
             };
         }
-        
+        */
     }
 }

@@ -12,10 +12,17 @@ namespace BnS_Multitool
     /// </summary>
     public partial class ErrorPrompt : Window
     {
-        public ErrorPrompt(string Message, bool good = false)
+        public ErrorPrompt(string Message, bool good = false, bool useBoldFont = false)
         {
             InitializeComponent();
             ErrorLabel.Text = Message;
+
+            //Set the owner and center this on the main window.
+            this.Owner = MainWindow.mainWindow;
+            this.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+
+            if (useBoldFont)
+                ErrorLabel.FontWeight = FontWeights.Bold;
 
             if (good)
             {

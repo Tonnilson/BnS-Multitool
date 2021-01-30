@@ -47,22 +47,6 @@ namespace BnS_Multitool
                 if (!Directory.Exists(backupLocation))
                     Directory.CreateDirectory(backupLocation);
 
-            //Backwards compatability with older versions, need to move all the files back to the bns directory, remove in 3 version iterations
-            if(SystemConfig.SYS.UPK_DIR != "" && Directory.Exists(SystemConfig.SYS.UPK_DIR))
-            {
-                foreach(string file in Directory.GetFiles(SystemConfig.SYS.UPK_DIR))
-                {
-                    try
-                    {
-                        FileInfo upkFile = new FileInfo(file);
-                        upkFile.MoveTo(backupLocation + upkFile.Name);
-                    } catch (Exception)
-                    {
-
-                    }
-                }
-            }
-
             systemToggles = new List<toggleStruct>()
             {
                 new toggleStruct() {className = "Assassin", animToggle = sin_anim_toggle, fxToggle = sin_fx_toggle},
@@ -111,131 +95,147 @@ namespace BnS_Multitool
 
         private async void handleToggleChange(object sender, RoutedEventArgs e)
         {
-            HorizontalToggleSwitch currentToggle = (HorizontalToggleSwitch)sender;
-
-            if (!_isInitialized)
-                return;
-
-            if (Process.GetProcessesByName("Client").Length >= 1)
+            try
             {
-                peepoWtfText.Text = "You can't do that when Blade & Soul is already running!";
-                ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
-                return;
-            }
+                HorizontalToggleSwitch currentToggle = (HorizontalToggleSwitch)sender;
 
+                if (!_isInitialized)
+                    return;
 
-            string sourceDirectory;
-            string destinationDirectory;
-
-            //Check if it is an individual class toggle
-            if (systemToggles.Any(toggle => toggle.animToggle == currentToggle || toggle.fxToggle == currentToggle))
-            {
-                string[] upkfiles;
-                toggleStruct sysToggle;
-
-                if(currentToggle.Name.Contains("_fx_"))
+                if (Process.GetProcessesByName("Client").Length >= 1)
                 {
-                    sysToggle = systemToggles.Where(x => x.fxToggle.Name == currentToggle.Name).FirstOrDefault();
-                    upkfiles = SystemConfig.SYS.CLASSES.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.EFFECTS).FirstOrDefault();
-                } else
-                {
-                    sysToggle = systemToggles.Where(x => x.animToggle.Name == currentToggle.Name).FirstOrDefault();
-                    upkfiles = SystemConfig.SYS.CLASSES.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.ANIMATIONS).FirstOrDefault();
+                    peepoWtfText.Text = "You can't do that when Blade & Soul is already running!";
+                    ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
+                    return;
                 }
 
-                //We're restoring
-                if(currentToggle.IsChecked)
-                {
-                    sourceDirectory = backupLocation;
-                    destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                } else
-                {
-                    sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                    destinationDirectory = backupLocation;
-                }
+                string sourceDirectory;
+                string destinationDirectory;
 
-               // _isInitialized = false;
-                foreach(string file in upkfiles)
+                //Check if it is an individual class toggle
+                if (systemToggles.Any(toggle => toggle.animToggle == currentToggle || toggle.fxToggle == currentToggle))
                 {
-                    try
+                    string[] upkfiles;
+                    toggleStruct sysToggle;
+
+                    if (currentToggle.Name.Contains("_fx_"))
                     {
-                        //Move our target file to our new destination
-                        if (File.Exists(sourceDirectory + file))
+                        sysToggle = systemToggles.Where(x => x.fxToggle.Name == currentToggle.Name).FirstOrDefault();
+                        upkfiles = SystemConfig.SYS.CLASSES.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.EFFECTS).FirstOrDefault();
+                    }
+                    else
+                    {
+                        sysToggle = systemToggles.Where(x => x.animToggle.Name == currentToggle.Name).FirstOrDefault();
+                        upkfiles = SystemConfig.SYS.CLASSES.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.ANIMATIONS).FirstOrDefault();
+                    }
+
+                    //We're restoring
+                    if (currentToggle.IsChecked)
+                    {
+                        sourceDirectory = backupLocation;
+                        destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
+                    }
+                    else
+                    {
+                        sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
+                        destinationDirectory = backupLocation;
+                    }
+
+                    // _isInitialized = false;
+                    if (upkfiles.Count() > 0)
+                    {
+                        foreach (string file in upkfiles)
                         {
-                            if (!File.Exists(destinationDirectory + file))
-                                File.Move(sourceDirectory + file, destinationDirectory + file);
-                            else
-                                File.Delete(sourceDirectory + file);
+                            try
+                            {
+                                //Move our target file to our new destination
+                                if (File.Exists(sourceDirectory + file))
+                                {
+                                    if (!File.Exists(destinationDirectory + file))
+                                        File.Move(sourceDirectory + file, destinationDirectory + file);
+                                    else
+                                        File.Delete(sourceDirectory + file);
+                                }
+                            }
+                            catch (Exception)
+                            {
+                                //ProgressControl.updateProgressLabel(ex.Message);
+                            }
                         }
                     }
-                    catch (Exception)
-                    {
-                        //ProgressControl.updateProgressLabel(ex.Message);
-                    }
-                }
 
-                //_isInitialized = true;
-                Dispatchers.labelContent(classLabel, String.Format("{0} {1}", sysToggle.className, (currentToggle.IsChecked) ? "Restored" : "Removed"));
-                ((Storyboard)FindResource("animate")).Begin(classLabel);
-                ((Storyboard)FindResource("animate")).Begin(successStatePicture);
-            }
+                    //_isInitialized = true;
+                    Dispatchers.labelContent(classLabel, String.Format("{0} {1}", sysToggle.className, (currentToggle.IsChecked) ? "Restored" : "Removed"));
+                    ((Storyboard)FindResource("animate")).Begin(classLabel);
+                    ((Storyboard)FindResource("animate")).Begin(successStatePicture);
+                }
                 else
-            {
-                string[] upkFiles;
-                upkFiles = SystemConfig.SYS.MAIN_UPKS;
-
-                _progressControl = new ProgressControl();
-                MainWindow.mainWindowFrame.RemoveBackEntry();
-                ProgressGrid.Visibility = Visibility.Visible;
-                MainGrid.Visibility = Visibility.Collapsed;
-
-                ProgressPanel.Children.Add(_progressControl);
-
-                //Turning whatever the fuck it is on
-                if (currentToggle.IsChecked)
                 {
-                    ProgressControl.errorSadPeepo(Visibility.Hidden);
-                    ProgressControl.updateProgressLabel("Restoring files");
-                    await Task.Delay(150);
-                    sourceDirectory = backupLocation;
-                    destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                } else
-                {
-                    ProgressControl.errorSadPeepo(Visibility.Hidden);
-                    ProgressControl.updateProgressLabel("Removing files");
-                    await Task.Delay(150);
-                    sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                    destinationDirectory = backupLocation;
-                }
+                    string[] upkFiles;
+                    upkFiles = SystemConfig.SYS.MAIN_UPKS;
 
-                foreach (string file in upkFiles)
-                {
-                    try
+                    _progressControl = new ProgressControl();
+                    MainWindow.mainWindowFrame.RemoveBackEntry();
+                    ProgressGrid.Visibility = Visibility.Visible;
+                    MainGrid.Visibility = Visibility.Collapsed;
+
+                    ProgressPanel.Children.Add(_progressControl);
+
+                    //Turning whatever the fuck it is on
+                    if (currentToggle.IsChecked)
                     {
-                        ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
-                        await Task.Delay(25);
-                        //Move our target file to our new destination
-                        if (File.Exists(sourceDirectory + file))
-                        {
-                            ProgressControl.updateProgressLabel(String.Format("{0} {1}", (currentToggle.IsChecked) ? "Restoring" : "Removing", file));
-                            if (!File.Exists(destinationDirectory + file))
-                                File.Move(sourceDirectory + file, destinationDirectory + file);
-                            else
-                                File.Delete(sourceDirectory + file);
-                        }
-
-                    } catch (Exception ex)
-                    {
-                        ProgressControl.updateProgressLabel(ex.Message);
-                        await Task.Delay(500);
+                        ProgressControl.errorSadPeepo(Visibility.Hidden);
+                        ProgressControl.updateProgressLabel("Restoring files");
+                        await Task.Delay(150);
+                        sourceDirectory = backupLocation;
+                        destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
                     }
-                    await Task.Delay(50);
-                }
+                    else
+                    {
+                        ProgressControl.errorSadPeepo(Visibility.Hidden);
+                        ProgressControl.updateProgressLabel("Removing files");
+                        await Task.Delay(150);
+                        sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
+                        destinationDirectory = backupLocation;
+                    }
 
-                ProgressGrid.Visibility = Visibility.Hidden;
-                MainGrid.Visibility = Visibility.Visible;
-                ProgressPanel.Children.Clear();
-                _progressControl = null;
+                    if (upkFiles.Count() > 0)
+                    {
+                        foreach (string file in upkFiles)
+                        {
+                            try
+                            {
+                                ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
+                                await Task.Delay(25);
+                                //Move our target file to our new destination
+                                if (File.Exists(sourceDirectory + file))
+                                {
+                                    ProgressControl.updateProgressLabel(String.Format("{0} {1}", (currentToggle.IsChecked) ? "Restoring" : "Removing", file));
+                                    if (!File.Exists(destinationDirectory + file))
+                                        File.Move(sourceDirectory + file, destinationDirectory + file);
+                                    else
+                                        File.Delete(sourceDirectory + file);
+                                }
+
+                            }
+                            catch (Exception ex)
+                            {
+                                ProgressControl.updateProgressLabel(ex.Message);
+                                await Task.Delay(500);
+                            }
+                            await Task.Delay(50);
+                        }
+                    }
+
+                    ProgressGrid.Visibility = Visibility.Hidden;
+                    MainGrid.Visibility = Visibility.Visible;
+                    ProgressPanel.Children.Clear();
+                    _progressControl = null;
+                }
+            } catch (Exception ex)
+            {
+                var dialog = new ErrorPrompt("Something went wrong, \r\rAddition information: \r" + ex.Message);
+                dialog.ShowDialog();
             }
 
             GC.WaitForPendingFinalizers();
@@ -322,29 +322,32 @@ namespace BnS_Multitool
                 destinationDirectory = backupLocation;
             }
 
-            foreach (string file in upkFiles)
+            if (upkFiles.Count() > 0)
             {
-                try
+                foreach (string file in upkFiles)
                 {
-                    ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
-                    await Task.Delay(25);
-                    //Move our target file to our new destination
-                    if (File.Exists(sourceDirectory + file))
+                    try
                     {
-                        ProgressControl.updateProgressLabel(String.Format("{0} {1}", currentState ? "Restoring" : "Removing", file));
-                        if (!File.Exists(destinationDirectory + file))
-                            File.Move(sourceDirectory + file, destinationDirectory + file);
-                        else
-                            File.Delete(sourceDirectory + file);
-                    }
+                        ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
+                        await Task.Delay(25);
+                        //Move our target file to our new destination
+                        if (File.Exists(sourceDirectory + file))
+                        {
+                            ProgressControl.updateProgressLabel(String.Format("{0} {1}", currentState ? "Restoring" : "Removing", file));
+                            if (!File.Exists(destinationDirectory + file))
+                                File.Move(sourceDirectory + file, destinationDirectory + file);
+                            else
+                                File.Delete(sourceDirectory + file);
+                        }
 
+                    }
+                    catch (Exception ex)
+                    {
+                        ProgressControl.updateProgressLabel(ex.Message);
+                        await Task.Delay(500);
+                    }
+                    await Task.Delay(50);
                 }
-                catch (Exception ex)
-                {
-                    ProgressControl.updateProgressLabel(ex.Message);
-                    await Task.Delay(500);
-                }
-                await Task.Delay(50);
             }
 
             ProgressGrid.Visibility = Visibility.Hidden;

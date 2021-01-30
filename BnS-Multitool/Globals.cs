@@ -13,13 +13,42 @@ namespace BnS_Multitool
         public static string localBnSVersion;
         public static string onlineBnSVersion;
         public static bool loginAvailable;
-        private static string loginServer = "updater.nclauncher.ncsoft.com";
+        private static string loginServer;
+        private static string loginServerVar;
+
+        public enum BnS_Region
+        {
+            NA,
+            EU,
+            TW,
+            KR
+        }
+
+        private static void refreshServerVar()
+        {
+            switch((BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION)
+            {
+                case BnS_Region.KR:
+                    loginServer = "up4svr.ncupdate.com";
+                    loginServerVar = "BNS_KOR";
+                    break;
+                case BnS_Region.TW:
+                    loginServer = "up4svr.plaync.com.tw";
+                    loginServerVar = "BnS";
+                    break;
+                default:
+                    loginServer = "updater.nclauncher.ncsoft.com";
+                    loginServerVar = "BnS";
+                    break;
+            }
+        }
 
         public static string onlineVersionNumber()
         {
             int version = 0;
             try
             {
+                refreshServerVar();
                 MemoryStream ms = new MemoryStream();
                 BinaryWriter bw = new BinaryWriter(ms);
                 NetworkStream ns = new TcpClient(loginServer, 27500).GetStream();
@@ -27,8 +56,8 @@ namespace BnS_Multitool
                 bw.Write((short)0);
                 bw.Write((short)6);
                 bw.Write((byte)10);
-                bw.Write((byte)"BnS".Length);
-                bw.Write(Encoding.ASCII.GetBytes("BnS"));
+                bw.Write((byte)loginServerVar.Length);
+                bw.Write(Encoding.ASCII.GetBytes(loginServerVar));
                 bw.BaseStream.Position = 0L;
                 bw.Write((short)ms.Length);
 
@@ -67,7 +96,7 @@ namespace BnS_Multitool
 
         public static void GameVersionCheck()
         {
-            IniHandler VersionInfo_BnS = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, "VersionInfo_BnS.ini"));
+            IniHandler VersionInfo_BnS = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, (BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == BnS_Region.KR ? "VersionInfo_BNS_KOR.ini" : "VersionInfo_BnS.ini"));
             localBnSVersion = VersionInfo_BnS.Read("VersionInfo", "GlobalVersion");
             onlineBnSVersion = onlineVersionNumber();
 
@@ -79,6 +108,7 @@ namespace BnS_Multitool
         {
             try
             {
+                refreshServerVar();
                 MemoryStream ms = new MemoryStream();
                 BinaryWriter bw = new BinaryWriter(ms);
                 NetworkStream ns = new TcpClient(loginServer, 27500).GetStream();
@@ -86,8 +116,8 @@ namespace BnS_Multitool
                 bw.Write((short)0);
                 bw.Write((short)4);
                 bw.Write((byte)10);
-                bw.Write((byte)"BnS".Length);
-                bw.Write(Encoding.ASCII.GetBytes("BnS"));
+                bw.Write((byte)loginServerVar.Length);
+                bw.Write(Encoding.ASCII.GetBytes(loginServerVar));
                 bw.BaseStream.Position = 0L;
                 bw.Write((short)ms.Length);
 
@@ -113,10 +143,8 @@ namespace BnS_Multitool
                 br.ReadBytes(br.ReadByte() + 1);
                 loginAvailable = br.ReadBoolean();
                 return loginAvailable;
-
-
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 loginAvailable = false;
                 return false;

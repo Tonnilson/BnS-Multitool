@@ -81,22 +81,60 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to # target hp
+        ///UI.Gauge.CurMax
+        ///
+        ///# target hp %
+        ///UI.Gauge.Percent
+        ///
+        ///# target range
+        ///UI.Target.Distance
+        ///
+        ///# f8 lobby #
+        ///UI.ArenaLobbyDuel.RoomNumber.Link.Text
+        ///
+        ///# /invite
+        ///Usercommand.party-invite1
+        ///
+        ///# /join
+        ///Usercommand.party-suggest-join2
+        ///
+        ///# dps meter
+        ///UI.DamageMeter.DamagePerSecond
+        ///
+        ///# dps meter player name
+        ///UI.DamageMeter.Name.Player
+        ///UI.DamageMeter.Name.Pc
+        ///
+        ///# challengemode stuff
+        ///UI.ChallengeParty.*
+        ///
+        ///# chat tab
+        ///UI.Hypertext.*.
         /// </summary>
-        internal static byte[] BnS_ToS_x64 {
+        internal static string minimal {
             get {
-                object obj = ResourceManager.GetObject("BnS_ToS_x64", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("minimal", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Byte[].
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;config&gt;
+        ///    &lt;options&gt;
+        ///        &lt;option name=&quot;useAutoBait&quot; enable=&quot;0&quot; /&gt;
+        ///        &lt;option name=&quot;useItemCap&quot; enable=&quot;0&quot; /&gt;
+        ///        &lt;option name=&quot;useMarketplace&quot; enable=&quot;0&quot; /&gt;
+        ///        &lt;option name=&quot;AutoCombat&quot; enable=&quot;0&quot; useRange=&quot;0&quot; range=&quot;30&quot;/&gt;
+        ///        &lt;option name=&quot;useNoCameraLock&quot; enable=&quot;0&quot; /&gt;
+        ///    &lt;/options&gt;
+        ///    &lt;gcd enable=&quot;0&quot;&gt;
+        ///    &lt;/gcd&gt;
+        ///&lt;/config&gt;.
         /// </summary>
-        internal static byte[] BnS_ToS_x86 {
+        internal static string multitool_qol {
             get {
-                object obj = ResourceManager.GetObject("BnS_ToS_x86", resourceCulture);
-                return ((byte[])(obj));
+                return ResourceManager.GetString("multitool_qol", resourceCulture);
             }
         }
         
@@ -123,6 +161,100 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to # include most UI text
+        ///-UI.MaxLevelGuide.*
+        ///-UI.Action.Credit*
+        ///UI.*
+        ///
+        ///# skill button text
+        ///Text_*
+        ///
+        ///# login keypad button
+        ///Text.Otp.*
+        ///
+        ///# crafting guild name
+        ///Craft.N.*
+        ///
+        ///# unity level
+        ///Name.AccountLevel_Name_0??
+        ///Name.AccountLevel_Name_1??
+        ///
+        ///# player name
+        ///Name.Pc.*
+        ///
+        ///# player class, etc
+        ///Name.job.*.style?
+        ///Name.job.*
+        ///Name.race.*
+        ///Name.sex.*
+        ///
+        ///# key name
+        ///Name.Key.*
+        ///Name.Slot.Key.*
+        ///#Name.KeyCommand.*
+        ///
+        ///# date/time
+        ///Name.Time.*
+        ///
+        ///# party member status
+        ///Name.Party.Status.*
+        ///Name.Team.Status.*
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string playable_kr {
+            get {
+                return ResourceManager.GetString("playable_kr", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to # include most UI text
+        ///-UI.MaxLevelGuide.*
+        ///-UI.Action.Credit*
+        ///UI.*
+        ///
+        ///# skill button text
+        ///Text_*
+        ///
+        ///# login keypad button
+        ///Text.Otp.*
+        ///
+        ///# crafting guild name
+        ///Craft.N.*
+        ///
+        ///# unity level
+        ///Name.AccountLevel_Name_0??
+        ///Name.AccountLevel_Name_1??
+        ///
+        ///# player name
+        ///Name.Pc.*
+        ///
+        ///# player class, etc
+        ///Name.job.*.style?
+        ///Name.job.*
+        ///Name.race.*
+        ///Name.sex.*
+        ///
+        ///# key name
+        ///Name.Key.*
+        ///Name.Slot.Key.*
+        ///#Name.KeyCommand.*
+        ///
+        ///# date/time
+        ///Name.Time.*
+        ///
+        ///# party member status
+        ///Name.Party.Status.*
+        ///Name.Team.Status.*
+        /// [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string playable_ncwest {
+            get {
+                return ResourceManager.GetString("playable_ncwest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
         ///&lt;patches&gt;
         ///  &lt;patch file=&quot;system.config2.xml&quot;&gt;
@@ -142,6 +274,22 @@ namespace BnS_Multitool.Properties {
         internal static string use_ingame_login {
             get {
                 return ResourceManager.GetString("use_ingame_login", resourceCulture);
+            }
+        }
+
+        internal static string AutoIdSearchNotSupported
+        {
+            get
+            {
+                return ResourceManager.GetString("AutoIdSearchNotSupported", resourceCulture);
+            }
+        }
+
+        internal static string translate
+        {
+            get
+            {
+                return ResourceManager.GetString("translate", resourceCulture);
             }
         }
     }

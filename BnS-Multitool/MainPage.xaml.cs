@@ -22,7 +22,7 @@ namespace BnS_Multitool
         private static int currentPing = -1;
         //private static string loginServer = "updater.nclauncher.ncsoft.com";
         private static DispatcherTimer onlineUsersTimer = new DispatcherTimer();
-        private static MainWindow.ONLINE_VERSION_STRUCT onlineJson;
+        public static MainWindow.ONLINE_VERSION_STRUCT onlineJson;
 
         public MainPage()
         {
@@ -52,8 +52,6 @@ namespace BnS_Multitool
                     Application.Current.Dispatcher.BeginInvoke((Action)delegate
                     {
                         var dialog = new ErrorPrompt("Update available, please be sure to read the change log for any critical changes.\r\rOnline Version: " + onlineJson.VERSION + "\rLocal: " + SystemConfig.SYS.VERSION, true);
-                        dialog.Owner = MainWindow.mainWindow;
-                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                         dialog.ShowDialog();
                     });
 
@@ -82,7 +80,7 @@ namespace BnS_Multitool
             Debug.WriteLine("Getting Tick");
             try
             {
-                string stringnumber = client.DownloadString(String.Format("http://tonic.pw/files/bnsmultitool/usersOnline.php?UID={0}", MainWindow.Fingerprint));
+                string stringnumber = client.DownloadString(String.Format("http://tonic.pw/files/bnsmultitool/usersOnline.php?UID={0}", SystemConfig.SYS.FINGERPRINT));
                 if (!(int.TryParse(stringnumber, out usersOnline)))
                     usersOnline = 0;
 
@@ -102,13 +100,16 @@ namespace BnS_Multitool
         private void monitorPing(object sender, DoWorkEventArgs e)
         {
             string regionIP;
-            switch(ACCOUNT_CONFIG.ACCOUNTS.REGION)
+            switch((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION)
             {
-                case 1:
+                case Globals.BnS_Region.EU:
                     regionIP = "18.194.180.254";
                     break;
-                case 2:
+                case Globals.BnS_Region.TW:
                     regionIP = "203.67.68.227";
+                    break;
+                case Globals.BnS_Region.KR:
+                    regionIP = "222.122.231.3";
                     break;
                 default:
                     regionIP = "184.73.104.101";
@@ -150,13 +151,16 @@ namespace BnS_Multitool
         private void pingProgress(object sender, ProgressChangedEventArgs e)
         {
             string regionID;
-            switch (ACCOUNT_CONFIG.ACCOUNTS.REGION)
+            switch ((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION)
             {
-                case 1:
+                case Globals.BnS_Region.EU:
                     regionID = "EU";
                     break;
-                case 2:
+                case Globals.BnS_Region.TW:
                     regionID = "TW";
+                    break;
+                case Globals.BnS_Region.KR:
+                    regionID = "KR";
                     break;
                 default:
                     regionID = "NA";
@@ -195,9 +199,14 @@ namespace BnS_Multitool
                     /*
                      * Generate a unique 'Fingerprint' for our user based off hardware
                      * Used for creating a unique total user count
-                     * Takes a hot minute to generate....
+                     * Store the unique ID in settings to speed up the process on next boot
                      */
-                    MainWindow.Fingerprint = Security.FingerPrint.Value();
+                    if (SystemConfig.SYS.FINGERPRINT == null)
+                    {
+                        SystemConfig.SYS.FINGERPRINT = Security.FingerPrint.Value();
+                        SystemConfig.appendChangesToConfig();
+                    }
+
                     onlineUsersTimer.IsEnabled = true;
                     onlineUsers_Tick(sender, new EventArgs());
                 }

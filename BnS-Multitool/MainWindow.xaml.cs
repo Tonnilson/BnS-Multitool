@@ -15,6 +15,8 @@ using System.Threading;
 using System.Reflection;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using System.Xml.Linq;
+using System.Xml.XPath;
 
 namespace BnS_Multitool
 {
@@ -33,6 +35,8 @@ namespace BnS_Multitool
         public class ONLINE_VERSION_STRUCT
         {
             public string VERSION { get; set; }
+            public List<string> QOL_HASH { get; set; }
+            public string QOL_ARCHIVE { get; set; }
             public List<CHANGELOG_STRUCT> CHANGELOG { get; set; }
         }
 
@@ -47,6 +51,8 @@ namespace BnS_Multitool
             public string PageName { get; set; }
             public Page PageSource { get; set; }
         }
+
+        public static XDocument qol_xml;
 
         public MainWindow()
         {
@@ -89,24 +95,62 @@ namespace BnS_Multitool
 
             this.MouseDown += delegate { try { DragMove(); } catch (Exception) { } };
 
+            try
+            {
+                const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
+                using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
+                {
+                    if ((int)ndpKey.GetValue("Release") < 461808)
+                    {
+                        var dialog = new ErrorPrompt("It seems you do not have .NET Framework 4.7.2 or higher, this is required for certain features to work properly.\nPlease install it and try launching again.");
+                        dialog.ShowDialog();
+                        Environment.Exit(0);
+                    }
+                }
+
+                if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
+                    File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"), Properties.Resources.multitool_qol);
+
+                qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+            }
+            catch (Exception) { }
+
             if (File.Exists("BnS-Multi-Tool-Updater.exe"))
                 File.Delete("BnS-Multi-Tool-Updater.exe");
 
-            if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + @"\bin\"))
+            if (String.IsNullOrEmpty(SystemConfig.SYS.BNS_DIR) || !Directory.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR,"bin")))
             {
                 //First check the registry, see if we can find the correct path, if not prompt the user when catching the error.
                 try
                 {
                     RegistryKey BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\NCWest\BnS");
-                    SystemConfig.SYS.BNS_DIR = BNS_REGISTRY.GetValue("BaseDir").ToString();
-                   //This is a slight correction for some systems, for whatever reason they are not registering the path correctly so I have to force this backslash onto it.
-                    if (SystemConfig.SYS.BNS_DIR.Last() != '\\')
-                        SystemConfig.SYS.BNS_DIR += "\\";
+
+                    if (BNS_REGISTRY != null)
+                    {
+                        SystemConfig.SYS.BNS_DIR = BNS_REGISTRY.GetValue("BaseDir").ToString();
+                        //This is a slight correction for some systems, for whatever reason they are not registering the path correctly so I have to force this backslash onto it.
+                        if (SystemConfig.SYS.BNS_DIR.Last() != '\\')
+                            SystemConfig.SYS.BNS_DIR += "\\";
+                    } else
+                    {
+                        BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\plaync\BNS_KOR");
+
+                        if (BNS_REGISTRY == null)
+                            throw new Exception("No registry entries for client");
+
+                        SystemConfig.SYS.BNS_DIR = BNS_REGISTRY.GetValue("BaseDir").ToString();
+                        if (SystemConfig.SYS.BNS_DIR.Last() != '\\')
+                            SystemConfig.SYS.BNS_DIR += "\\";
+
+                        ACCOUNT_CONFIG.ACCOUNTS.REGION = (int)Globals.BnS_Region.KR;
+                        ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE = 5;
+                    }
 
                     SystemConfig.appendChangesToConfig();
 
                     if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\"))
                         throw new Exception("Directory doesn't eixst");
+
                 }
                 catch (Exception)
                 {
@@ -333,9 +377,9 @@ namespace BnS_Multitool
 
         private void GameUpdaterButton(object sender, RoutedEventArgs e)
         {
-            if(ACCOUNT_CONFIG.ACCOUNTS.REGION > 1)
+            if((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.TW)
             {
-                var dialog = new ErrorPrompt("This feature is only available for NA and EU region.");
+                var dialog = new ErrorPrompt("This feature is only available for NA, EU and KR region");
                 dialog.ShowDialog();
             }
             else

@@ -124,14 +124,20 @@
   <data name="BnS_Multi_Tool_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\BnS-Multi-Tool-Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
-  <data name="BnS_ToS_x64" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\BnS-ToS-x64.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="minimal" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\minimal.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="BnS_ToS_x86" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\BnS-ToS-x86.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  <data name="multitool_qol" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\multitool_qol.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="patches" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\patches.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="playable_kr" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\playable_kr.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  </data>
+  <data name="playable_ncwest" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\playable_ncwest.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
   <data name="use_ingame_login" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\use-ingame-login.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>

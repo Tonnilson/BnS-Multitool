@@ -19,19 +19,14 @@ namespace BnS_Multitool
             {
                 ACCOUNTS = new ACCOUNTS_CONFIG
                 {
-                    FAST_LAUNCH = 0,
                     USE_ALL_CORES = 0,
                     USE_TEXTURE_STREAMING = 0,
                     REGION = 0,
                     CLIENT_BIT = 0,
                     LANGUAGE = 0,
-                    TOS_AUTO_BAIT = 0,
-                    TOS_RAISE_CAP = 0,
-                    TOS_MARKETPLACE = 0,
-                    TOS_AUTOCOMBAT = 0,
-                    TOS_AUTOCOMBATRANGE = 0,
-                    TOS_AUTOCOMBATRANGE_VALUE = 30,
+                    SELECT_LAST_CHAR = 0,
                     MEMORY_CLEANER = 0,
+                    ADDITIONAL_PARAMS = "",
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
                 };
 
@@ -44,17 +39,6 @@ namespace BnS_Multitool
                 {
                     string _JSON = File.ReadAllText(CONFIG_FILE);
                     ACCOUNTS = JsonConvert.DeserializeObject<ACCOUNTS_CONFIG>(_JSON);
-
-                    //Check and add property if it doesn't exist, mainly used for updates.
-
-                    if(SystemConfig.SYS.PATCH_310 == 0)
-                    {
-                        ACCOUNTS.TOS_AUTOCOMBAT = 0;
-                        ACCOUNTS.TOS_AUTOCOMBATRANGE = 0;
-                        ACCOUNTS.TOS_AUTOCOMBATRANGE_VALUE = 30; //Default is 30m
-                        SystemConfig.SYS.PATCH_310 = 1;
-                        SystemConfig.appendChangesToConfig();
-                    }
 
                     appendChangesToConfig();
                 } catch (Exception)
@@ -82,19 +66,14 @@ namespace BnS_Multitool
 
         public struct ACCOUNTS_CONFIG
         {
-            public int FAST_LAUNCH { get; set; }
             public int USE_ALL_CORES { get; set; }
             public int USE_TEXTURE_STREAMING { get; set; }
             public int REGION { get; set; }
             public int CLIENT_BIT { get; set; }
             public int LANGUAGE { get; set; }
-            public int TOS_AUTO_BAIT { get; set; }
-            public int TOS_RAISE_CAP { get; set; }
-            public int TOS_MARKETPLACE { get; set; }
-            public int TOS_AUTOCOMBAT { get; set; }
-            public int TOS_AUTOCOMBATRANGE { get; set; }
-            public int TOS_AUTOCOMBATRANGE_VALUE { get; set; }
+            public int SELECT_LAST_CHAR { get; set; }
             public int MEMORY_CLEANER { get; set; }
+            public string ADDITIONAL_PARAMS { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
         }
 

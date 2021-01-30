@@ -91,6 +91,9 @@
     <Reference Include="MiscUtil.Compression.Vcdiff">
       <HintPath>C:\Users\ztoni\Desktop\MiscUtil.Compression.Vcdiff-1.0.0\MiscUtil.Compression.Vcdiff\bin\Debug\netstandard1.3\MiscUtil.Compression.Vcdiff.dll</HintPath>
     </Reference>
+    <Reference Include="MvvmHelpers, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Refractored.MvvmHelpers.1.6.2\lib\net461\MvvmHelpers.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=12.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.12.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
@@ -105,6 +108,9 @@
     <Reference Include="System.IO.Compression" />
     <Reference Include="System.IO.Compression.FileSystem" />
     <Reference Include="System.Management" />
+    <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ValueTuple.4.5.0\lib\net47\System.ValueTuple.dll</HintPath>
+    </Reference>
     <Reference Include="System.Web" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
@@ -134,6 +140,20 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="ACCOUNTS_CONFIG.cs" />
+    <Compile Include="BDAT\Bdat.cs" />
+    <Compile Include="BDAT\BNSDat.cs" />
+    <Compile Include="BDAT\TextWriter.cs" />
+    <Compile Include="BDAT\Translation\CharExtension.cs" />
+    <Compile Include="BDAT\Translation\FilterCriteria.cs" />
+    <Compile Include="BDAT\Translation\ReplaceCriteria.cs" />
+    <Compile Include="BDAT\Translation\TranslatableItem.cs" />
+    <Compile Include="BDAT\Translation\TranslateFileBl.cs" />
+    <Compile Include="BDAT\Translation\TranslateFileDal.cs" />
+    <Compile Include="BDAT\UndoRedo\EditableElement.cs" />
+    <Compile Include="BDAT\UndoRedo\EditCommand.cs" />
+    <Compile Include="BDAT\UndoRedo\UndoRedoManager.cs" />
+    <Compile Include="BnsPerf\BnsPerformanceFix.cs" />
+    <Compile Include="BnsPerf\Filter.cs" />
     <Compile Include="Dispatchers.cs" />
     <Compile Include="Effects.xaml.cs">
       <DependentUpon>Effects.xaml</DependentUpon>
@@ -147,6 +167,19 @@
     </Compile>
     <Compile Include="Globals.cs" />
     <Compile Include="IniHandler.cs" />
+    <Compile Include="Ionic.Zlib\CRC32.cs" />
+    <Compile Include="Ionic.Zlib\Deflate.cs" />
+    <Compile Include="Ionic.Zlib\DeflateStream.cs" />
+    <Compile Include="Ionic.Zlib\GZipStream.cs" />
+    <Compile Include="Ionic.Zlib\Inflate.cs" />
+    <Compile Include="Ionic.Zlib\InfTree.cs" />
+    <Compile Include="Ionic.Zlib\ParallelDeflateOutputStream.cs" />
+    <Compile Include="Ionic.Zlib\Tree.cs" />
+    <Compile Include="Ionic.Zlib\Zlib.cs" />
+    <Compile Include="Ionic.Zlib\ZlibBaseStream.cs" />
+    <Compile Include="Ionic.Zlib\ZlibCodec.cs" />
+    <Compile Include="Ionic.Zlib\ZlibConstants.cs" />
+    <Compile Include="Ionic.Zlib\ZlibStream.cs" />
     <Compile Include="Modpolice.xaml.cs">
       <DependentUpon>Modpolice.xaml</DependentUpon>
     </Compile>
@@ -328,12 +361,6 @@
     <Resource Include="Images\BnSIcon.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\BnS-ToS-x86.exe" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Resources\BnS-ToS-x64.exe" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\peepoRunxmas.gif" />
   </ItemGroup>
   <ItemGroup>
@@ -341,6 +368,21 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Resources\BnS-Multi-Tool-Updater.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\multitool_qol.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\minimal.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\playable_kr.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\playable_ncwest.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\sedro.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\Fody.6.2.4\build\Fody.targets" Condition="Exists('..\packages\Fody.6.2.4\build\Fody.targets')" />
