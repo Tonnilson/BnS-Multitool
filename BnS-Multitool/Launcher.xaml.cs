@@ -20,6 +20,7 @@ using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using System.Management;
+using System.Globalization;
 
 namespace BnS_Multitool
 {
@@ -942,13 +943,6 @@ namespace BnS_Multitool
                 foreach (SkillData skill in dataList)
                     elements.Add(new XElement("skill", new XAttribute("id", skill.skillID.ToString()), new XAttribute("value", skill.skillvalue), new XAttribute("mode", skill.mode.ToString())));
 
-                /*
-                tempdoc.Descendants("gcd").Last().Add(
-                     from skill in dataList
-                     select new XElement("skill", new XAttribute("id", skill.skillID),
-                                         new XAttribute("value", skill.skillvalue),
-                                         new XAttribute("mode", skill.mode)));
-                */
                 //tempdoc.XPathSelectElement("config/gcd").Attribute("enable").Value = ((bool)enableGCD.IsChecked) ? "1" : "0";
                 MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
 

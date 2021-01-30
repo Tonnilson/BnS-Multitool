@@ -481,7 +481,7 @@ namespace BnS_Multitool
                         filter = BnsPerformanceFix.Filter.Load(stream);
 
                     string temp = "";
-                    string temp2 = "";
+                    string temp2  = "";
                     string status;
                     bool patchingBin = false;
                     if (SystemConfig.SYS.patch32 == 1)
@@ -509,10 +509,6 @@ namespace BnS_Multitool
                             status = BnsPerformanceFix.BnsPerformanceFix.FilterLocalDatInPlace(temp, filter);
 
                         Dispatchers.labelContent(PatchingLabel, status);
-
-                        if (Directory.Exists(Path.GetDirectoryName(temp)))
-                            Directory.Delete(Path.GetDirectoryName(temp), true);
-
                         await Task.Delay(2000);
                     }
 
@@ -538,14 +534,13 @@ namespace BnS_Multitool
                                 File.Delete(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64", "plugins", "localfile64.bin"));
 
                             File.Move(binfile, Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64", "plugins", "localfile64.bin"));
-                        } else
+                        }
+                        else
                             status = BnsPerformanceFix.BnsPerformanceFix.FilterLocalDatInPlace(temp2, filter);
-
-                        if (Directory.Exists(Path.GetDirectoryName(temp2)))
-                            Directory.Delete(Path.GetDirectoryName(temp2), true);
 
                         Dispatchers.labelContent(PatchingLabel, status);
                     }
+
 
                     await Task.Delay(500);
                     Dispatchers.labelContent(PatchingLabel, "Cleaning up");

@@ -17,6 +17,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using System.Globalization;
 
 namespace BnS_Multitool
 {
@@ -84,6 +85,16 @@ namespace BnS_Multitool
             }
             
             InitializeComponent();
+
+            string CultureName = Thread.CurrentThread.CurrentCulture.Name;
+            CultureInfo ci = new CultureInfo(CultureName);
+            if (ci.NumberFormat.NumberDecimalSeparator != ".")
+            {
+                // Forcing use of decimal separator for numerical values
+                ci.NumberFormat.NumberDecimalSeparator = ".";
+                Thread.CurrentThread.CurrentCulture = ci;
+                Thread.CurrentThread.CurrentUICulture = ci;
+            }
 
             //Construct our taskbar icon
             taskBar.Icon = Properties.Resources.AppIcon;

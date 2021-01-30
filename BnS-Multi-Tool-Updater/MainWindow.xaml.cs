@@ -216,6 +216,8 @@ namespace BnS_Multi_Tool_Updater
                 ProgressControl.Value = 0;
                 downloadingLbl.Content = "Incorrect Hash";
                 MessageBox.Show("Are you sure the multi tool is closed and an anti-virus is not blocking the download? You can try again", "Failed to update");
+                downloadFull.Visibility = Visibility.Visible;
+                downloadBtn.Visibility = Visibility.Hidden;
             }
         }
 
@@ -248,6 +250,107 @@ namespace BnS_Multi_Tool_Updater
         private void close(object sender, RoutedEventArgs e)
         {
             Environment.Exit(0);
+        }
+
+        private async void downloadFullClick(object sender, RoutedEventArgs e)
+        {
+            downloadComplete = new TaskCompletionSource<bool>();
+
+            downloadBtn.Visibility = Visibility.Hidden;
+            VersionGrid.Visibility = Visibility.Hidden;
+            ProgressControl.Value = 0;
+            ProgressText.Text = "0%";
+            downloadingLbl.Content = "Downloading...";
+            ProgressGrid.Visibility = Visibility.Visible;
+            bool failedToUpdate = false;
+
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    WebClient client = new WebClient();
+                    if (File.Exists("BnS-Multi-Tool-New.exe"))
+                        File.Delete("BnS-Multi-Tool-New.exe");
+
+                    client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DL_PROGRESS_CHANGED);
+                    client.DownloadFileCompleted += new AsyncCompletedEventHandler(DL_COMPLETED);
+                    client.DownloadFileAsync(new Uri("http://tonic.pw/files/bnsmultitool/BnS-Multi-Tool.exe"), "BnS-Multi-Tool-New.exe");
+
+                    await downloadComplete.Task;
+                    await Task.Delay(1000);
+
+                    //Hash check
+                    string localHash = CalculateMD5("BnS-Multi-Tool-New.exe");
+                    await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        downloadingLbl.Content = "Verifying....";
+                    }));
+
+                    await Task.Delay(1000);
+                    if (localHash == onlineJson.HASH)
+                    {
+                        string jsonString = File.ReadAllText("settings.json");
+                        var SYS = JsonConvert.DeserializeObject<SYSConfig>(jsonString);
+
+                        SYS.VERSION = onlineJson.VERSION;
+
+                        //Append new UPKs to our main list
+                        if (onlineJson.MAIN_UPKS.Count() > 0)
+                        {
+                            List<string> _MAIN_UPKS = SYS.MAIN_UPKS.ToList();
+                            foreach (string UPK in onlineJson.MAIN_UPKS)
+                            {
+                                if (!SYS.MAIN_UPKS.Contains(UPK))
+                                    _MAIN_UPKS.Add(UPK);
+                            }
+
+                            SYS.MAIN_UPKS = _MAIN_UPKS.ToArray();
+                        }
+
+                        jsonString = JsonConvert.SerializeObject(SYS, Formatting.Indented);
+                        File.WriteAllText("settings.json", jsonString);
+                        await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            downloadingLbl.Content = "Launching....";
+                        }));
+
+                        await Task.Delay(500);
+
+                        if (File.Exists("BnS-Multi-Tool.exe"))
+                            File.Delete("BnS-Multi-Tool.exe");
+
+                        File.Move("BnS-Multi-Tool-New.exe", "BnS-Multi-Tool.exe");
+
+                        ProcessStartInfo proc = new ProcessStartInfo();
+                        proc.Verb = "runas";
+                        proc.FileName = "BnS-Multi-Tool.exe";
+                        Process.Start(proc);
+                        Environment.Exit(0);
+                    }
+                    else
+                        failedToUpdate = true;
+
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                    failedToUpdate = true;
+                }
+            });
+
+            //This is redundant but just in case
+            if (failedToUpdate)
+            {
+                ProgressText.Text = "FAILED";
+                downloadBtn.Visibility = Visibility.Visible;
+                //VersionGrid.Visibility = Visibility.Visible;
+                //ProgressGrid.Visibility = Visibility.Hidden;
+                ProgressControl.Value = 0;
+                downloadingLbl.Content = "Incorrect Hash";
+                MessageBox.Show("Are you sure the multi tool is closed and an anti-virus is not blocking the download? You can try again", "Failed to update");
+                downloadFull.Visibility = Visibility.Visible;
+                downloadBtn.Visibility = Visibility.Hidden;
+            }
         }
     }
 }

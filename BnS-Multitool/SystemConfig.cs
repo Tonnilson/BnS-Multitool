@@ -19,7 +19,7 @@ namespace BnS_Multitool
             {
                 SYS = new SYSConfig
                 {
-                    VERSION = "3.2.1",
+                    VERSION = "3.2.2",
                     FINGERPRINT = null,
                     ADDITIONAL_EFFECTS = 0,
                     PATCH_310 = 0,

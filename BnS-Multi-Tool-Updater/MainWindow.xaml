@@ -33,6 +33,7 @@
         </Grid>
 
         <Button x:Name="downloadBtn" Margin="182,279,184,10" FontFamily="Arial" FontWeight="Bold" FontSize="14" Content="Download" Click="downloadClick"/>
+        <Button Visibility="Hidden" x:Name="downloadFull" Margin="182,279,184,10" FontFamily="Arial" FontWeight="Bold" FontSize="14" Content="Download" Click="downloadFullClick"/>
         <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="457,-1,1,293" Click="close"/>
     </Grid>
 </Window>
