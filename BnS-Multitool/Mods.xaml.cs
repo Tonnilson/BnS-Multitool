@@ -253,7 +253,7 @@ namespace BnS_Multitool
         private string original_local64;
         private string original_local;
 
-        private void OpenLocalDatEditorr(object sender, RoutedEventArgs e)
+        private void OpenLocalDatEditor(object sender, RoutedEventArgs e)
         {
             ((Storyboard)FindResource("FadeOut")).Begin(MainGrid);
             ((Storyboard)FindResource("FadeIn")).Begin(LocalDatGrid);
@@ -268,7 +268,11 @@ namespace BnS_Multitool
             {
                 if (infoDat.Count == 0)
                 {
-                    List<string> FileInfoMap = File.ReadLines(Path.Combine(SystemConfig.SYS.BNS_DIR, regionFromSelection() == "NCWEST" ? "FileInfoMap_BnS.dat" : "FileInfoMap_BNS_KOR.dat")).ToList<string>();
+                    var FileInfoMapName = Path.GetFileName(Directory.EnumerateFiles(SystemConfig.SYS.BNS_DIR).Where(x => x.Contains("FileInfoMap_")).FirstOrDefault());
+                    if (String.IsNullOrEmpty(FileInfoMapName))
+                        FileInfoMapName = "FileInfoMap_BnS.dat";
+
+                    List<string> FileInfoMap = File.ReadLines(Path.Combine(SystemConfig.SYS.BNS_DIR, FileInfoMapName)).ToList<string>();
                     Parallel.ForEach<string>(FileInfoMap, new ParallelOptions { MaxDegreeOfParallelism = 2 }, delegate (string line)
                     {
                         string[] lineData = line.Split(new char[] { ':' });
@@ -305,7 +309,7 @@ namespace BnS_Multitool
                         if (File.Exists(Path.Combine(originalLocalPath, "local64.dat.bk")))
                             original_local64 = Path.Combine(originalLocalPath, "local64.dat.bk");
                         else
-                            original_local64 = Path.Combine(original_local64, local64_dati.Name);
+                            original_local64 = Path.Combine(originalLocalPath, local64_dati.Name);
                     }
                     else
                         original_local64 = Path.Combine(originalLocalPath, local64_dati.Name);
@@ -452,26 +456,26 @@ namespace BnS_Multitool
 
                     if (!original_local.Contains(".bk"))
                     {
-                        if (localSize != long.Parse(local_dat.size))
+                        if (localSize != long.Parse(local_dat.size) || !(local_dat.hash.Equals(GameUpdater.SHA1HASH(original_local), StringComparison.CurrentCultureIgnoreCase)))
                         {
                             Application.Current.Dispatcher.Invoke((Action)delegate
                             {
-                                var dialog = new ErrorPrompt("local.dat does not match the current version of the game and there is no backup source, run a file check before trying again.");
+                                var dialog = new ErrorPrompt("local.dat does not match the current version of the game and there is no backup source, run a file check before trying again.", false, true);
                                 dialog.ShowDialog();
-                                return;
+                                throw new Exception("Wrong version");
                             });
                         }
                     }
 
                     if (!original_local64.Contains(".bk"))
                     {
-                        if (local64Size != long.Parse(local64_dat.size))
+                        if (local64Size != long.Parse(local64_dat.size) || !(local64_dat.hash.Equals(GameUpdater.SHA1HASH(original_local64), StringComparison.CurrentCultureIgnoreCase)))
                         {
                             Application.Current.Dispatcher.Invoke((Action)delegate
                             {
-                                var dialog = new ErrorPrompt("local64.dat does not match the current version of the game and there is no backup source, run a file check before trying again.");
+                                var dialog = new ErrorPrompt("local64.dat does not match the current version of the game and there is no backup source, run a file check before trying again.", false, true);
                                 dialog.ShowDialog();
-                                return;
+                                throw new Exception("Wrong version");
                             });
                         }
                     }
@@ -665,26 +669,26 @@ namespace BnS_Multitool
 
                     if (!original_local.Contains(".bk"))
                     {
-                        if (localSize != long.Parse(local_dat.size))
+                        if (localSize != long.Parse(local_dat.size) || !(local_dat.hash.Equals(GameUpdater.SHA1HASH(original_local), StringComparison.CurrentCultureIgnoreCase)))
                         {
                             Application.Current.Dispatcher.Invoke((Action)delegate
                             {
-                                var dialog = new ErrorPrompt("local.dat does not match the current version of the game and there is no backup source, run a file check before trying again.");
+                                var dialog = new ErrorPrompt("local.dat does not match the current version of the game and there is no backup source, run a file check before trying again.", false, true);
                                 dialog.ShowDialog();
-                                return;
+                                throw new Exception("Wrong version");
                             });
                         }
                     }
 
                     if (!original_local64.Contains(".bk"))
                     {
-                        if (local64Size != long.Parse(local64_dat.size))
+                        if (local64Size != long.Parse(local64_dat.size) || !(local64_dat.hash.Equals(GameUpdater.SHA1HASH(original_local64), StringComparison.CurrentCultureIgnoreCase)))
                         {
                             Application.Current.Dispatcher.Invoke((Action)delegate
                             {
-                                var dialog = new ErrorPrompt("local64.dat does not match the current version of the game and there is no backup source, run a file check before trying again.");
+                                var dialog = new ErrorPrompt("local64.dat does not match the current version of the game and there is no backup source, run a file check before trying again.", false, true);
                                 dialog.ShowDialog();
-                                return;
+                                throw new Exception("Wrong version");
                             });
                         }
                     }
@@ -856,11 +860,23 @@ namespace BnS_Multitool
                     ((Storyboard)FindResource("FadeOut")).Begin(PatchProgress);
                     return;
                 }
-                if (File.Exists(local_dat.Substring(0, local_dat.Length - 3)))
-                    File.Delete(local_dat.Substring(0, local_dat.Length - 3));
+                try
+                {
+                    if (File.Exists(local_dat.Substring(0, local_dat.Length - 3)))
+                        File.Delete(local_dat.Substring(0, local_dat.Length - 3));
 
-                File.Move(local_dat, local_dat.Substring(0, local_dat.Length - 3));
-                original_local = original_local.Substring(0, original_local.Length - 3);
+                    File.Move(local_dat, local_dat.Substring(0, local_dat.Length - 3));
+                    original_local = original_local.Substring(0, original_local.Length - 3);
+                } catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        var dialog = new ErrorPrompt(String.Format("Error restoring backup\r\r{0}", ex.Message));
+                        dialog.Owner = MainWindow.mainWindow;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        dialog.ShowDialog();
+                    });
+                }
             }
 
             if (SystemConfig.SYS.patch64 == 1)
@@ -872,11 +888,24 @@ namespace BnS_Multitool
                     ((Storyboard)FindResource("FadeOut")).Begin(PatchProgress);
                     return;
                 }
-                if (File.Exists(local64_dat.Substring(0, local64_dat.Length - 3)))
-                    File.Delete(local64_dat.Substring(0, local64_dat.Length - 3));
 
-                File.Move(local64_dat, local64_dat.Substring(0, local64_dat.Length - 3));
-                original_local64 = original_local64.Substring(0, original_local64.Length - 3);
+                try
+                {
+                    if (File.Exists(local64_dat.Substring(0, local64_dat.Length - 3)))
+                        File.Delete(local64_dat.Substring(0, local64_dat.Length - 3));
+
+                    File.Move(local64_dat, local64_dat.Substring(0, local64_dat.Length - 3));
+                    original_local64 = original_local64.Substring(0, original_local64.Length - 3);
+                } catch (Exception ex)
+                {
+                    Application.Current.Dispatcher.Invoke((Action)delegate
+                    {
+                        var dialog = new ErrorPrompt(String.Format("Error restoring backup\r\r{0}", ex.Message));
+                        dialog.Owner = MainWindow.mainWindow;
+                        dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                        dialog.ShowDialog();
+                    });
+                }
             }
 
             await Task.Delay(1000);
@@ -899,7 +928,7 @@ namespace BnS_Multitool
         {
             _progressControl = new ProgressControl();
             ProgressGrid.Visibility = Visibility.Visible;
-            LocalDatGrid.Visibility = Visibility.Collapsed;
+            LocalDatGrid.Visibility = Visibility.Hidden;
             ProgressPanel.Children.Add(_progressControl);
 
             string pluginName = "SigBypasser";
@@ -917,7 +946,7 @@ namespace BnS_Multitool
                     Directory.CreateDirectory("modpolice");
 
                 ProgressControl.updateProgressLabel("Retrieving file list...");
-                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/Sk9B0QTI#IdIJnQ9qaCU5H71djC25zg"));
+                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/6lUDWQRB#08LQQAjiqfgo7tGWGd2QEg"));
 
                 INode currentNode = null;
                 IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
@@ -994,7 +1023,7 @@ namespace BnS_Multitool
 
         private static Modpolice.pluginFileInfo sigbypasserPlugin;
         private static bool sigbypasserInstalled;
-        private void Page_Loaded(object sender, RoutedEventArgs e)
+        private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
 
@@ -1031,6 +1060,24 @@ namespace BnS_Multitool
                 sigbypasserPlugin = null;
 
             sigbypasserLabel.Content = String.Format("Installed: {0}", (sigbypasserPlugin != null) ? sigbypasserPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed");
+
+            try
+            {
+                var client = new MegaApiClient();
+                await client.LoginAnonymousAsync();
+                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/6lUDWQRB#08LQQAjiqfgo7tGWGd2QEg"));
+
+                INode currentNode = null;
+                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
+
+                //Find our latest nodes for download
+                INode sigbypasser_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("SigBypasser")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+
+                System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"^(?<fileName>[\w\\.]+)_(?<date>[\w\\.]{10})(?<ext>[\w\\.]+)");
+                DateTime sigbypasser_date = DateTime.Parse(pattern.Match(sigbypasser_node.Name).Groups["date"].Value);
+                Dispatchers.labelContent(SigBypasserrOnlineLbl, String.Format("Online: {0}", sigbypasser_date.ToString("MM-dd-yy")));
+            } catch (Exception)
+            { }
         }
 
         private void PatchBit(object sender, RoutedEventArgs e)

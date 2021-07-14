@@ -71,6 +71,15 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to .
+        /// </summary>
+        internal static string AutoIdSearchNotSupported {
+            get {
+                return ResourceManager.GetString("AutoIdSearchNotSupported", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
         internal static byte[] BnS_Multi_Tool_Updater {
@@ -255,40 +264,10 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;patches&gt;
-        ///  &lt;patch file=&quot;system.config2.xml&quot;&gt;
-        ///    &lt;!-- enable ingame login --&gt;
-        ///    &lt;select-node query=&quot;/config/option[@name=&apos;region&apos; and (@value=&apos;&apos; or @value=&apos;NCWEST&apos; or @value=&apos;NCTaiwan&apos;)]&quot;&gt;
-        ///      &lt;root&gt;
-        ///        &lt;select-node query=&quot;/config/option[@name=&apos;use-web-launching&apos;]/@value&quot;&gt;
-        ///          &lt;set-value value=&quot;false&quot; /&gt;
-        ///        &lt;/select-node&gt; 
-        ///      &lt;/root&gt;
-        ///    &lt;/select-node&gt;
-        ///  &lt;/patch&gt;
-        ///  &lt;patch file=&quot;release.config2.xml&quot;&gt;
-        ///    &lt;select-node query=&quot;/config&quot;&gt;
-        ///      &lt;!-- s [rest of string was truncated]&quot;;.
+        ///   Looks up a localized string similar to .
         /// </summary>
-        internal static string use_ingame_login {
+        internal static string translate {
             get {
-                return ResourceManager.GetString("use_ingame_login", resourceCulture);
-            }
-        }
-
-        internal static string AutoIdSearchNotSupported
-        {
-            get
-            {
-                return ResourceManager.GetString("AutoIdSearchNotSupported", resourceCulture);
-            }
-        }
-
-        internal static string translate
-        {
-            get
-            {
                 return ResourceManager.GetString("translate", resourceCulture);
             }
         }

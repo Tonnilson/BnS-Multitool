@@ -44,7 +44,7 @@ namespace BnS_Multitool
             WebClient client = new WebClient();
             try
             {
-                var json = client.DownloadString("http://tonic.pw/files/bnsmultitool/version.json");
+                var json = client.DownloadString(Globals.MAIN_SERVER_ADDR + "version.json");
                 onlineJson = JsonConvert.DeserializeObject<MainWindow.ONLINE_VERSION_STRUCT>(json);
 
                 if (onlineJson.VERSION != MainWindow.FileVersion())
@@ -80,7 +80,7 @@ namespace BnS_Multitool
             Debug.WriteLine("Getting Tick");
             try
             {
-                string stringnumber = client.DownloadString(String.Format("http://tonic.pw/files/bnsmultitool/usersOnline.php?UID={0}", SystemConfig.SYS.FINGERPRINT));
+                string stringnumber = client.DownloadString(String.Format("{1}usersOnline.php?UID={0}", SystemConfig.SYS.FINGERPRINT, Globals.MAIN_SERVER_ADDR));
                 if (!(int.TryParse(stringnumber, out usersOnline)))
                     usersOnline = 0;
 
@@ -187,28 +187,34 @@ namespace BnS_Multitool
             ChangeLog.Document.Blocks.Clear();
             await Task.Run(async () =>
             {
-                checkForUpdate();
-
-                while (onlineJson.CHANGELOG == null) { await Task.Delay(50); }
-                
-                foreach (var version in onlineJson.CHANGELOG)
-                    appendToChangelog(string.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));
-
-                if (!onlineUsersTimer.IsEnabled)
+                try
                 {
-                    /*
-                     * Generate a unique 'Fingerprint' for our user based off hardware
-                     * Used for creating a unique total user count
-                     * Store the unique ID in settings to speed up the process on next boot
-                     */
-                    if (SystemConfig.SYS.FINGERPRINT == null)
-                    {
-                        SystemConfig.SYS.FINGERPRINT = Security.FingerPrint.Value();
-                        SystemConfig.appendChangesToConfig();
-                    }
+                    checkForUpdate();
 
-                    onlineUsersTimer.IsEnabled = true;
-                    onlineUsers_Tick(sender, new EventArgs());
+                    while (onlineJson.CHANGELOG == null) { await Task.Delay(50); }
+
+                    foreach (var version in onlineJson.CHANGELOG)
+                        appendToChangelog(string.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));
+
+                    if (!onlineUsersTimer.IsEnabled)
+                    {
+                        /*
+                         * Generate a unique 'Fingerprint' for our user based off hardware
+                         * Used for creating a unique total user count
+                         * Store the unique ID in settings to speed up the process on next boot
+                         */
+                        if (SystemConfig.SYS.FINGERPRINT == null)
+                        {
+                            SystemConfig.SYS.FINGERPRINT = Security.FingerPrint.Value();
+                            SystemConfig.appendChangesToConfig();
+                        }
+
+                        onlineUsersTimer.IsEnabled = true;
+                        onlineUsers_Tick(sender, new EventArgs());
+                    }
+                } catch (Exception ex)
+                {
+                    appendToChangelog(ex.Message);
                 }
             });
         }

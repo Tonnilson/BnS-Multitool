@@ -24,7 +24,7 @@ UI.DamageMeter.Name.Player
 UI.DamageMeter.Name.Pc
 
 # challengemode stuff
-UI.ChallengeParty.*
+UI.ChallengeParty*
 
 # chat tab
 UI.Hypertext.*

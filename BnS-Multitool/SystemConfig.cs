@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
 using System.IO;
-using Gapotchenko.FX;
 
 namespace BnS_Multitool
 {
@@ -19,10 +18,12 @@ namespace BnS_Multitool
             {
                 SYS = new SYSConfig
                 {
-                    VERSION = "3.2.2",
+                    VERSION = MainWindow.FileVersion(),
                     FINGERPRINT = null,
                     ADDITIONAL_EFFECTS = 0,
                     PATCH_310 = 0,
+                    PATCH_321 = 1,
+                    PATCH_333 = 1,
                     BNS_DIR = "",
                     MAIN_UPKS = ihatemylife,
                     DELTA_PATCHING = 1,
@@ -44,7 +45,7 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Summoner",
                                 EFFECTS = new string[] { "00006660.upk", "00060554.upk", "00080169.upk" },
-                                ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk" }
+                                ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk", "00078884.upk" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -97,8 +98,8 @@ namespace BnS_Multitool
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Warlock",
-                                EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk" },
-                                ANIMATIONS = new string[] { "00023439.upk", "00056575.upk" }
+                                EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk", "00079415.upk", "00080679.upk" },
+                                ANIMATIONS = new string[] { "00023439.upk", "00056575.upk", "00080259.upk" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -125,6 +126,7 @@ namespace BnS_Multitool
                     string _JSON = File.ReadAllText(CONFIG_FILE);
                     SYS = JsonConvert.DeserializeObject<SYSConfig>(_JSON);
 
+                    bool changesToConfig = false;
                     //This whole section is for patching older clients, eventually will remove.
                     if (SYS.CLASSES == null)
                         SYS.CLASSES = new List<BNS_CLASS_STRUCT>() { };
@@ -132,6 +134,7 @@ namespace BnS_Multitool
                     //Hotfix
                     if(SYS.CLASSES.Count < 1)
                     {
+                        changesToConfig = true;
                         SYS.CLASSES = new List<BNS_CLASS_STRUCT>
                         {
                             new BNS_CLASS_STRUCT()
@@ -144,7 +147,7 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Summoner",
                                 EFFECTS = new string[] { "00006660.upk", "00060554.upk", "00080169.upk" },
-                                ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk" }
+                                ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk", "00078884.upk" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -197,8 +200,8 @@ namespace BnS_Multitool
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Warlock",
-                                EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk" },
-                                ANIMATIONS = new string[] { "00023439.upk", "00056575.upk" }
+                                EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk", "00079415.upk", "00080679.upk" },
+                                ANIMATIONS = new string[] { "00023439.upk", "00056575.upk", "00080259.upk" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -215,19 +218,33 @@ namespace BnS_Multitool
                         };
                     }
                     
-                    if(SYS.PATCH_321 == 0)
+                    if(SYS.PATCH_329 == 0)
                     {
+                        changesToConfig = true;
                         int ind = SYS.CLASSES.FindIndex(x => x.CLASS == "Summoner");
                         if (ind != -1)
                         {
                             SYS.CLASSES[ind].EFFECTS = new string[] { "00006660.upk", "00060554.upk", "00080169.upk" };
-                            SYS.CLASSES[ind].ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk" };
-                            SYS.PATCH_321 = 1;
+                            SYS.CLASSES[ind].ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk", "00078884.upk" };
+                            SYS.PATCH_329 = 1;
                         }
                     }
 
-                    if(SYS.PATCH_310 == 0)
+                    if (SYS.PATCH_333 == 0)
                     {
+                        changesToConfig = true;
+                        int ind = SYS.CLASSES.FindIndex(x => x.CLASS == "Warlock");
+                        if (ind != -1)
+                        {
+                            SYS.CLASSES[ind].EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk", "00079415.upk", "00080679.upk" };
+                            SYS.CLASSES[ind].ANIMATIONS = new string[] { "00023439.upk", "00056575.upk", "00080259.upk" };
+                            SYS.PATCH_333 = 1;
+                        }
+                    }
+
+                    if (SYS.PATCH_310 == 0)
+                    {
+                        changesToConfig = true;
                         int ind = SYS.CLASSES.FindIndex(x => x.CLASS == "Bladedancer");
                         if(ind != -1)
                         {
@@ -236,18 +253,11 @@ namespace BnS_Multitool
                         }
                         SYS.PING_CHECK = 1;
                         SYS.DELTA_PATCHING = 1;
-
-                        //Patch use-ingame-login.xml with KR entry and syntax fix.
-                        string xml_path = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "patches", "use-ingame-login.xml");
-
-                        if (File.Exists(xml_path))
-                        {
-                            File.Delete(xml_path);
-                            File.WriteAllText(xml_path, Properties.Resources.use_ingame_login);
-                        }
                     }
+                    
+                    if(changesToConfig)
+                        appendChangesToConfig();
 
-                    appendChangesToConfig();
                 } catch (Exception)
                 {
                     var dialog = new ErrorPrompt("There was an error reading the config file: settings.json\rIf error persists delete settings.json or check for syntax errors.");
@@ -259,8 +269,15 @@ namespace BnS_Multitool
 
         public static void appendChangesToConfig()
         {
-            string json = JsonConvert.SerializeObject(SYS, Formatting.Indented);
-            File.WriteAllText(CONFIG_FILE, json);
+            try
+            {
+                string json = JsonConvert.SerializeObject(SYS, Formatting.Indented);
+                File.WriteAllText(CONFIG_FILE, json);
+            } catch (Exception ex)
+            {
+                var dialog = new ErrorPrompt(ex.Message);
+                dialog.ShowDialog();
+            }
         }
 
         public static bool DoesClassExist(string element)
@@ -275,6 +292,8 @@ namespace BnS_Multitool
             public int ADDITIONAL_EFFECTS { get; set; }
             public int PATCH_310 { get; set; }
             public int PATCH_321 { get; set; }
+            public int PATCH_329 { get; set; }
+            public int PATCH_333 { get; set; }
             public int UPDATER_THREADS { get; set; }
             public int NEW_GAME_OPTION { get; set; }
             public int MINIMZE_ACTION { get; set; }

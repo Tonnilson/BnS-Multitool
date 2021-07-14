@@ -78,7 +78,7 @@ namespace BnS_Multi_Tool_Updater
                 LocalVersion.Content = "Local: " + SYS.VERSION;
 
                 WebClient client = new WebClient();
-                var json = client.DownloadString("http://tonic.pw/files/bnsmultitool/version.json");
+                var json = client.DownloadString("http://multitool.tonic.pw/version.json");
                 onlineJson = JsonConvert.DeserializeObject<WEB_VERSION_CLASS>(json);
             }
             catch (Exception) { }
@@ -127,7 +127,7 @@ namespace BnS_Multi_Tool_Updater
                     WebClient client = new WebClient();
                     client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DL_PROGRESS_CHANGED);
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(DL_COMPLETED);
-                    client.DownloadFileAsync(new Uri("http://tonic.pw/files/bnsmultitool/BnS-Multi-Tool.exe.dlt"), "BnS-Multi-Tool.exe.dlt");
+                    client.DownloadFileAsync(new Uri(String.Format("http://multitool.tonic.pw/update/{0}/BnS-Multi-Tool.exe.dlt", onlineJson.VERSION.Replace(".",""))), "BnS-Multi-Tool.exe.dlt");
 
                     await downloadComplete.Task;
 
@@ -136,11 +136,22 @@ namespace BnS_Multi_Tool_Updater
                         downloadingLbl.Content = "Patching....";
                     }));
 
-                    using (FileStream original = File.OpenRead("BnS-Multi-Tool.exe"))
-                    using (FileStream patch = File.OpenRead("BnS-Multi-Tool.exe.dlt"))
-                    using (FileStream target = File.Open("BnS-Multi-Tool-New.exe", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                    try
                     {
-                        VcdiffDecoder.Decode(original, patch, target);
+                        using (FileStream original = File.OpenRead("BnS-Multi-Tool.exe"))
+                        using (FileStream patch = File.OpenRead("BnS-Multi-Tool.exe.dlt"))
+                        using (FileStream target = File.Open("BnS-Multi-Tool-New.exe", FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                        {
+                            VcdiffDecoder.Decode(original, patch, target);
+                        }
+                    } catch (Exception)
+                    {
+                        if (File.Exists("BnS-Multi-Tool-New.exe"))
+                            File.Delete("BnS-Multi-Tool-New.exe");
+                        downloadComplete = new TaskCompletionSource<bool>();
+                        client.DownloadFileAsync(new Uri(String.Format("http://multitool.tonic.pw/update/{0}/BnS-Multi-Tool.exe", onlineJson.VERSION.Replace(".", ""))), "BnS-Multi-Tool-New.exe");
+
+                        await downloadComplete.Task;
                     }
 
                     await Task.Delay(1000);
@@ -152,7 +163,34 @@ namespace BnS_Multi_Tool_Updater
                         downloadingLbl.Content = "Verifying....";
                     }));
 
-                    await Task.Delay(1000);
+                    await Task.Delay(600);
+
+                    if(localHash != onlineJson.HASH)
+                    {
+                        try
+                        {
+                            await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
+                            {
+                                downloadingLbl.Content = "Retrying...";
+                            }));
+
+                            if (File.Exists("BnS-Multi-Tool-New.exe"))
+                                File.Delete("BnS-Multi-Tool-New.exe");
+                            downloadComplete = new TaskCompletionSource<bool>();
+                            client.DownloadFileAsync(new Uri(String.Format("http://multitool.tonic.pw/update/{0}/BnS-Multi-Tool.exe", onlineJson.VERSION.Replace(".", ""))), "BnS-Multi-Tool-New.exe");
+
+                            await downloadComplete.Task;
+                        } catch (Exception) { }
+                        localHash = CalculateMD5("BnS-Multi-Tool-New.exe");
+
+                        await downloadingLbl.Dispatcher.BeginInvoke(new Action(() =>
+                        {
+                            downloadingLbl.Content = "Verifying....";
+                        }));
+                        await Task.Delay(600);
+                    }
+
+
                     if (localHash == onlineJson.HASH)
                     {
                         string jsonString = File.ReadAllText("settings.json");
@@ -215,7 +253,7 @@ namespace BnS_Multi_Tool_Updater
                 //ProgressGrid.Visibility = Visibility.Hidden;
                 ProgressControl.Value = 0;
                 downloadingLbl.Content = "Incorrect Hash";
-                MessageBox.Show("Are you sure the multi tool is closed and an anti-virus is not blocking the download? You can try again", "Failed to update");
+                MessageBox.Show("Initial update failed, you can try again for a full download. If it fails again download manually from website.", "Failed to update");
                 downloadFull.Visibility = Visibility.Visible;
                 downloadBtn.Visibility = Visibility.Hidden;
             }
@@ -274,7 +312,7 @@ namespace BnS_Multi_Tool_Updater
 
                     client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DL_PROGRESS_CHANGED);
                     client.DownloadFileCompleted += new AsyncCompletedEventHandler(DL_COMPLETED);
-                    client.DownloadFileAsync(new Uri("http://tonic.pw/files/bnsmultitool/BnS-Multi-Tool.exe"), "BnS-Multi-Tool-New.exe");
+                    client.DownloadFileAsync(new Uri(String.Format("http://multitool.tonic.pw/update/{0}/BnS-Multi-Tool.exe.dlt", onlineJson.VERSION.Replace(".", ""))), "BnS-Multi-Tool-New.exe");
 
                     await downloadComplete.Task;
                     await Task.Delay(1000);

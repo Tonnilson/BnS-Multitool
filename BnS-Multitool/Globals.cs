@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace BnS_Multitool
 {
@@ -15,13 +13,28 @@ namespace BnS_Multitool
         public static bool loginAvailable;
         private static string loginServer;
         private static string loginServerVar;
+        public static string MAIN_SERVER_ADDR = @"http://multitool.tonic.pw/";
+
+        public class BnS_Servers
+        {
+            public string region { get; set; }
+            public List<BnS_Server_Details> info { get; set; }
+        }
+
+        public class BnS_Server_Details
+        {
+            public string loginServer { get; set; }
+            public string loginVar { get; set; }
+            public string CDN { get; set; }
+        }
 
         public enum BnS_Region
         {
             NA,
             EU,
             TW,
-            KR
+            KR,
+            TEST
         }
 
         private static void refreshServerVar()
@@ -30,11 +43,15 @@ namespace BnS_Multitool
             {
                 case BnS_Region.KR:
                     loginServer = "up4svr.ncupdate.com";
-                    loginServerVar = "BNS_KOR";
+                    loginServerVar = "BNS_LIVE";
                     break;
                 case BnS_Region.TW:
                     loginServer = "up4svr.plaync.com.tw";
                     loginServerVar = "BnS";
+                    break;
+                case BnS_Region.TEST:
+                    loginServer = "up4svr.plaync.com";
+                    loginServerVar = "BNS_KOR_TEST";
                     break;
                 default:
                     loginServer = "updater.nclauncher.ncsoft.com";

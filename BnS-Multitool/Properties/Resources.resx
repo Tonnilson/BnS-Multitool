@@ -121,6 +121,9 @@
   <data name="AppIcon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\favicon.ico;System.Drawing.Icon, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="AutoIdSearchNotSupported" xml:space="preserve">
+    <value />
+  </data>
   <data name="BnS_Multi_Tool_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\BnS-Multi-Tool-Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
@@ -139,7 +142,7 @@
   <data name="playable_ncwest" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\playable_ncwest.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>
-  <data name="use_ingame_login" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\Resources\use-ingame-login.xml;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
+  <data name="translate" xml:space="preserve">
+    <value />
   </data>
 </root>

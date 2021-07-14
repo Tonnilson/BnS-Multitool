@@ -213,10 +213,10 @@
                     <Separator Background="#FF353D4C" Margin="0,64,0,395"/>
                     <Label Background="#FF282C36" Margin="0,78,0,48"/>
                     <Separator Background="#FF353D4C" Margin="3,434,-2,45"/>
-                    <Separator Background="#FF353D4C" Margin="0,203,1,276"/>
-                    <Label Content="Game Updater" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,96,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
-                    <Label Content="Updater threads" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,131,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
-                    <ComboBox x:Name="lstBoxUpdaterThreads" Margin="176,131,285,328" FontWeight="Bold" FontSize="14">
+                    <Separator Background="#FF353D4C" Margin="0,188,1,291"/>
+                    <Label Content="Game Updater" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,86,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
+                    <Label Content="Updater threads" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,121,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxUpdaterThreads" Margin="176,121,285,338" FontWeight="Bold" FontSize="14">
                         <ComboBoxItem>4</ComboBoxItem>
                         <ComboBoxItem>5</ComboBoxItem>
                         <ComboBoxItem>6</ComboBoxItem>
@@ -225,28 +225,29 @@
                         <ComboBoxItem>9</ComboBoxItem>
                         <ComboBoxItem>10</ComboBoxItem>
                     </ComboBox>
-                    <Label Content="Delta Patching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,164,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
-                    <CheckBox x:Name="DeltaPatching_Checkbox" Content="" Margin="176,170,318,294" Foreground="White" />
-                    <CheckBox x:Name="PingCheckTick" Content="" Margin="176,339,318,125" Foreground="White" />
-                    <Label Content="Starting new game" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,258,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold" Height="28" Width="147"/>
-                    <ComboBox x:Name="lstBoxNewGame" Margin="172,258,144,200" FontWeight="Bold">
+                    <Label Content="Delta Patching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,154,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
+                    <CheckBox x:Name="DeltaPatching_Checkbox" Content="" Margin="176,160,318,304" Foreground="White" />
+                    <CheckBox x:Name="PingCheckTick" Content="" Margin="176,318,318,146" Foreground="White" />
+                    <Label Content="Starting new game" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,237,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold" Height="28" Width="147"/>
+                    <ComboBox x:Name="lstBoxNewGame" Margin="172,237,144,221" FontWeight="Bold">
                         <ComboBoxItem>Nothing</ComboBoxItem>
                         <ComboBoxItem>Minimize launcher</ComboBoxItem>
                         <ComboBoxItem>Minimize to system tray</ComboBoxItem>
                         <ComboBoxItem>Close launcher</ComboBoxItem>
                     </ComboBox>
-                    <Label Content="When clicking [ - ]" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,297,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
-                    <ComboBox x:Name="lstBoxLauncherX" Margin="172,297,144,159" FontWeight="Bold">
+                    <Label Content="When clicking [ - ]" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,276,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxLauncherX" Margin="172,276,144,180" FontWeight="Bold">
                         <ComboBoxItem>Minimize launcher</ComboBoxItem>
                         <ComboBoxItem>Minimize to system tray</ComboBoxItem>
                     </ComboBox>
-                    <Label Content="Enable Ping Check" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,336,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
-                    <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="38,402,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
+                    <Label Content="Enable Ping Check" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,315,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                    <Button Content="Remove Compatibility Options" FontWeight="Bold" Click="CompatibilityOptions_Click" Margin="38,346,285,109" />
+                    <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="38,406,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
                     <Button Margin="396,446,10,10" Content="Close" FontWeight="Bold" Click="SettingsCancel" />
-                    <Label Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,218,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
-                    <Button Margin="396,402,34,58" Content="Browse" FontWeight="Bold" Click="SettingsBrowse" />
+                    <Label Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,197,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
+                    <Button Margin="396,406,34,54" Content="Browse" FontWeight="Bold" Click="SettingsBrowse" />
                     <Button Margin="276,446,130,10" Content="Confirm" FontWeight="Bold" Click="SaveSettings" />
-                    <Label Content="Blade &amp; Soul Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,373,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+                    <Label Content="Blade &amp; Soul Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,377,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
                 </Grid>
             </Border>
         </Grid>

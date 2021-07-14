@@ -40,6 +40,7 @@
             <GroupBox Header="Login Helper" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="10,315,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
                     <TextBlock TextWrapping="WrapWithOverflow" Text="What is loginhelper? Login helper is used to automatically log in and submit a pin. This is required to use the launcher." Foreground="#FF68D349"/>
+                    <Button Visibility="Hidden" x:Name="del_loginhelper" FontFamily="Segoe UI Symbol" Content="&#xe106; Uninstall" Margin="211,36,10,66" Click="deletePlugin" Foreground="White"/>
                     <Button x:Name="LOGINHELPER_INSTALL" FontFamily="Segoe UI Symbol" Width="76" Content="Install &#xE118;" Margin="211,58,10,24" Click="installLoginHelperClick"/>
                     <Label x:Name="loginhelperLocalLbl" Content="Current: Not Installed" Margin="4,50,91,45" Background="{x:Null}" Foreground="White" FontSize="16" />
                     <Label x:Name="loginhelperOnlineLbl" Content="Online: Fetching...." Margin="4,76,91,17" Background="{x:Null}" Foreground="White" FontSize="16" />
@@ -60,7 +61,13 @@
             </GroupBox>
             <GroupBox Header="Active Processes" BorderThickness="0.2" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="309" Margin="341,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <ListBox Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" x:Name="ProcessInfo" Margin="4,6,6,32" MouseDoubleClick="ActiveProcessesDblClick"/>
+                    <ListBox Background="#FF1E2021" BorderBrush="{x:Null}" ItemsSource="{Binding ActiveClientList}" Foreground="White" FontFamily="Arial" FontWeight="Bold" x:Name="ProcessInfo" Margin="4,6,6,0" MouseDoubleClick="ActiveProcessesDblClick" Height="141" VerticalAlignment="Top">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DisplayName}"/>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
                     <Button x:Name="KillAll_Btn" Margin="113,152,108,3" Width="76" Content="Kill All" Click="KillAllProcs"/>
                 </Grid>
             </GroupBox>
@@ -97,6 +104,7 @@
             <GroupBox Header="Character Select" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="341,315,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
                     <TextBlock TextWrapping="WrapWithOverflow" Text="Character select lets you quickly log into a character of your choice. This is optional and not required." Foreground="#FF68D349"/>
+                    <Button Visibility="Hidden" x:Name="del_charselect" FontFamily="Segoe UI Symbol" Content="&#xe106; Uninstall" Margin="211,36,10,66" Click="deletePlugin" Foreground="White"/>
                     <Button x:Name="CHARSELECT_INSTALL" FontFamily="Segoe UI Symbol" Width="76" Content="Install &#xE118;" Margin="211,58,10,24" Click="installLoginHelperClick"/>
                     <Label x:Name="charSelectLocalLbl" Content="Current: Not Installed" Margin="4,50,91,45" Background="{x:Null}" Foreground="White" FontSize="16" />
                     <Label x:Name="charSelectOnlineLbl" Content="Online: Fetching...." Margin="4,76,91,17" Background="{x:Null}" Foreground="White" FontSize="16" />
@@ -124,17 +132,169 @@
                             <ComboBoxItem>KOREAN</ComboBoxItem>
                         </ComboBox>
                         <Label Content="LANGUAGE" Foreground="White" FontSize="16" Margin="10,310,427,116" FontWeight="Bold" />
-                        <CheckBox x:Name="NOTEXTURE_STREAMING" Content="No Texture Streaming" Margin="25,363,337,71" Foreground="White" Click="launchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold" />
-                        <CheckBox x:Name="USE_ALL_CORES" Content="Use All Cores" Background="White" Foreground="White" Margin="25,341,382,93" Click="launchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold" />
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useAutoBait" Content="All fishing bait auto" Margin="298,112,53,324" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="enableGCD" Content="Enabled" Margin="206,76,256,360" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useItemCap" Content="Raise received items cap" Margin="298,135,53,301" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useMarketplace" Content="Marketplace Anywhere" Margin="298,158,53,278" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="AutoCombat" Content="Auto Combat Anywhere" Margin="298,181,53,255" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useNoCameraLock" Content="Remove Camera Lock" Margin="298,204,53,232" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="autocombatrangeTOS" Content="Custom Auto Combat Range" Margin="298,227,53,209" Foreground="White" FontWeight="Bold" FontFamily="Arial"/>
-                        <Label Content="Range:           m" Margin="353,247,17,183" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                        <TextBox HorizontalContentAlignment="Center" x:Name="autoCombatRange" Text="30" Margin="403,251,108,188" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" PreviewTextInput="isNumericInput" LostFocus="autoCombatRange_LostFocus" FontFamily="Arial" FontWeight="Bold"/>
+                        <CheckBox x:Name="NOTEXTURE_STREAMING" Content="No Texture Streaming" Margin="25,363,337,71" Foreground="White" Click="launchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">No Texture Streaming</TextBlock>
+                                    <TextBlock>
+                                       Disables texture streaming, highest quality textures are always loaded.
+                                        <LineBreak/>
+                                        Recommended for 64-bit Client but not 32-bit client, could cause crashing on 32-bit.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="AUTOPATCH_QOL" Content="Disable auto patching QoL" Margin="25,385,337,49" Foreground="White" Click="launchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Disable auto patching QoL</TextBlock>
+                                    <TextBlock>
+                                       Checking this will disable the auto-patching feature of quality of life plugin.
+                                        <LineBreak/>
+                                        Should be left unchecked to make sure the plugin is always up-to-date.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="useDebug" Content="Enable Debug Mode" Margin="25,407,337,27" Foreground="White" Click="launchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Enable Debug Console</TextBlock>
+                                    <TextBlock>
+                                        When enabled a console window will appear with each new game client, console window will outprint various text being
+                                       <LineBreak/>
+                                        outputted by the game or plugins.
+                                        <LineBreak/>
+                                        <LineBreak/>
+                                        Multi-tool QoL plugin when GCD is enabled will outprint current Skill ID, GCD and modified GCD for each skill being used.
+                                        <LineBreak/>
+                                        Simple way to get Skill ID's
+                                        without pulling the game apart or other methods.
+                                        <LineBreak/>
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Should be left unchecked for normal gameplay experience" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="USE_ALL_CORES" Content="Use All Cores" Background="White" Foreground="White" Margin="25,341,382,93" Click="launchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Use All Cores</TextBlock>
+                                    <TextBlock>
+                                       Force the use of all available cores on platform
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useAutoBait" Content="All fishing bait auto" Margin="298,106,53,330" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">All Fishing bait auto</TextBlock>
+                                    <TextBlock>
+                                       Turns all fishing bait into auto-bait.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="enableGCD" Content="Enabled" Margin="206,76,256,360" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Enable GCD</TextBlock>
+                                    <TextBlock>
+                                       Determines whether or not to hook functions related to GCD on launch.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useItemCap" Content="Raise received items cap" Margin="298,128,53,308" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Raise received items cap</TextBlock>
+                                    <TextBlock>
+                                       Raises the cap for retrieving items from received items from 100 to 10,000
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useMarketplace" Content="Marketplace Anywhere" Margin="298,150,53,286" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Marketplace Anywhere</TextBlock>
+                                    <TextBlock>
+                                       Enables the use of Marketplace (F5) in areas restricted (Arena/Battlegrounds/Cross server).
+                                        <LineBreak/>
+                                        Only able to view items, cannot list or buy.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="AutoCombat" Content="Auto Combat Anywhere" Margin="298,172,53,264" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Auto Combat Anywhere</TextBlock>
+                                    <TextBlock>
+                                       Enables Auto-combat for all zones
+                                    </TextBlock>
+                                    <TextBlock FontWeight="Bold" Foreground="Red">
+                                        WARNING: Using auto combat in public areas where it is usually not available could lead to player reports -> ban.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useNoCameraLock" Content="Remove Camera Lock" Margin="298,194,53,242" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Remove Camera Lock</TextBlock>
+                                    <TextBlock>
+                                       Removes camera lock from skills that would otherwise lock your camera. Skills that lock your character in place are not effected by this.
+                                        <LineBreak/>
+                                        Example: Astromancer stormweaver spec skills (2/3/4) lock your camera, preventing you from turning.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="useNoWallRunStamina" Content="Infinite Wall Run" Margin="298,216,53,220" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Infinite Wall Run</TextBlock>
+                                    <TextBlock>
+                                       Removes stamina consumption while wall running.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="launchInfoCheckStateChanged" x:Name="autocombatrangeTOS" Content="Custom Auto Combat Range" Margin="298,238,53,198" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Custom Auto-combat Range</TextBlock>
+                                    <TextBlock>
+                                       Allows you to adjust the maximum search range for targets. By default this is 30m.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <Label Content="Range:           m" Margin="353,257,17,173" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
+                        <TextBox HorizontalContentAlignment="Center" x:Name="autoCombatRange" Text="30" Margin="403,261,108,178" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" PreviewTextInput="isNumericInput" LostFocus="autoCombatRange_LostFocus" FontFamily="Arial" FontWeight="Bold"/>
                         <StackPanel Orientation="Horizontal" Margin="270,95,269,38">
                             <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="#FF3A4253" Width="12" Margin="2,8,2,137"/>
                         </StackPanel>
@@ -171,9 +331,10 @@
                                 </Style>
                             </DataGrid.Resources>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Skill ID" Binding="{Binding skillID}" Width="*"/>
-                                <DataGridTextColumn Header="Value" Binding="{Binding skillvalue}" Width="70"/>
-                                <DataGridTextColumn Header="Mode" Binding="{Binding mode}" Width="50"/>
+                                <DataGridTextColumn Header="Skill ID" Binding="{Binding skillID}" Width="65"/>
+                                <DataGridTextColumn Header="Value" Binding="{Binding skillvalue}" Width="*"/>
+                                <DataGridTextColumn Header="Mode" Binding="{Binding mode}" Width="*"/>
+                                <DataGridTextColumn Header="Description" Binding="{Binding description}" Width="100"/>
                             </DataGrid.Columns>
                         </DataGrid>
                         <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content="(&#xE11B;) Custom Skills GCD" BorderBrush="{x:Null}" Click="ShowGcdInfo" FontSize="18" Margin="3,70,343,353" FontWeight="Bold"/>
@@ -208,7 +369,7 @@
                             <LineBreak/>
                             <LineBreak/>
                         </TextBlock>
-                        <TextBlock TextWrapping="Wrap" Foreground="#FFFFEC32" FontFamily="Arial" FontSize="16" Margin="10,377,0,10" FontWeight="Bold">If you have issues with GCD not working on 64-bit, there is a compatibility issue with dx12 mod, for whatever reason it prevents the plugin from hooking the function.</TextBlock>
+                        <TextBlock TextWrapping="Wrap" Foreground="#FFFFEC32" FontFamily="Arial" FontSize="16" Margin="10,377,0,10" FontWeight="Bold">You can delete rows by selecting and pressing the delete key on your keyboard, additionally you can insert new rows with F2 outside of double clicking. You can use P in-game (Character Menu) to reload the GCD values</TextBlock>
                     </Grid>
                 </Grid>
             </Border>

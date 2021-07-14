@@ -78,7 +78,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Content="Local Dat" Margin="483,187,51,276" FontFamily="Arial Black" FontSize="16" Click="OpenLocalDatEditorr" RenderTransformOrigin="0.5,0.753"/>
+            <Button Content="Local Dat" Margin="483,187,51,276" FontFamily="Arial Black" FontSize="16" Click="OpenLocalDatEditor" RenderTransformOrigin="0.5,0.753"/>
         </Grid>
         <Grid x:Name="LocalDatGrid" Visibility="Hidden">
             <Label Content="Filter Name:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="0,20,512,432"/>
@@ -101,9 +101,22 @@
             <Button Content="&#xe10a;" Margin="622,453,8,10" FontFamily="Segoe UI Symbol" FontSize="16" FontWeight="Bold" Click="CloseLocalDat"/>
             <CheckBox x:Name="patch32bit" Content="Patch 32-bit" Margin="509,402,21,68" Foreground="White" FontFamily="Arial" FontWeight="Bold" Click="PatchBit"/>
             <CheckBox x:Name="patch64bit" Content="Patch 64-bit" Margin="509,428,21,42" FontFamily="Arial" FontWeight="Bold" Foreground="White" Click="PatchBit"/>
-            <Label Content="Sigbypasser" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="470,223,10,229"/>
-            <Button x:Name="InstallSigBypasser" Content="Install" Margin="477,291,98,172" FontFamily="Arial" FontSize="16" Click="InstallSigbypasser" FontWeight="Bold"/>
-            <Label x:Name="sigbypasserLabel" Content="Installed: Not Installed" Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="470,262,10,204" FontSize="14"/>
+            <Label Content="Sigbypasser" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="470,223,10,229">
+                <Label.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">SigBypasser</TextBlock>
+                        <TextBlock>
+                         SigBypasser is required to run a modified local.dat, if this is not installed all
+                          <LineBreak/>
+                            of the text will be missing from the game.
+                        </TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </Label.ToolTip>
+            </Label>
+            <Button x:Name="InstallSigBypasser" Content="Install" Margin="477,310,98,153" FontFamily="Arial" FontSize="16" Click="InstallSigbypasser" FontWeight="Bold"/>
+            <Label x:Name="sigbypasserLabel" Content="Installed: Not Installed" Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="470,262,10,203" FontSize="14"/>
+            <Label x:Name="SigBypasserrOnlineLbl" Content="Online: Fetching.." Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="470,284,10,180" FontSize="14"/>
         </Grid>
         <Grid x:Name="PatchProgress" Visibility="Hidden">
             <Label Background="Black" Opacity="0.7"/>

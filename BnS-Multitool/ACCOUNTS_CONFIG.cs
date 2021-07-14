@@ -25,6 +25,7 @@ namespace BnS_Multitool
                     CLIENT_BIT = 0,
                     LANGUAGE = 0,
                     SELECT_LAST_CHAR = 0,
+                    AUTPATCH_QOL = 0,
                     MEMORY_CLEANER = 0,
                     ADDITIONAL_PARAMS = "",
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
@@ -40,7 +41,7 @@ namespace BnS_Multitool
                     string _JSON = File.ReadAllText(CONFIG_FILE);
                     ACCOUNTS = JsonConvert.DeserializeObject<ACCOUNTS_CONFIG>(_JSON);
 
-                    appendChangesToConfig();
+                    //appendChangesToConfig();
                 } catch (Exception)
                 {
                     var dialog = new ErrorPrompt("There was an error reading the config file: accounts.json\rIf error persists delete accounts.json or check for syntax errors.");
@@ -73,6 +74,7 @@ namespace BnS_Multitool
             public int LANGUAGE { get; set; }
             public int SELECT_LAST_CHAR { get; set; }
             public int MEMORY_CLEANER { get; set; }
+            public int AUTPATCH_QOL { get; set; }
             public string ADDITIONAL_PARAMS { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
         }

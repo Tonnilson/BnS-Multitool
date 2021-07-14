@@ -120,9 +120,15 @@ namespace BnS_Multitool
                 }
 
                 if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
-                    File.WriteAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"), Properties.Resources.multitool_qol);
+                {
+                    using (StreamWriter output = File.CreateText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
+                        output.Write(Properties.Resources.multitool_qol);
+                }
 
                 qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+
+                ToolTipService.ShowDurationProperty.OverrideMetadata(
+                    typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
             }
             catch (Exception) { }
 
@@ -185,6 +191,14 @@ namespace BnS_Multitool
             DeltaPatching_Checkbox.IsChecked = (SystemConfig.SYS.DELTA_PATCHING == 1) ? true : false;
             PingCheckTick.IsChecked = (SystemConfig.SYS.PING_CHECK == 1) ? true : false;
             BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
+
+            //Cheap lazy fix because I'm done really doing anything with this.
+            if(SystemConfig.SYS.patch64 == 0)
+            {
+                SystemConfig.SYS.patch64 = 1;
+                SystemConfig.SYS.patch32 = 1;
+                SystemConfig.appendChangesToConfig();
+            }
         }
 
         private void EXIT_BTN_Click(object sender, RoutedEventArgs e)
@@ -405,6 +419,28 @@ namespace BnS_Multitool
 
                 if (RESULT == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(FOLDER.SelectedPath))
                     BNS_LOCATION_BOX.Text = FOLDER.SelectedPath + ((FOLDER.SelectedPath.Last() != '\\') ? "\\" : "");
+            }
+        }
+
+        private void CompatibilityOptions_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                //Get rid of compatibility options on Client.exe for both bin & bin64
+                RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers", true);
+                var keys = key.GetValueNames().Where(x => x.Contains(@"bin\Client.exe") || x.Contains(@"bin64\Client.exe"));
+                foreach (var v in keys)
+                    key.DeleteValue(v);
+
+                key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers", true);
+                keys = key.GetValueNames().Where(x => x.Contains(@"bin\Client.exe") || x.Contains(@"bin64\Client.exe"));
+                foreach (var v in keys)
+                    key.DeleteValue(v);
+
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
             }
         }
     }

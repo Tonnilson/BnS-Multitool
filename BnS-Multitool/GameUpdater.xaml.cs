@@ -13,20 +13,23 @@ using System.ComponentModel;
 using System.Net;
 using MiscUtil.Compression.Vcdiff;
 using System.Windows.Media;
+using BnS_Multitool.Extensions;
+using System.Security.AccessControl;
+using System.Security.Principal;
+using Newtonsoft.Json;
 
 namespace BnS_Multitool
 {
     /// <summary>
     /// Interaction logic for GameUpdater.xaml
     /// </summary>
-    /// 
 
     public partial class GameUpdater : Page
     {
         private string localVersion;
         private string onlineVersion;
         private BackgroundWorker patchWorker = new BackgroundWorker();
-        private string BASE_URL = @"http://live.patcher.bladeandsoul.com/BnS/";
+        private string BASE_URL = @"http://d37ob46rk09il3.cloudfront.net/BnS/";
         private string BNS_PATH = SystemConfig.SYS.BNS_DIR;
         private long currentBytes = 0L;
         private long totalBytes = 0L;
@@ -41,14 +44,30 @@ namespace BnS_Multitool
             public string flag { get; set; }
         }
 
+        public enum PatchFile_FlagType
+        {
+            Unknown, // 0
+            UnChanged, // 1
+            Changed, // 2
+            ChangedDiff, // 3
+            ChangedOrigial, // 4
+            Added // 5
+        }
+
+        public class MultipartArchives
+        {
+            public string File { get; set; }
+            public string Directory { get; set; }
+            public List<string> Archives { get; set; }
+        }
+
         public GameUpdater()
         {
             InitializeComponent();
 
             patchWorker.DoWork += new DoWorkEventHandler(PatchGame);
             patchWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PatchGameFinished);
-
-            ServicePointManager.DefaultConnectionLimit = 30;
+            ServicePointManager.DefaultConnectionLimit = 30; //Raise the concurrent connection limit for WebClient
         }
 
         private void PatchGameFinished(object sender, RunWorkerCompletedEventArgs e)
@@ -107,6 +126,7 @@ namespace BnS_Multitool
             effectandanimations = effectandanimations.Concat(SystemConfig.SYS.MAIN_UPKS).ToArray();
 
             BnSInfoMap = new List<BnSFileInfo>();
+            List<MultipartArchives> partArchives = new List<MultipartArchives>();
 
             //We need to make sure the version difference is not greater than 1, if it is that's a whole mess I can't be bothered to code.
             bool canDeltaPatch = ((int.Parse(onlineVersion) - int.Parse(localVersion)) < 2) && SystemConfig.SYS.DELTA_PATCHING == 1 && onlineVersion != localVersion;
@@ -142,6 +162,9 @@ namespace BnS_Multitool
                 string configDat = (canDeltaPatch) ? PatchInfoStr : FileInfoStr;
 
                 List<string> InfoMapLines = File.ReadLines(Path.Combine(BNS_PATH, "PatchManager", onlineVersion, configDat)).ToList<string>();
+                List<string> local_hashes = File.ReadLines(Path.Combine(BNS_PATH, Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "FileInfoMap_*.dat").First()))
+                    .Where(x => Path.GetFileName(x.Split(new char[] { ':' })[0]).Contains("local")).ToList<string>();
+
                 int totalFiles = InfoMapLines.Count<string>();
                 int processedFiles = 0;
                 //long totalBytes = 0L;
@@ -171,14 +194,32 @@ namespace BnS_Multitool
 
                     if (canDeltaPatch)
                     {
-                        //Various checks to verify that local.dat is the original and not a modified dat.
-                        if (Path.GetFileName(currentFilePath).Contains("local") && fInfo.Length < 5000000)
+                        /*
+                         * Check for modified local*.dat file
+                         * If modified or not matching current local hash flag it
+                        */
+                        if(Path.GetFileName(currentFilePath).Contains("local") && fInfo.Exists && (PatchFile_FlagType)int.Parse(FileFlag) == PatchFile_FlagType.ChangedOrigial)
                         {
-                            FilePath = Path.Combine("Zip", FilePath.Substring(4, FilePath.Length - 4));
-                            FileFlag = "5";
+                            Debug.WriteLine("Checking {0}", currentFilePath);
+                            string localFileInfo = local_hashes.First(x => x.Split(new char[] { ':' })[0] == currentFilePath);
+                            string localHash = SHA1HASH(Path.Combine(BNS_PATH, currentFilePath));
+                            if(localHash != localFileInfo.Split(new char[] { ':' })[2])
+                            {
+                                FilePath = Path.Combine("Zip", FilePath.Substring(4, FilePath.Length - 4));
+                                FileFlag = "5";
+                                Debug.WriteLine("File: {0}", FilePath);
+                            }
+                        } else if (Path.GetFileName(currentFilePath).Contains("local") && (PatchFile_FlagType)int.Parse(FileFlag) == PatchFile_FlagType.ChangedDiff)
+                        {
+                            string localFileInfo = local_hashes.First(x => x.Split(new char[] { ':' })[0] == currentFilePath);
+                            string localHash = SHA1HASH(Path.Combine(BNS_PATH, currentFilePath));
+                            if (localHash != localFileInfo.Split(new char[] { ':' })[2])
+                                FileFlag = "0";
                         }
 
-                        if (FileFlag == "3")
+                        //181\contents\Local\NCWEST\ENGLISH\data\local.dat.dlt.zip:15709460:e4e70b66a7f28f899d9b9bfa0cf3bbcbb8d44e4f:3
+                        //Zip\contents\Local\NCWEST\ENGLISH\data\local.dat.zip:16323936:3ec45a6e1004ea7a70878f540adb7bda60b2346b:4
+                        if ((PatchFile_FlagType)int.Parse(FileFlag) == PatchFile_FlagType.ChangedDiff)
                         {
                             if (!Directory.Exists(Path.GetDirectoryName(Path.Combine(BNS_PATH, "PatchManager", onlineVersion, FilePath))))
                                 Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(BNS_PATH, "PatchManager", onlineVersion, FilePath)));
@@ -189,7 +230,7 @@ namespace BnS_Multitool
                                 Interlocked.Add(ref totalBytes, long.Parse(FileSize));
                             }
                         }
-                        else if (FileFlag == "5")
+                        else if ((PatchFile_FlagType)int.Parse(FileFlag) == PatchFile_FlagType.Added)
                         {
                             if (!Directory.Exists(Path.GetDirectoryName(Path.Combine(BNS_PATH, "PatchManager", onlineVersion, FilePath))))
                                 Directory.CreateDirectory(Path.GetDirectoryName(Path.Combine(BNS_PATH, "PatchManager", onlineVersion, FilePath)));
@@ -209,11 +250,7 @@ namespace BnS_Multitool
                             //Make sure the directory is not the web font directory, for whatever reason this is read-only
                             if (!FilePath.Contains(@"\web"))
                             {
-                                if (fInfo.Length.ToString() != FileSize)
-                                {
-                                    BnSInfoMap.Add(new BnSFileInfo() { path = FilePath, size = FileSize, hash = FileHash, flag = FileFlag });
-                                    Interlocked.Add(ref totalBytes, long.Parse(FileSize));
-                                } else if (FileHash != SHA1HASH(Path.Combine(BNS_PATH, currentFilePath)))
+                                if (FileHash != SHA1HASH(Path.Combine(BNS_PATH, currentFilePath)))
                                 {
                                     BnSInfoMap.Add(new BnSFileInfo() { path = FilePath, size = FileSize, hash = FileHash, flag = FileFlag });
                                     Interlocked.Add(ref totalBytes, long.Parse(FileSize));
@@ -235,7 +272,7 @@ namespace BnS_Multitool
                     }
                 });
 
-                Debug.WriteLine(String.Format("Download Size: {0} ({1}) files", SizeSuffix(totalBytes, 2), BnSInfoMap.Count()));
+                //Debug.WriteLine(String.Format("Download Size: {0} ({1}) files", SizeSuffix(totalBytes, 2), BnSInfoMap.Count()));
                 Dispatchers.textBlock(ProgressBlock, String.Format("Download Size: {0} ({1}) files", SizeSuffix(totalBytes, 2), BnSInfoMap.Count()));
 
                 totalFiles = BnSInfoMap.Count();
@@ -243,8 +280,8 @@ namespace BnS_Multitool
                 PatchingLabel.Dispatcher.BeginInvoke(new Action(() => { PatchingLabel.Visibility = Visibility.Visible; }));
 
                 FilesProcessed(0);
-
                 Dispatchers.labelContent(PatchingLabel, "Downloading...");
+                Thread.Sleep(2000); //Create some slack for our progress bar to reset fully (visual).
 
                 Parallel.ForEach<BnSFileInfo>(BnSInfoMap, new ParallelOptions { MaxDegreeOfParallelism = threadCount }, delegate (BnSFileInfo file)
                 {
@@ -273,10 +310,10 @@ namespace BnS_Multitool
                             File.Delete(fpath);
 
                         downloadComplete = new TaskCompletionSource<bool>();
-                        if(DownloadContents(String.Format(@"{0}{1}/Patch/{2}", BASE_URL, onlineVersion, (canDeltaPatch) ? file.path : @"/Zip/" + file.path + ".zip"), fpath))
-                            processedFiles++;
+                        if(DownloadContents(String.Format(@"{0}{1}/Patch/{2}", BASE_URL, onlineVersion, (canDeltaPatch) ? file.path : @"Zip/" + file.path + ".zip"), fpath))
+                            Interlocked.Increment(ref processedFiles);
 
-                        Debug.WriteLine("{0}", file.path);
+                        //Debug.WriteLine("{0}", file.path);
                         FilesProcessed((int)((double)processedFiles / totalFiles * 100));
 
                     }
@@ -317,17 +354,6 @@ namespace BnS_Multitool
                                 fInfo = new FileInfo(Path.Combine(BNS_PATH, currentFilePath));
                         }
 
-                        //Various checks to verify that local.dat is the original and not a modified dat.
-                        if (file.flag == "3" && Path.GetFileName(currentFilePath).Contains("local") && fInfo.Length < 5000000)
-                        {
-                            if (File.Exists(Path.Combine(Path.GetDirectoryName(currentFilePath), Path.GetFileName(currentFilePath) + ".bk")))
-                            {
-                                Debug.WriteLine("Local dat detected, changing to bk");
-                                currentFilePath = Path.Combine(Path.GetDirectoryName(currentFilePath), Path.GetFileName(currentFilePath) + ".bk");
-                                fInfo = new FileInfo(Path.Combine(BNS_PATH, currentFilePath));
-                            }
-                        }
-
                         try
                         {
                             DecompressFileLZMA(fpath, fpath.Substring(0, fpath.Length - 4));
@@ -353,8 +379,13 @@ namespace BnS_Multitool
                                     fInfo.Delete();
 
                                 File.Move(fpath, Path.Combine(BNS_PATH, currentFilePath));
+
+                                //Cleanup the local bk
+                                if (currentFilePath.Contains("local") && currentFilePath.EndsWith("dat"))
+                                    if (File.Exists(Path.Combine(BNS_PATH, currentFilePath + ".bk")))
+                                        File.Delete(Path.Combine(BNS_PATH, currentFilePath + ".bk"));
                             }
-                            processedFiles++;
+                            Interlocked.Increment(ref processedFiles);
                             FilesProcessed((int)((double)processedFiles / totalFiles * 100));
                             Dispatchers.textBlock(ProgressBlock, String.Format("{0} ({1}%)", SizeSuffix(totalBytes, 2), (int)((double)processedFiles / totalFiles * 100)));
                         }
@@ -376,11 +407,11 @@ namespace BnS_Multitool
 
                 File.Move(Path.Combine(BNS_PATH, "PatchManager", onlineVersion, FileInfoStr), Path.Combine(BNS_PATH, FileInfoStr));
 
-                IniHandler hIni = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR ? "VersionInfo_BNS_KOR.ini" : "VersionInfo_BnS.ini"));
+                IniHandler hIni = new IniHandler(Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault());
                 hIni.Write("VersionInfo", "GlobalVersion", onlineVersion);
                 Directory.Delete(Path.Combine(BNS_PATH, "PatchManager", onlineVersion), true);
 
-                //onlineVersion = "165";
+                //onlineVersion = "177";
 
             } catch (Exception ex)
             {
@@ -393,15 +424,16 @@ namespace BnS_Multitool
         {
             WebClient client = new WebClient{Proxy = null};
             client.Headers.Add("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.141 Safari/537.36"); //Set a user agent incase they are disallowing connections with no agent specified.
-            
+
             try
             {
                 if (!Directory.Exists(Path.GetDirectoryName(path)))
                     Directory.CreateDirectory(Path.GetDirectoryName(path));
 
                 client.DownloadFile(new Uri(url), path);
-            } catch (WebException)
+            } catch (WebException ex)
             {
+                Debug.WriteLine(url);
                 //Maybe it was a fluke, lets try again.
                 using (new WebClient())
                 {
@@ -434,7 +466,7 @@ namespace BnS_Multitool
             }));
         }
 
-        private static string SHA1HASH(string filePath)
+        public static string SHA1HASH(string filePath)
         {
             try
             {
@@ -454,21 +486,21 @@ namespace BnS_Multitool
                 }
             } catch(Exception)
             {
-                return "";
+                return String.Empty;
             }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
             if ((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR)
-                BASE_URL = @"http://bnskor.ncupdate.com/BNS_KOR/";
+                BASE_URL = @"http://bnskor.ncupdate.com/BNS_LIVE/";
             else
-                BASE_URL = @"http://live.patcher.bladeandsoul.com/BnS/";
+                BASE_URL = @"http://d37ob46rk09il3.cloudfront.net/BnS/";
 
-            IniHandler VersionInfo_BnS = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR ? "VersionInfo_BNS_KOR.ini" : "VersionInfo_BnS.ini"));
+            IniHandler VersionInfo_BnS = new IniHandler(Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault());
             localVersion = VersionInfo_BnS.Read("VersionInfo", "GlobalVersion");
             onlineVersion = Globals.onlineVersionNumber();
-            //onlineVersion = "164";
+            //onlineVersion = "183";
 
             localVersionLabel.Content = localVersion.ToString();
             currentVersionLabel.Content = String.Format("{0}", (onlineVersion == "") ? "Error" : onlineVersion);
@@ -500,9 +532,7 @@ namespace BnS_Multitool
                 using (FileStream originalFile = File.OpenRead(original))
                 using (FileStream patchFile = File.OpenRead(patch))
                 using (FileStream targetFile = File.Open(Path.Combine(Path.GetDirectoryName(patch), targetFileName), FileMode.OpenOrCreate, FileAccess.ReadWrite))
-                {
                     VcdiffDecoder.Decode(originalFile, patchFile, targetFile);
-                }
 
                 return true;
             }
@@ -522,7 +552,7 @@ namespace BnS_Multitool
                 httpWebRequest = WebRequest.Create(url) as HttpWebRequest;
                 httpWebRequest.Method = "HEAD";
                 httpWebResponse = httpWebRequest.GetResponse() as HttpWebResponse;
-                result = (httpWebResponse.StatusCode == HttpStatusCode.OK);
+                result = httpWebResponse.StatusCode == HttpStatusCode.OK;
             }
             catch
             {
@@ -541,7 +571,7 @@ namespace BnS_Multitool
 
         private void DownloadBtn_Click(object sender, RoutedEventArgs e)
         {
-            IniHandler VersionInfo_BnS = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR ? "VersionInfo_BNS_KOR.ini" : "VersionInfo_BnS.ini"));
+            IniHandler VersionInfo_BnS = new IniHandler(Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault());
             localVersion = VersionInfo_BnS.Read("VersionInfo", "GlobalVersion");
             DownloadBtn.IsEnabled = false;
             ProgressGrid.Visibility = Visibility.Visible;
@@ -549,34 +579,54 @@ namespace BnS_Multitool
             patchWorker.RunWorkerAsync();
         }
 
+        private static void DecompressStreamLZMA(string directory, List<string> files, string outFile)
+        {
+            if (File.Exists(outFile))
+                File.Delete(outFile);
+
+            using (var output = new FileStream(outFile, FileMode.Create))
+            using (var input = new ConcatStream(files.Select(file => File.OpenRead(Path.Combine(directory, file)))))
+            {
+                var decoder = new SevenZip.Compression.LZMA.Decoder();
+
+                byte[] properties = new byte[5];
+                if (input.Read(properties, 0, 5) != 5)
+                    throw (new Exception("input .lzma is too short"));
+                decoder.SetDecoderProperties(properties);
+
+                byte[] sizeBytes = new byte[8];
+                if (input.Read(sizeBytes, 0, 8) != 8)
+                    throw (new Exception("input .lzma is too short"));
+
+                long outSize = BitConverter.ToInt64(sizeBytes, 0);
+                long compressedSize = input.Length - 13;
+                decoder.Code(input, output, compressedSize, outSize, null);
+            }
+        }
+
         private static void DecompressFileLZMA(string inFile, string outFile)
         {
+            if (File.Exists(outFile))
+                File.Delete(outFile);
+
             using (FileStream input = new FileStream(inFile, FileMode.Open))
+            using (FileStream output = new FileStream(outFile, FileMode.Create))
             {
-                using (FileStream output = new FileStream(outFile, FileMode.Create))
-                {
-                    SevenZip.Compression.LZMA.Decoder decoder = new SevenZip.Compression.LZMA.Decoder();
+                SevenZip.Compression.LZMA.Decoder decoder = new SevenZip.Compression.LZMA.Decoder();
 
-                    byte[] properties = new byte[5];
-                    if (input.Read(properties, 0, 5) != 5)
-                        throw (new Exception("input .lzma is too short"));
-                    decoder.SetDecoderProperties(properties);
+                byte[] properties = new byte[5];
+                if (input.Read(properties, 0, 5) != 5)
+                    throw (new Exception("input .lzma is too short"));
+                decoder.SetDecoderProperties(properties);
 
-                    long outSize = 0;
-                    for (int i = 0; i < 8; i++)
-                    {
-                        int v = input.ReadByte();
-                        if (v < 0)
-                            throw (new Exception("Can't Read 1"));
-                        outSize |= ((long)(byte)v) << (8 * i);
-                    }
-                    long compressedSize = input.Length - input.Position;
+                byte[] sizeBytes = new byte[8];
+                if (input.Read(sizeBytes, 0, 8) != 8)
+                    throw (new Exception("input .lzma is too short"));
 
-                    decoder.Code(input, output, compressedSize, outSize, null);
-                }
+                long outSize = BitConverter.ToInt64(sizeBytes, 0);
+                long compressedSize = input.Length - input.Position;
+                decoder.Code(input, output, compressedSize, outSize, null);
             }
-
-            File.Delete(inFile); //Cleanup
         }
     }
 }
