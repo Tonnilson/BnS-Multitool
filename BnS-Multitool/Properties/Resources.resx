@@ -127,6 +127,9 @@
   <data name="BnS_Multi_Tool_Updater" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\BnS-Multi-Tool-Updater.exe;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="class_removes" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\class_removes.zip;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="minimal" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\Resources\minimal.txt;System.String, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089;Windows-1252</value>
   </data>

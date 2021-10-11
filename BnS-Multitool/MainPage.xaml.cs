@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO.Compression;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -13,6 +14,18 @@ using System.Windows.Threading;
 
 namespace BnS_Multitool
 {
+    public class GZipWebClient : WebClient
+    {
+        protected override WebRequest GetWebRequest(Uri address)
+        {
+            HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
+            ((HttpWebRequest)request).ReadWriteTimeout = 6000;
+            request.Timeout = 6000;
+            request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
+            return request;
+        }
+    }
+
     /// <summary>
     /// Interaction logic for MainPage.xaml
     /// </summary>
@@ -39,17 +52,18 @@ namespace BnS_Multitool
             //MainWindow.versionWorker.RunWorkerAsync();
         }
 
-        private static void checkForUpdate()
+        private static async Task checkForUpdate()
         {
-            WebClient client = new WebClient();
+            WebClient client = new GZipWebClient();
+           
             try
             {
-                var json = client.DownloadString(Globals.MAIN_SERVER_ADDR + "version.json");
+                var json = client.DownloadString(Globals.MAIN_SERVER_ADDR + "version_UE4.json");
                 onlineJson = JsonConvert.DeserializeObject<MainWindow.ONLINE_VERSION_STRUCT>(json);
 
                 if (onlineJson.VERSION != MainWindow.FileVersion())
                 {
-                    Application.Current.Dispatcher.BeginInvoke((Action)delegate
+                     Application.Current.Dispatcher.BeginInvoke((Action)delegate
                     {
                         var dialog = new ErrorPrompt("Update available, please be sure to read the change log for any critical changes.\r\rOnline Version: " + onlineJson.VERSION + "\rLocal: " + SystemConfig.SYS.VERSION, true);
                         dialog.ShowDialog();
@@ -75,7 +89,7 @@ namespace BnS_Multitool
 
         private void onlineUsers_Tick(object sender, EventArgs e)
         {
-            WebClient client = new WebClient();
+            WebClient client = new GZipWebClient();
             int usersOnline = 0;
             Debug.WriteLine("Getting Tick");
             try
@@ -106,7 +120,7 @@ namespace BnS_Multitool
                     regionIP = "18.194.180.254";
                     break;
                 case Globals.BnS_Region.TW:
-                    regionIP = "203.67.68.227";
+                    regionIP = "210.242.83.163";
                     break;
                 case Globals.BnS_Region.KR:
                     regionIP = "222.122.231.3";
@@ -127,6 +141,8 @@ namespace BnS_Multitool
                         Stopwatch stopwatch = new Stopwatch();
                         stopwatch.Start();
 
+                        socket.ReceiveTimeout = 1500;
+                        socket.SendTimeout = 1500;
                         socket.Connect(regionIP, 10100);
                         stopwatch.Stop();
 
@@ -189,9 +205,7 @@ namespace BnS_Multitool
             {
                 try
                 {
-                    checkForUpdate();
-
-                    while (onlineJson.CHANGELOG == null) { await Task.Delay(50); }
+                    await checkForUpdate();
 
                     foreach (var version in onlineJson.CHANGELOG)
                         appendToChangelog(string.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));

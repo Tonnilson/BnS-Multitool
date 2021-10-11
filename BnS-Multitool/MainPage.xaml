@@ -18,7 +18,7 @@
         </TextBlock>
         <Image x:Name="PictureBox" gif:AnimationBehavior.SourceUri="Resources/peepoLaptopHappy.gif" Margin="-2,84,586,341"/>
         <Label Content="Changelog" Background="{x:Null}" Foreground="White" Margin="10,182,467,275" FontFamily="Arial" FontWeight="Bold" FontSize="20"/>
-        <RichTextBox IsReadOnly="True" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
+        <RichTextBox IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
         <Grid Margin="226,65,284,339">
             <Button HorizontalAlignment="Left" Style="{StaticResource PayPalButton}" VerticalAlignment="Top" Width="112" Height="55"
                 Click="Button_Click" Margin="35,27,0,0">

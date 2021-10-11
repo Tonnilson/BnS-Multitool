@@ -11,7 +11,7 @@
                     <ControlTemplate TargetType="{x:Type Thumb}">
                         <Grid x:Name="Grid">
                             <Rectangle HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto" Fill="Transparent" />
-                            <Border x:Name="ScrollBarRectangle" CornerRadius="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"  Background="{TemplateBinding Background}" />
+                            <Border x:Name="ScrollBarRectangle" CornerRadius="1" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Width="Auto" Height="Auto"  Background="{TemplateBinding Background}" />
                         </Grid>
                         <ControlTemplate.Triggers>
                             <Trigger Property="Tag" Value="Horizontal">
@@ -393,6 +393,11 @@
                     <Setter Property="Background" Value="#FF4176BF"/>
                     <Setter Property="BorderBrush" Value="#FF2D415D"/>
                 </Trigger>
+                <Trigger Property="IsEnabled" Value="False">
+                    <Setter Property="Background" Value="#FF274276"/>
+                    <Setter Property="BorderBrush" Value="#FF2D415D"/>
+                    <Setter Property="Foreground" Value="#FFD1D1D1"/>
+                </Trigger>
             </Style.Triggers>
         </Style>
         <Style x:Key="TitleBarButtons" TargetType="{x:Type Button}">
@@ -481,7 +486,7 @@
                                         </TransformGroup>
                                     </Rectangle.RenderTransform>
                                 </Rectangle>
-                                <Image gif:AnimationBehavior.SourceUri="Images/peepoRunxmas.gif" Stretch="Uniform" HorizontalAlignment="Right"/>
+                                <Image gif:AnimationBehavior.SourceUri="Images/copium.gif" Stretch="Uniform" HorizontalAlignment="Right"/>
                             </Grid>
                         </Grid>
                         <ControlTemplate.Triggers>

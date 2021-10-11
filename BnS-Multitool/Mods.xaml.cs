@@ -55,7 +55,7 @@ namespace BnS_Multitool
             //FilterList.AppendText(Properties.Resources.playable_ncwest);
         }
 
-        private void refreshModList(object sender, DoWorkEventArgs e)
+        private void RefreshModList(object sender, DoWorkEventArgs e)
         {
             if (!Directory.Exists(modPath))
                 Directory.CreateDirectory(modPath);
@@ -97,16 +97,8 @@ namespace BnS_Multitool
             string region = regionFromSelection();
 
             //KR is slightly different so we need to adjust for that.
-            if (region == "NCSoft")
-            {
-                modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "bns", "CookedPC_mod");
-                modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "bns", "CookedPC", "mod");
-            }
-            else
-            {
-                modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "Local", region, languageFromSelection(), "CookedPC_mod");
-                modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "Local", region, languageFromSelection(), "CookedPC", "mod");
-            }
+            modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Mods");
+            modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Mods");
 
             if (!Directory.Exists(modPath))
                 Directory.CreateDirectory(modPath);
@@ -119,7 +111,7 @@ namespace BnS_Multitool
             ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE = currentIndex;
             ACCOUNT_CONFIG.appendChangesToConfig();
 
-            refreshModList(sender, new DoWorkEventArgs(sender));
+            RefreshModList(sender, new DoWorkEventArgs(sender));
         }
 
         private void AddonsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -128,17 +120,26 @@ namespace BnS_Multitool
             try
             {
                 MODS_CLASS AddonEntry = ModsListBox.SelectedItem as MODS_CLASS;
-                if (AddonEntry == null) return;
+                if (AddonEntry != null)
+                {
+                    if (Directory.GetFiles(Path.Combine(modPath, AddonEntry.Name), "*.upk").Length != 0)
+                    {
+                        new ErrorPrompt(string.Format("{0} contains files meant for UE3 and not UE4", AddonEntry.Name)).ShowDialog();
+                        return;
+                    }
 
-                if (AddonEntry == null) return;
-                if (AddonEntry.isChecked)
-                    AddonEntry.isChecked = false;
-                else
-                    AddonEntry.isChecked = true;
+                    if (AddonEntry == null) return;
 
-                ModsListBox.SelectedItem = AddonEntry;
-                CollectionViewSource.GetDefaultView(ModsListBox.DataContext).Refresh();
-                ModsListBox.SelectedIndex = lastSelectedMod;
+                    if (AddonEntry == null) return;
+                    if (AddonEntry.isChecked)
+                        AddonEntry.isChecked = false;
+                    else
+                        AddonEntry.isChecked = true;
+
+                    ModsListBox.SelectedItem = AddonEntry;
+                    CollectionViewSource.GetDefaultView(ModsListBox.DataContext).Refresh();
+                    ModsListBox.SelectedIndex = lastSelectedMod;
+                }
             } catch (Exception ex)
             {
                 var dialog = new ErrorPrompt(ex.Message);
@@ -152,15 +153,37 @@ namespace BnS_Multitool
             {
                 lastSelectedMod = ModsListBox.SelectedIndex;
                 MODS_CLASS AddonEntry = ModsListBox.SelectedItem as MODS_CLASS;
-                if (AddonEntry.isChecked)
-                    AddonEntry.isChecked = false;
-                else
-                    AddonEntry.isChecked = true;
+                if (AddonEntry != null)
+                {
+                    if (Directory.GetFiles(Path.Combine(modPath, AddonEntry.Name), "*.upk").Length != 0)
+                    {
+                        new ErrorPrompt(string.Format("{0} contains files meant for UE3 and not UE4", AddonEntry.Name)).ShowDialog();
+                        return;
+                    }
+                    if (AddonEntry.isChecked)
+                        AddonEntry.isChecked = false;
+                    else
+                        AddonEntry.isChecked = true;
 
-                ModsListBox.SelectedItem = AddonEntry;
-                CollectionViewSource.GetDefaultView(ModsListBox.DataContext).Refresh();
-                ModsListBox.SelectedIndex = lastSelectedMod;
-                e.Handled = true;
+                    ModsListBox.SelectedItem = AddonEntry;
+                    CollectionViewSource.GetDefaultView(ModsListBox.DataContext).Refresh();
+                    ModsListBox.SelectedIndex = lastSelectedMod;
+                    e.Handled = true;
+                }
+            }
+        }
+
+        private void OnModChecked(object sender, RoutedEventArgs e)
+        {
+            // Janky way to interact with the way I do data binding, maybe one day I will switch to a view model and handle it the proper way.
+            foreach(var mod in userMods)
+            {
+               if(Directory.GetFiles(Path.Combine(modPath, mod.Name), "*.upk").Length != 0 && mod.isChecked)
+                {
+                    new ErrorPrompt(string.Format("{0} contains files meant for UE3 and not UE4", mod.Name)).ShowDialog();
+                    mod.isChecked = false;
+                    CollectionViewSource.GetDefaultView(ModsListBox.DataContext).Refresh();
+                }
             }
         }
 
@@ -413,7 +436,7 @@ namespace BnS_Multitool
                 return;
             }
 
-            if((!File.Exists(original_local) || !File.Exists(original_local64)))
+            if(!File.Exists(original_local) || !File.Exists(original_local64))
             {
                 var dialog = new ErrorPrompt(String.Format("The Following dats are missing with no backup source:\n\n{0}{1}", !File.Exists(original_local) ? "local.dat\n" : "", !File.Exists(original_local64) ? "local64.dat" : ""), false, true);
                 dialog.ShowDialog();
@@ -1028,18 +1051,8 @@ namespace BnS_Multitool
             LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
 
             string region = regionFromSelection();
-
-            //KR is slightly different so we need to adjust for that.
-            if (region == "NCSoft")
-            {
-                modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "bns", "CookedPC_mod");
-                modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "bns", "CookedPC", "mod");
-            }
-            else
-            {
-                modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "Local", region, languageFromSelection(), "CookedPC_mod");
-                modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "contents", "Local", region, languageFromSelection(), "CookedPC", "mod");
-            }
+            modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Mods");
+            modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Mods");
 
             //These are custom so we need to check if they exist, if not create them for the language.
             if (!Directory.Exists(modPath))
@@ -1049,7 +1062,7 @@ namespace BnS_Multitool
                 Directory.CreateDirectory(modDestination);
 
             worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(refreshModList);
+            worker.DoWork += new DoWorkEventHandler(RefreshModList);
             worker.RunWorkerAsync(); LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
 
             //https://mega.nz/folder/Sk9B0QTI#IdIJnQ9qaCU5H71djC25zg

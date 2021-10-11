@@ -21,9 +21,6 @@ namespace BnS_Multitool
                     VERSION = MainWindow.FileVersion(),
                     FINGERPRINT = null,
                     ADDITIONAL_EFFECTS = 0,
-                    PATCH_310 = 0,
-                    PATCH_321 = 1,
-                    PATCH_333 = 1,
                     BNS_DIR = "",
                     MAIN_UPKS = ihatemylife,
                     DELTA_PATCHING = 1,
@@ -33,85 +30,91 @@ namespace BnS_Multitool
                     PING_CHECK = 1,
                     patch32 = 1,
                     patch64 = 1,
-                    CLASSES = new List<BNS_CLASS_STRUCT>
+                    CLASS = new List<BNS_CLASS_STRUCT>
                     {
                         new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Assassin",
-                                EFFECTS = new string[] { "00010504.upk", "00060553.upk", "00069254.upk" },
-                                ANIMATIONS = new string[] { "00007916.upk", "00056572.upk", "00068516.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Assassin_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Summoner",
-                                EFFECTS = new string[] { "00006660.upk", "00060554.upk", "00080169.upk" },
-                                ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk", "00078884.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Summoner_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Summon_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "KungFuMaster",
-                                EFFECTS = new string[] { "00060549.upk", "00010771.upk", "00064821.upk" },
-                                ANIMATIONS = new string[] { "00007912.upk", "00056568.upk", "00064820.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Cestus_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_KungfuFighter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Gunslinger",
-                                EFFECTS = new string[] { "00007307.upk", "00060552.upk" },
-                                ANIMATIONS = new string[] { "00007915.upk", "00056571.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Shooter_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Shooter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Destroyer",
-                                EFFECTS = new string[] { "00008841.upk", "00060551.upk",  "00067307.upk"},
-                                ANIMATIONS = new string[] { "00007914.upk", "00056570.upk", "00068515.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Destroyer_05_SF_p.pak"},
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Forcemaster",
-                                EFFECTS = new string[] { "00009801.upk", "00060550.upk", "00072638.upk" },
-                                ANIMATIONS = new string[] { "00007913.upk", "00056569.upk", "00068626.upk", "00068628.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_AuraMaster_05_SF_p.pak", "Mod_Remove_AureaMaster_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_ForceMaster_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Soulfighter",
-                                EFFECTS = new string[] { "00034433.upk", "00060557.upk" },
-                                ANIMATIONS = new string[] { "00034408.upk", "00056576.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_SoulFighter_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_SoulFighter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Archer",
-                                EFFECTS = new string[] { "00064738.upk", "00068166.upk" },
-                                ANIMATIONS = new string[] { "00064736.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Archer_05_SF_p.pak" },
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Blademaster",
-                                EFFECTS = new string[] { "00010354.upk", "00013263.upk", "00060548.upk" },
-                                ANIMATIONS = new string[] { "00007911.upk", "00056567.upk" }
+                                EFFECTS = new string[] {  },
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Bladedancer",
-                                EFFECTS = new string[] { "00031769.upk", "00060555.upk", "00072644.upk", "00072646.upk" },
-                                ANIMATIONS = new string[] { "00018601.upk", "00056574.upk", "00078303.upk", "00078533.upk"}
+                                EFFECTS = new string[] { "Mod_Remove_SwordMaster_05_SF_p.pak" },
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Warlock",
-                                EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk", "00079415.upk", "00080679.upk" },
-                                ANIMATIONS = new string[] { "00023439.upk", "00056575.upk", "00080259.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Warlock_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Warlock_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Warden",
-                                EFFECTS = new string[] { "00056127.upk", "00060558.upk", "00020753.upk" },
-                                ANIMATIONS = new string[] { "00056577.upk", "00056126.upk", "00056566.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Warrior_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Warrior_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Astromancer",
-                                EFFECTS = new string[] { "00072639.upk", "00072642.upk" },
-                                ANIMATIONS = new string[] { "00076159.upk", "00069237.upk", "00069238.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Thunderder_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Thunderer_Animset_p.pak" }
+                            },
+                            new BNS_CLASS_STRUCT()
+                            {
+                                CLASS = "Dualblade",
+                                EFFECTS = new string[] { "Mod_Remove_Dualblade_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_DualBlade_Animset_p.pak", "Mod_Remove_DualBlader_Animset_p.pak" }
                             }
                     }
                 };
@@ -128,131 +131,100 @@ namespace BnS_Multitool
 
                     bool changesToConfig = false;
                     //This whole section is for patching older clients, eventually will remove.
-                    if (SYS.CLASSES == null)
-                        SYS.CLASSES = new List<BNS_CLASS_STRUCT>() { };
+                    if (SYS.CLASS == null)
+                        SYS.CLASS = new List<BNS_CLASS_STRUCT>() { };
 
                     //Hotfix
-                    if(SYS.CLASSES.Count < 1)
+                    if(SYS.CLASS.Count < 1)
                     {
                         changesToConfig = true;
-                        SYS.CLASSES = new List<BNS_CLASS_STRUCT>
+                        SYS.CLASS = new List<BNS_CLASS_STRUCT>
                         {
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Assassin",
-                                EFFECTS = new string[] { "00010504.upk", "00060553.upk", "00069254.upk" },
-                                ANIMATIONS = new string[] { "00007916.upk", "00056572.upk", "00068516.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Assassin_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Summoner",
-                                EFFECTS = new string[] { "00006660.upk", "00060554.upk", "00080169.upk" },
-                                ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk", "00078884.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Summoner_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Summon_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "KungFuMaster",
-                                EFFECTS = new string[] { "00060549.upk", "00010771.upk", "00064821.upk" },
-                                ANIMATIONS = new string[] { "00007912.upk", "00056568.upk", "00064820.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Cestus_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_KungfuFighter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Gunslinger",
-                                EFFECTS = new string[] { "00007307.upk", "00060552.upk" },
-                                ANIMATIONS = new string[] { "00007915.upk", "00056571.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Shooter_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Shooter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Destroyer",
-                                EFFECTS = new string[] { "00008841.upk", "00060551.upk",  "00067307.upk"},
-                                ANIMATIONS = new string[] { "00007914.upk", "00056570.upk", "00068515.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Destroyer_05_SF_p.pak"},
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Forcemaster",
-                                EFFECTS = new string[] { "00009801.upk", "00060550.upk", "00072638.upk" },
-                                ANIMATIONS = new string[] { "00007913.upk", "00056569.upk", "00068626.upk", "00068628.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_AuraMaster_05_SF_p.pak", "Mod_Remove_AureaMaster_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_ForceMaster_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Soulfighter",
-                                EFFECTS = new string[] { "00034433.upk", "00060557.upk" },
-                                ANIMATIONS = new string[] { "00034408.upk", "00056576.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_SoulFighter_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_SoulFighter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Archer",
-                                EFFECTS = new string[] { "00064738.upk", "00068166.upk" },
-                                ANIMATIONS = new string[] { "00064736.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Archer_05_SF_p.pak" },
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Blademaster",
-                                EFFECTS = new string[] { "00010354.upk", "00013263.upk", "00060548.upk" },
-                                ANIMATIONS = new string[] { "00007911.upk", "00056567.upk" }
+                                EFFECTS = new string[] {  },
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Bladedancer",
-                                EFFECTS = new string[] { "00031769.upk", "00060555.upk", "00072644.upk", "00072646.upk" },
-                                ANIMATIONS = new string[] { "00018601.upk", "00056574.upk", "00078303.upk", "00078533.upk"}
+                                EFFECTS = new string[] { "Mod_Remove_SwordMaster_05_SF_p.pak" },
+                                ANIMATIONS = new string[] {  }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Warlock",
-                                EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk", "00079415.upk", "00080679.upk" },
-                                ANIMATIONS = new string[] { "00023439.upk", "00056575.upk", "00080259.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Warlock_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Warlock_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Warden",
-                                EFFECTS = new string[] { "00056127.upk", "00060558.upk", "00020753.upk" },
-                                ANIMATIONS = new string[] { "00056577.upk", "00056126.upk", "00056566.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Warrior_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Warrior_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Astromancer",
-                                EFFECTS = new string[] { "00072639.upk", "00072642.upk" },
-                                ANIMATIONS = new string[] { "00076159.upk", "00069237.upk", "00069238.upk" }
+                                EFFECTS = new string[] { "Mod_Remove_Thunderder_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Thunderer_Animset_p.pak" }
+                            },
+                            new BNS_CLASS_STRUCT()
+                            {
+                                CLASS = "Dualblade",
+                                EFFECTS = new string[] { "Mod_Remove_Dualblade_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_DualBlade_Animset_p.pak", "Mod_Remove_DualBlader_Animset_p.pak" }
                             }
                         };
-                    }
-                    
-                    if(SYS.PATCH_329 == 0)
-                    {
-                        changesToConfig = true;
-                        int ind = SYS.CLASSES.FindIndex(x => x.CLASS == "Summoner");
-                        if (ind != -1)
-                        {
-                            SYS.CLASSES[ind].EFFECTS = new string[] { "00006660.upk", "00060554.upk", "00080169.upk" };
-                            SYS.CLASSES[ind].ANIMATIONS = new string[] { "00007917.upk", "00056573.upk", "00080266.upk", "00078884.upk" };
-                            SYS.PATCH_329 = 1;
-                        }
-                    }
-
-                    if (SYS.PATCH_333 == 0)
-                    {
-                        changesToConfig = true;
-                        int ind = SYS.CLASSES.FindIndex(x => x.CLASS == "Warlock");
-                        if (ind != -1)
-                        {
-                            SYS.CLASSES[ind].EFFECTS = new string[] { "00023411.upk", "00023412.upk", "00060556.upk", "00060729.upk", "00079415.upk", "00080679.upk" };
-                            SYS.CLASSES[ind].ANIMATIONS = new string[] { "00023439.upk", "00056575.upk", "00080259.upk" };
-                            SYS.PATCH_333 = 1;
-                        }
-                    }
-
-                    if (SYS.PATCH_310 == 0)
-                    {
-                        changesToConfig = true;
-                        int ind = SYS.CLASSES.FindIndex(x => x.CLASS == "Bladedancer");
-                        if(ind != -1)
-                        {
-                            SYS.CLASSES[ind].EFFECTS = new string[] { "00031769.upk", "00060555.upk", "00072644.upk", "00072646.upk" };
-                            SYS.CLASSES[ind].ANIMATIONS = new string[] { "00018601.upk", "00056574.upk", "00078303.upk", "00078533.upk" };
-                        }
-                        SYS.PING_CHECK = 1;
-                        SYS.DELTA_PATCHING = 1;
                     }
                     
                     if(changesToConfig)
@@ -282,7 +254,7 @@ namespace BnS_Multitool
 
         public static bool DoesClassExist(string element)
         {
-            return SYS.CLASSES.Any(entry => entry.CLASS == element);
+            return SYS.CLASS.Any(entry => entry.CLASS == element);
         }
 
         public struct SYSConfig
@@ -290,10 +262,6 @@ namespace BnS_Multitool
             public string VERSION { get; set; }
             public string FINGERPRINT { get; set; }
             public int ADDITIONAL_EFFECTS { get; set; }
-            public int PATCH_310 { get; set; }
-            public int PATCH_321 { get; set; }
-            public int PATCH_329 { get; set; }
-            public int PATCH_333 { get; set; }
             public int UPDATER_THREADS { get; set; }
             public int NEW_GAME_OPTION { get; set; }
             public int MINIMZE_ACTION { get; set; }
@@ -303,7 +271,7 @@ namespace BnS_Multitool
             public int patch32 { get; set; }
             public string BNS_DIR { get; set; }
             public string[] MAIN_UPKS { get; set; }
-            public List<BNS_CLASS_STRUCT> CLASSES { get; set; }
+            public List<BNS_CLASS_STRUCT> CLASS { get; set; }
         }
 
         public class BNS_CLASS_STRUCT

@@ -13,23 +13,6 @@ using ToggleSwitch;
 using Button = System.Windows.Controls.Button;
 using Path = System.IO.Path;
 
-namespace System.IO
-{
-    public static class FileInfoExtensions
-    {
-        public static void Rename(this FileInfo fileInfo, string newName)
-        {
-            if (!fileInfo.Exists)
-                return;
-
-            if (File.Exists(fileInfo.Directory + @"\" + newName))
-                File.Delete(fileInfo.Directory + @"\" + newName);
-
-            fileInfo.MoveTo(Path.Combine(fileInfo.Directory.FullName, newName));
-        }
-    }
-}
-
 namespace BnS_Multitool
 {
     /// <summary>
@@ -38,10 +21,8 @@ namespace BnS_Multitool
     /// 
     public partial class Modpolice : Page
     {
-        private static string bin_x86 = @"\bin\";
-        private static string bin_x64 = @"\bin64\";
-        private static string plugins_x86 = bin_x86 + @"plugins\";
-        private static string plugins_x64 = bin_x64 + @"plugins\";
+        private static string bin_path = @"BNSR\Binaries\Win64\";
+        private static string plugins_path = Path.Combine(bin_path, "plugins");
         private static string patches_xml = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches.xml";
         private ProgressControl _progressControl;
         private static pluginFileInfo lessLoadingScreen = null;
@@ -82,85 +63,45 @@ namespace BnS_Multitool
         public Modpolice()
         {
             InitializeComponent();
-
-            //BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
         }
 
         private async Task checkOnlineVersions()
         {
             #region pluginloader
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + @"\bin\winmm.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + @"\bin64\winmm.dll")))
-                pluginloader = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + @"\bin\winmm.dll");
+            if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, bin_path, "winmm.dll")))
+                pluginloader = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, bin_path, "winmm.dll"));
             else
                 pluginloader = null;
 
-            Dispatchers.labelContent(pluginloaderLabel, String.Format("Current: {0}", (pluginloader != null) ? pluginloader.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            Dispatchers.labelContent(pluginloaderLabel, string.Format("Current: {0}", (pluginloader != null) ? pluginloader.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             #endregion
 
             #region bnspatch
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnspatch.dll")))
-                bnspatchPlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll");
+            if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnspatch.dll")))
+                bnspatchPlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnspatch.dll"));
             else
                 bnspatchPlugin = null;
 
-            Dispatchers.labelContent(bnspatchLabel, String.Format("Current: {0}", (bnspatchPlugin != null) ? bnspatchPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            Dispatchers.labelContent(bnspatchLabel, string.Format("Current: {0}", (bnspatchPlugin != null) ? bnspatchPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             #endregion
 
             #region bnsnogg
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnsnogg.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnsnogg.dll")))
-                bnsnoggPlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnsnogg.dll");
+            if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnsnogg.dll")))
+                bnsnoggPlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnsnogg.dll"));
             else
                 bnsnoggPlugin = null;
 
-            Dispatchers.labelContent(bnsnogglocalLabel, String.Format("Current: {0}", (bnsnoggPlugin != null) ? bnsnoggPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
-            #endregion
-
-            #region lessloadingscreen
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "lessloadingscreens.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "lessloadingscreens.dll")))
-            {
-                lessLoadingScreen = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "lessloadingscreens.dll");
-                Dispatchers.toggleIsChecked(lessloadingToggle, true);
-            }
-            else if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "lessloadingscreens.dll.off") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "lessloadingscreens.dll.off")))
-                lessLoadingScreen = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "lessloadingscreens.dll.off");
-            else
-                lessLoadingScreen = null;
-
-            if (lessLoadingScreen == null)
-                Dispatchers.buttonVisibility(del_lessloadingscreens, Visibility.Hidden);
-            else
-                Dispatchers.buttonVisibility(del_lessloadingscreens, Visibility.Visible);
-
-            Dispatchers.labelContent(lessloadingCurrentLbl, String.Format("Current: {0}", (lessLoadingScreen != null) ? lessLoadingScreen.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
-            #endregion
-
-            #region fpsbooster
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "fpsbooster.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "fpsbooster.dll")))
-            {
-                simplemodeTraining = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "fpsbooster.dll");
-                Dispatchers.toggleIsChecked(simplemodeToggle, true);
-            }
-            else if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "fpsbooster.dll.off") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "fpsbooster.dll.off")))
-                simplemodeTraining = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "fpsbooster.dll.off");
-            else
-                simplemodeTraining = null;
-
-            Dispatchers.labelContent(SimplemodeCurrentLbl, String.Format("Current: {0}", (simplemodeTraining != null) ? simplemodeTraining.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
-            if (simplemodeTraining == null)
-                Dispatchers.buttonVisibility(del_fpsbooster, Visibility.Hidden);
-            else
-                Dispatchers.buttonVisibility(del_fpsbooster, Visibility.Visible);
-
+            Dispatchers.labelContent(bnsnogglocalLabel, string.Format("Current: {0}", (bnsnoggPlugin != null) ? bnsnoggPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             #endregion
 
             #region highpriorityplugin
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "highpriority.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "highpriority.dll")))
+            if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "highpriority.dll")))
             {
-                highpriorityplugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "highpriority.dll");
+                highpriorityplugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "highpriority.dll"));
                 Dispatchers.toggleIsChecked(HighpriorityToggle, true);
             }
-            else if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "highpriority.dll.off") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "highpriority.dll.off")))
-                highpriorityplugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "highpriority.dll.off");
+            else if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "highpriority.dll.off")))
+                highpriorityplugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "highpriority.dll.off"));
             else
                 highpriorityplugin = null;
 
@@ -169,17 +110,17 @@ namespace BnS_Multitool
             else
                 Dispatchers.buttonVisibility(del_highpriority, Visibility.Visible);
 
-            Dispatchers.labelContent(HighpriorityCurrentLbl, String.Format("Current: {0}", (highpriorityplugin != null) ? highpriorityplugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            Dispatchers.labelContent(HighpriorityCurrentLbl, string.Format("Current: {0}", (highpriorityplugin != null) ? highpriorityplugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             #endregion
 
             #region cutsceneremoval
-            if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "cutsceneremoval.dll") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "cutsceneremoval.dll")))
+            if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "cutsceneremoval.dll")))
             {
-                cutscenePlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "cutsceneremoval.dll");
+                cutscenePlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "cutsceneremoval.dll"));
                 Dispatchers.toggleIsChecked(CutsceneremovalToggle, true);
             }
-            else if ((File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "cutsceneremoval.dll.off") && File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "cutsceneremoval.dll.off")))
-                cutscenePlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "cutsceneremoval.dll.off");
+            else if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "cutsceneremoval.dll.off")))
+                cutscenePlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "cutsceneremoval.dll.off"));
             else
                 cutscenePlugin = null;
 
@@ -188,43 +129,42 @@ namespace BnS_Multitool
             else
                 Dispatchers.buttonVisibility(del_cutsceneremoval, Visibility.Visible);
 
-            Dispatchers.labelContent(CutsceneremovalCurrentLbl, String.Format("Current: {0}", (cutscenePlugin != null) ? cutscenePlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            Dispatchers.labelContent(CutsceneremovalCurrentLbl, string.Format("Current: {0}", (cutscenePlugin != null) ? cutscenePlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             #endregion
 
             try
             {
-                var client = new MegaApiClient();
-                await client.LoginAnonymousAsync();
+                if (Globals.MEGA_API_CLIENT == null)
+                    Globals.MEGA_API_CLIENT = new MegaApiClient();
 
-                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA")); //Modpolice / Pilao Repo
-                IEnumerable<INode> nodes2 = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw")); //My repo
+                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
+                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
+
+                IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA")); //Modpolice / Pilao Repo
+                IEnumerable<INode> nodes2 = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw")); //My repo
 
                 INode parent_node = nodes.Single(x => x.Type == NodeType.Root);
-                INode lessloading_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^lessloadingscreens_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-                INode fpsbooster_node = nodes2.Where(x => x.Type == NodeType.File && x.Name.Contains("fpsbooster")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                INode bnspatch_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnspatch_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                INode pluginloader_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^loader3_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                INode cutscene_node = nodes2.Where(x => x.Type == NodeType.File && x.Name.Contains("UE4_cutscene_removal")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                INode bnsnogg_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnsnogg_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
                 INode highpriority_node = nodes2.Where(x => x.Type == NodeType.File && x.Name.Contains("highpriority")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-                INode bnspatch_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnspatch_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-                INode pluginloader_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^loader3_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-                INode bnsnogg_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnsnogg_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-                INode cutscene_node = nodes2.Where(x => x.Type == NodeType.File && x.Name.Contains("cutsceneremoval")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
 
                 //Format date based off file name.
-                Regex pattern = new Regex(@"^(?<fileName>[\w\\.]+)_(?<date>[\d\\.]{10})(?<ext>[\w\\.]+)");
-                DateTime highpriority_date = DateTime.Parse(pattern.Match(highpriority_node.Name).Groups["date"].Value);
-                DateTime lessloading_date = DateTime.Parse(pattern.Match(lessloading_node.Name).Groups["date"].Value);
-                DateTime fpsbooster_date = DateTime.Parse(pattern.Match(fpsbooster_node.Name).Groups["date"].Value);
+                Regex pattern = new Regex(@"^(?<fileName>[\w\\.]+)_(?<date>[\d\\.|-]{10})(?<ext>[\w\\.]+)");
                 DateTime pluginloader_date = DateTime.Parse(pattern.Match(pluginloader_node.Name).Groups["date"].Value);
                 DateTime bnspatch_date = DateTime.Parse(pattern.Match(bnspatch_node.Name).Groups["date"].Value);
-                DateTime bnsnogg_date = DateTime.Parse(pattern.Match(bnsnogg_node.Name).Groups["date"].Value);
                 DateTime cutscene_date = DateTime.Parse(pattern.Match(cutscene_node.Name).Groups["date"].Value);
+                DateTime bnsnogg_date = DateTime.Parse(pattern.Match(bnsnogg_node.Name).Groups["date"].Value);
+                DateTime highpriority_date = DateTime.Parse(pattern.Match(highpriority_node.Name).Groups["date"].Value);
 
-                Dispatchers.labelContent(lessloadingOnlineLbl, String.Format("Online: {0}", lessloading_date.ToString("MM-dd-yy")));
-                Dispatchers.labelContent(SimplemodeOnlineLbl, String.Format("Online: {0}", fpsbooster_date.ToString("MM-dd-yy")));
-                Dispatchers.labelContent(HighpriorityOnlineLbl, String.Format("Online: {0}", highpriority_date.ToString("MM-dd-yy")));
-                Dispatchers.labelContent(bnspatchOnlineLbl, String.Format("Online: {0}", bnspatch_date.ToString("MM-dd-yy")));
-                Dispatchers.labelContent(pluginloaderOnlineLbl, String.Format("Online: {0}", pluginloader_date.ToString("MM-dd-yy")));
-                Dispatchers.labelContent(bnsnoggOnlineLabel, String.Format("Online: {0}", bnsnogg_date.ToString("MM-dd-yy")));
-                Dispatchers.labelContent(CutsceneremovalOnlineLbl, String.Format("Online: {0}", cutscene_date.ToString("MM-dd-yy")));
+                Dispatchers.labelContent(bnspatchOnlineLbl, string.Format("Online: {0}", bnspatch_date.ToString("MM-dd-yy")));
+                Dispatchers.labelContent(pluginloaderOnlineLbl, string.Format("Online: {0}", pluginloader_date.ToString("MM-dd-yy")));
+                Dispatchers.labelContent(CutsceneremovalOnlineLbl, string.Format("Online: {0}", cutscene_date.ToString("MM-dd-yy")));
+                Dispatchers.labelContent(bnsnoggOnlineLabel, string.Format("Online: {0}", bnsnogg_date.ToString("MM-dd-yy")));
+                Dispatchers.labelContent(HighpriorityOnlineLbl, string.Format("Online: {0}", highpriority_date.ToString("MM-dd-yy")));
+
+                await Globals.MEGA_API_CLIENT.LogoutAsync();
 
             } catch (Exception ex)
             {
@@ -244,7 +184,7 @@ namespace BnS_Multitool
             {
                 case "simplemodeToggle":
                     pluginName = "fpsbooster";
-                    break;
+                    return;
                 case "lessloadingToggle":
                     pluginName = "lessloadingscreens";
                     break;
@@ -256,25 +196,21 @@ namespace BnS_Multitool
                     break;
             }
 
-            bool isChecked = (bool)((HorizontalToggleSwitch)sender).IsChecked;
+            bool isChecked = ((HorizontalToggleSwitch)sender).IsChecked;
 
             if(isChecked)
             {
-                if(File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll.off") || File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll.off"))
+                if(File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, pluginName + ".dll.off")))
                 {
-                    FileInfo pluginFile_x86 = new FileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll.off");
-                    FileInfo pluginFile_x64 = new FileInfo(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll.off");
+                    FileInfo pluginFile_x86 = new FileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, pluginName + ".dll.off"));
                     pluginFile_x86.Rename(pluginName + ".dll");
-                    pluginFile_x64.Rename(pluginName + ".dll");
                 }
             } else
             {
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll") || File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll"))
+                if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, pluginName + ".dll")))
                 {
-                    FileInfo pluginFile_x86 = new FileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll");
-                    FileInfo pluginFile_x64 = new FileInfo(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll");
+                    FileInfo pluginFile_x86 = new FileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, pluginName + ".dll"));
                     pluginFile_x86.Rename(pluginName + ".dll.off");
-                    pluginFile_x64.Rename(pluginName + ".dll.off");
                 }
             }
         }
@@ -286,12 +222,12 @@ namespace BnS_Multitool
             {
                 case "simplemodeInstall":
                     pluginName = "fpsbooster";
-                    break;
+                    return;
                 case "lessloadingInstall":
                     pluginName = "lessloadingscreens";
-                    break;
+                    return;
                 case "CutsceneremovalInstall":
-                    pluginName = "cutsceneremoval";
+                    pluginName = "UE4_cutscene_removal";
                     break;
                 default:
                     pluginName = "highpriority";
@@ -313,22 +249,23 @@ namespace BnS_Multitool
                     Directory.CreateDirectory("modpolice");
 
                 ProgressControl.updateProgressLabel("Logging into Mega");
-                var client = new MegaApiClient();
-                await client.LoginAnonymousAsync();
+
+                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
+                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
 
                 ProgressControl.updateProgressLabel("Retrieving file list...");
 
                 IEnumerable<INode> nodes;
 
-                if (pluginName == "cutsceneremoval" || pluginName == "highpriority" || pluginName == "fpsbooster")
-                    nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw"));
+                if (pluginName == "UE4_cutscene_removal" || pluginName == "highpriority" || pluginName == "fpsbooster")
+                    nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw"));
                 else
-                    nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                    nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
 
                 INode currentNode = null;
-                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
+                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(string.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
                 INode parent_node = nodes.Single(x => x.Type == NodeType.Root);
-                INode pluginNode = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^" + pluginName + @"_(?<date>[\d\\.]{10}).*").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                INode pluginNode = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^" + pluginName + @"_(?<date>[\d\\.|-]{10}).*").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
 
                 if (pluginNode == null)
                 {
@@ -343,53 +280,39 @@ namespace BnS_Multitool
                     File.Delete(@"modpolice\" + pluginNode.Name);
 
                 currentNode = pluginNode;
-                await client.DownloadFileAsync(currentNode, @"modpolice\" + pluginNode.Name, progress);
+                await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + pluginNode.Name, progress);
 
                 ProgressControl.updateProgressLabel("Unzipping: " + pluginNode.Name);
                 await Task.Delay(750);
                 Modpolice.ExtractZipFileToDirectory(@".\modpolice\" + pluginNode.Name, @".\modpolice", true);
 
-                ProgressControl.updateProgressLabel("Installing " + pluginName + " x86");
+                if (pluginName == "UE4_cutscene_removal")
+                    pluginName = "cutsceneremoval";
+
+                ProgressControl.updateProgressLabel("Installing " + pluginName);
                 await Task.Delay(750);
 
-                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86))
-                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_x86);
+                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_path))
+                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_path);
 
                 //Delete the current plugin dll
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll");
+                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_path + pluginName + ".dll"))
+                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_path + pluginName + ".dll");
 
                 //Make sure there isn't a plugin dll that is in an off state
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll.off"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll.off");
+                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_path + pluginName + ".dll.off"))
+                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_path + pluginName + ".dll.off");
 
-                File.Move(@".\modpolice\bin\plugins\" + pluginName + ".dll", SystemConfig.SYS.BNS_DIR + plugins_x86 + pluginName + ".dll");
-
-                ProgressControl.updateProgressLabel("Installing " + pluginName + " x64");
-                await Task.Delay(750);
-
-                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64))
-                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_x64);
-
-                //Delete the current plugin dll
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll");
-
-                //Make sure there isn't a plugin dll that is in an off state
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll.off"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll.off");
-
-                File.Move(@".\modpolice\bin64\plugins\" + pluginName + ".dll", SystemConfig.SYS.BNS_DIR + plugins_x64 + pluginName + ".dll");
+                MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
 
                 ProgressControl.updateProgressLabel("All done");
                 await Task.Delay(750);
-
-                await client.LogoutAsync();
 
             } catch (Exception ex)
             {
                 ProgressControl.errorSadPeepo(Visibility.Visible);
                 ProgressControl.updateProgressLabel(ex.Message);
+                Debug.WriteLine(ex.ToString());
                 await Task.Delay(7000);
             }
             try
@@ -402,43 +325,43 @@ namespace BnS_Multitool
 
                 if (pluginName == "fpsbooster")
                 {
-                    simplemodeTraining = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "fpsbooster.dll");
+                    simplemodeTraining = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_path + "fpsbooster.dll");
 
                     if (simplemodeTraining != null)
                         Dispatchers.buttonVisibility(del_fpsbooster, Visibility.Visible);
 
-                    Dispatchers.toggleIsChecked(simplemodeToggle, true);
-                    Dispatchers.labelContent(SimplemodeCurrentLbl, String.Format("Current: {0}", (simplemodeTraining != null) ? simplemodeTraining.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                    //Dispatchers.toggleIsChecked(simplemodeToggle, true);
+                    Dispatchers.labelContent(SimplemodeCurrentLbl, string.Format("Current: {0}", (simplemodeTraining != null) ? simplemodeTraining.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
                 }
                 else if (pluginName == "lessloadingscreens")
                 {
-                    lessLoadingScreen = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "lessloadingscreens.dll");
+                    lessLoadingScreen = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_path + "lessloadingscreens.dll");
 
                     if (lessLoadingScreen != null)
                         Dispatchers.buttonVisibility(del_lessloadingscreens, Visibility.Visible);
 
-                    Dispatchers.toggleIsChecked(lessloadingToggle, true);
-                    Dispatchers.labelContent(lessloadingCurrentLbl, String.Format("Current: {0}", (lessLoadingScreen != null) ? lessLoadingScreen.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                    //Dispatchers.toggleIsChecked(lessloadingToggle, true);
+                    Dispatchers.labelContent(lessloadingCurrentLbl, string.Format("Current: {0}", (lessLoadingScreen != null) ? lessLoadingScreen.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
                 }
-                else if (pluginName == "cutsceneremoval")
+                else if (pluginName == "UE4_cutscene_removal")
                 {
-                    cutscenePlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "cutsceneremoval.dll");
+                    cutscenePlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "cutsceneremoval.dll"));
 
                     if (cutscenePlugin != null)
                         Dispatchers.buttonVisibility(del_cutsceneremoval, Visibility.Visible);
 
                     Dispatchers.toggleIsChecked(CutsceneremovalToggle, true);
-                    Dispatchers.labelContent(CutsceneremovalCurrentLbl, String.Format("Current: {0}", (cutscenePlugin != null) ? cutscenePlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                    Dispatchers.labelContent(CutsceneremovalCurrentLbl, string.Format("Current: {0}", (cutscenePlugin != null) ? cutscenePlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
                 }
                 else
                 {
-                    highpriorityplugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "highpriority.dll");
+                    highpriorityplugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "highpriority.dll"));
 
                     if (highpriorityplugin != null)
                         Dispatchers.buttonVisibility(del_highpriority, Visibility.Visible);
 
                     Dispatchers.toggleIsChecked(HighpriorityToggle, true);
-                    Dispatchers.labelContent(HighpriorityCurrentLbl, String.Format("Current: {0}", (highpriorityplugin != null) ? highpriorityplugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                    Dispatchers.labelContent(HighpriorityCurrentLbl, string.Format("Current: {0}", (highpriorityplugin != null) ? highpriorityplugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
                 }
 
                 Dispatchers.btnIsEnabled((Button)sender, false);
@@ -453,14 +376,34 @@ namespace BnS_Multitool
             await Task.Run(async () => await checkOnlineVersions());
         }
 
+        public static void MoveDirectory(string source, string target)
+        {
+            var sourcePath = source.TrimEnd('\\', ' ');
+            var targetPath = target.TrimEnd('\\', ' ');
+            var files = Directory.EnumerateFiles(sourcePath, "*", SearchOption.AllDirectories)
+                                 .GroupBy(s => Path.GetDirectoryName(s));
+            foreach (var folder in files)
+            {
+                var targetFolder = folder.Key.Replace(sourcePath, targetPath);
+                Directory.CreateDirectory(targetFolder);
+                foreach (var file in folder)
+                {
+                    var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
+                    if (File.Exists(targetFile)) File.Delete(targetFile);
+                    File.Move(file, targetFile);
+                }
+            }
+            Directory.Delete(source, true);
+        }
+
         private void refreshSomeShit()
         {
             //Get the file info and display version for pluginloader
-            pluginloader = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + @"\bin\" + "winmm.dll");
-            Dispatchers.labelContent(pluginloaderLabel, String.Format("Current: {0}", (pluginloader != null) ? pluginloader.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            pluginloader = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, bin_path, "winmm.dll"));
+            Dispatchers.labelContent(pluginloaderLabel, string.Format("Current: {0}", (pluginloader != null) ? pluginloader.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
 
-            bnspatchPlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll");
-            Dispatchers.labelContent(bnspatchLabel, String.Format("Current: {0}", (bnspatchPlugin != null) ? bnspatchPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            bnspatchPlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnspatch.dll"));
+            Dispatchers.labelContent(bnspatchLabel, string.Format("Current: {0}", (bnspatchPlugin != null) ? bnspatchPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
         }
 
         private async void installModPolice(object sender, RoutedEventArgs e)
@@ -475,22 +418,22 @@ namespace BnS_Multitool
                 try
                 {
                     ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                    var client = new MegaApiClient();
-                    await client.LoginAnonymousAsync();
+                    if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
+                        await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
 
                     if (!Directory.Exists("modpolice"))
                         Directory.CreateDirectory("modpolice");
 
                     ProgressControl.updateProgressLabel("Retrieving file list...");
-                    IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                    IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
 
                     INode currentNode = null;
-                    IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
+                    IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(string.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
 
                     //Find our latest nodes for download
                     INode parent_node = nodes.Single(x => x.Type == NodeType.Root);
-                    INode bnspatch_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnspatch_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-                    INode pluginloader_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^loader3_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                    INode bnspatch_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnspatch_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                    INode pluginloader_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^loader3_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
 
                     if (pluginloader_node == null)
                     {
@@ -504,7 +447,7 @@ namespace BnS_Multitool
                             File.Delete(@"modpolice\" + pluginloader_node.Name);
 
                         ProgressControl.errorSadPeepo(Visibility.Hidden);
-                        await client.DownloadFileAsync(currentNode, @"modpolice\" + pluginloader_node.Name, progress);
+                        await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + pluginloader_node.Name, progress);
                     }
 
                     if (pluginloader_node == null)
@@ -519,7 +462,7 @@ namespace BnS_Multitool
                             File.Delete(@"modpolice\" + bnspatch_node.Name);
 
                         ProgressControl.errorSadPeepo(Visibility.Hidden);
-                        await client.DownloadFileAsync(currentNode, @"modpolice\" + bnspatch_node.Name, progress);
+                        await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + bnspatch_node.Name, progress);
                     }
 
                     ProgressControl.updateProgressLabel("All done, logging out...");
@@ -544,68 +487,52 @@ namespace BnS_Multitool
                                .OrderByDescending(d => new FileInfo(d).Name)
                                     .Select(Name => Path.GetFileNameWithoutExtension(Name)).First().ToString();
 
-                    ProgressControl.updateProgressLabel("Unzipping " + _PLUGINLOADER_VERSION);
-                    ExtractZipFileToDirectory(@".\modpolice\" + _PLUGINLOADER_VERSION + ".zip", @".\modpolice", true);
+                ProgressControl.updateProgressLabel("Unzipping " + _PLUGINLOADER_VERSION);
+                ExtractZipFileToDirectory(@".\modpolice\" + _PLUGINLOADER_VERSION + ".zip", @".\modpolice", true);
 
-                    await Task.Delay(750);
-                    ProgressControl.updateProgressLabel("Unzipping " + _BNSPATCH_VERSION);
-                    ExtractZipFileToDirectory(@".\modpolice\" + _BNSPATCH_VERSION + ".zip", @".\modpolice", true);
+                await Task.Delay(750);
+                ProgressControl.updateProgressLabel("Unzipping " + _BNSPATCH_VERSION);
+                ExtractZipFileToDirectory(@".\modpolice\" + _BNSPATCH_VERSION + ".zip", @".\modpolice", true);
 
-                    //pluginloader x86
-                    if (File.Exists(SystemConfig.SYS.BNS_DIR + bin_x86 + "winmm.dll"))
-                        File.Delete(SystemConfig.SYS.BNS_DIR + bin_x86 + "winmm.dll");
+                ProgressControl.updateProgressLabel("Installing Modpolice Core");
+                await Task.Delay(750);
 
-                    ProgressControl.updateProgressLabel("Installing Loader3 x86");
-                    await Task.Delay(750);
+                MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
 
-                    File.Move(@".\modpolice\bin\winmm.dll", SystemConfig.SYS.BNS_DIR + bin_x86 + "winmm.dll");
+                /*
+                //pluginloader x86
+                if (File.Exists(SystemConfig.SYS.BNS_DIR + bin_path + "winmm.dll"))
+                    File.Delete(SystemConfig.SYS.BNS_DIR + bin_path + "winmm.dll");
 
-                    //pluginloader x64
-                    if (File.Exists(SystemConfig.SYS.BNS_DIR + bin_x64 + "winmm.dll"))
-                        File.Delete(SystemConfig.SYS.BNS_DIR + bin_x64 + "winmm.dll");
+                ProgressControl.updateProgressLabel("Installing Loader3");
+                await Task.Delay(750);
 
-                    ProgressControl.updateProgressLabel("Installing Loader3 x64");
-                    await Task.Delay(750);
+                File.Move(Path.Combine(Directory.GetCurrentDirectory(), "modpolice", bin_path, "winmm.dll"), SystemConfig.SYS.BNS_DIR + bin_path + "winmm.dll");
 
-                    File.Move(@".\modpolice\bin64\winmm.dll", SystemConfig.SYS.BNS_DIR + bin_x64 + "winmm.dll");
+                //bnspatch x86
+                ProgressControl.updateProgressLabel("Checking if plugins folder exists");
+                await Task.Delay(500);
 
-                    //bnspatch x86
-                    ProgressControl.updateProgressLabel("Checking if plugins folder exists for x86");
-                    await Task.Delay(500);
+                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_path))
+                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_path);
 
-                    if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86))
-                        Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_x86);
+                ProgressControl.updateProgressLabel("Installing bnspatch");
+                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_path + "bnspatch.dll"))
+                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_path + "bnspatch.dll");
 
-                    ProgressControl.updateProgressLabel("Installing bnspatch x86");
-                    if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll"))
-                        File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll");
+                File.Move(Path.Combine(Directory.GetCurrentDirectory(), "modpolice", plugins_path, "bnspatch.dll"), Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnspatch.dll"));
+                */
+                ProgressControl.updateProgressLabel("Searching for patches.xml");
+                await Task.Delay(500);
 
-                    File.Move(@".\modpolice\bin\plugins\bnspatch.dll", SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll");
+                if (!File.Exists(patches_xml))
+                {
+                    ProgressControl.updateProgressLabel("patches.xml not found, installing...");
+                    File.WriteAllText(patches_xml, Properties.Resources.patches);
+                }
 
-                    //bnspatch x64
-                    ProgressControl.updateProgressLabel("Checking if plugins folder exists for x64");
-                    await Task.Delay(500);
-
-                    if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64))
-                        Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_x64);
-
-                    ProgressControl.updateProgressLabel("Installing bnspatch x64");
-                    if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnspatch.dll"))
-                        File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnspatch.dll");
-
-                    File.Move(@".\modpolice\bin64\plugins\bnspatch.dll", SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnspatch.dll");
-
-                    ProgressControl.updateProgressLabel("Searching for patches.xml");
-                    await Task.Delay(500);
-
-                    if(!File.Exists(patches_xml))
-                    {
-                        ProgressControl.updateProgressLabel("patches.xml not found, installing...");
-                        File.WriteAllText(patches_xml, Properties.Resources.patches);
-                    }
-
-                    ProgressControl.updateProgressLabel("pluginloader & bnspatch successfully installed");
-                    await Task.Delay(2000);
+                ProgressControl.updateProgressLabel("pluginloader & bnspatch successfully installed");
+                await Task.Delay(2000);
             } catch (Exception ex)
             {
                 ProgressControl.errorSadPeepo(Visibility.Visible);
@@ -621,11 +548,11 @@ namespace BnS_Multitool
                 _progressControl = null;
 
                 //Get the file info and display version for pluginloader
-                pluginloader = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + @"\bin\" + "winmm.dll");
-                Dispatchers.labelContent(pluginloaderLabel, String.Format("Current: {0}", (pluginloader != null) ? pluginloader.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                pluginloader = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, bin_path, "winmm.dll"));
+                Dispatchers.labelContent(pluginloaderLabel, string.Format("Current: {0}", (pluginloader != null) ? pluginloader.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
 
-                bnspatchPlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnspatch.dll");
-                Dispatchers.labelContent(bnspatchLabel, String.Format("Current: {0}", (bnspatchPlugin != null) ? bnspatchPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                bnspatchPlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnspatch.dll"));
+                Dispatchers.labelContent(bnspatchLabel, string.Format("Current: {0}", (bnspatchPlugin != null) ? bnspatchPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             } catch (Exception)
             {
                 //Why are we here, is it just to suffer?
@@ -651,9 +578,7 @@ namespace BnS_Multitool
                     string completeFileName = Path.GetFullPath(Path.Combine(destinationDirectoryFullPath, file.FullName));
 
                     if (!completeFileName.StartsWith(destinationDirectoryFullPath, StringComparison.OrdinalIgnoreCase))
-                    {
-                        throw new IOException("Trying to extract file outside of destination directory. See this link for more info: https://snyk.io/research/zip-slip-vulnerability");
-                    }
+                        throw new IOException("Trying to extract file outside of destination directory.");
 
                     if (file.Name == "")
                     {// Assuming Empty for Directory
@@ -667,7 +592,7 @@ namespace BnS_Multitool
 
         private void openBinLocation(object sender, RoutedEventArgs e)
         {
-            Process.Start(((Button)sender).Name == "openbin86" ? SystemConfig.SYS.BNS_DIR + @"\bin" : SystemConfig.SYS.BNS_DIR + @"\bin64");
+            Process.Start(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64"));
         }
 
         private async void installBNSNOGG(object sender, RoutedEventArgs e)
@@ -680,26 +605,26 @@ namespace BnS_Multitool
             try
             {
                 ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                var client = new MegaApiClient();
-                await client.LoginAnonymousAsync();
+                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
+                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
 
                 if (!Directory.Exists("modpolice"))
                     Directory.CreateDirectory("modpolice");
 
                 ProgressControl.updateProgressLabel("Retrieving file list...");
-                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
 
                 INode currentNode = null;
-                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
+                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(string.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
 
                 //Find our latest nodes for download
                 INode parent_node = nodes.Single(x => x.Type == NodeType.Root);
-                INode bnsnogg_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnsnogg_(?<date>[\d\\.]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                INode bnsnogg_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnsnogg_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
 
                 if (bnsnogg_node == null)
                 {
                     ProgressControl.errorSadPeepo(Visibility.Visible);
-                    ProgressControl.updateProgressLabel("Error retrieving pluginloader");
+                    ProgressControl.updateProgressLabel("Error retrieving bnsnogg");
                 }
                 else
                 {
@@ -708,7 +633,7 @@ namespace BnS_Multitool
                         File.Delete(@"modpolice\" + bnsnogg_node.Name);
 
                     ProgressControl.errorSadPeepo(Visibility.Hidden);
-                    await client.DownloadFileAsync(currentNode, @"modpolice\" + bnsnogg_node.Name, progress);
+                    await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + bnsnogg_node.Name, progress);
                 }
 
                 ProgressControl.updateProgressLabel("All done, logging out...");
@@ -721,39 +646,13 @@ namespace BnS_Multitool
                 ProgressControl.updateProgressLabel("Unzipping " + _BNSNOGG_VERSION);
                 ExtractZipFileToDirectory(@".\modpolice\" + _BNSNOGG_VERSION + ".zip", @".\modpolice", true);
 
-                //pluginloader x86
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + bin_x86 + "version.dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + bin_x86 + "version.dll");
+                if (!Directory.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path)))
+                    Directory.CreateDirectory(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path));
 
-                ProgressControl.updateProgressLabel("Installing bnsnogg x86");
+                ProgressControl.updateProgressLabel("Installing bnsnogg");
                 await Task.Delay(750);
 
-                File.Move(@".\modpolice\bin\version.dll", SystemConfig.SYS.BNS_DIR + bin_x86 + "version.dll");
-
-                //pluginloader x64
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + bin_x64 + "version.dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + bin_x64 + "version.dll");
-
-                ProgressControl.updateProgressLabel("Installing bnsnogg x64");
-                await Task.Delay(750);
-
-                File.Move(@".\modpolice\bin64\version.dll", SystemConfig.SYS.BNS_DIR + bin_x64 + "version.dll");
-
-                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86))
-                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_x86);
-
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnsnogg.dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnsnogg.dll");
-
-                File.Move(@".\modpolice\bin\plugins\bnsnogg.dll", SystemConfig.SYS.BNS_DIR + plugins_x86 + "bnsnogg.dll");
-
-                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64))
-                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_x64);
-
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnsnogg.dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnsnogg.dll");
-
-                File.Move(@".\modpolice\bin64\plugins\bnsnogg.dll", SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnsnogg.dll");
+                Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "modpolice", plugins_path)).ToList().ForEach(f => File.Move(f, Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, Path.GetFileName(f))));
 
                 ProgressControl.updateProgressLabel("bnsnogg successfully installed");
                 await Task.Delay(2000);
@@ -772,8 +671,8 @@ namespace BnS_Multitool
                 ProgressPanel.Children.Clear();
                 _progressControl = null;
 
-                bnsnoggPlugin = new pluginFileInfo(SystemConfig.SYS.BNS_DIR + plugins_x64 + "bnsnogg.dll");
-                Dispatchers.labelContent(bnsnogglocalLabel, String.Format("Current: {0}", (bnsnoggPlugin != null) ? bnsnoggPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+                bnsnoggPlugin = new pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnsnogg.dll"));
+                Dispatchers.labelContent(bnsnogglocalLabel, string.Format("Current: {0}", (bnsnoggPlugin != null) ? bnsnoggPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
             }
             catch (Exception)
             {
@@ -789,11 +688,10 @@ namespace BnS_Multitool
             ProgressPanel.Children.Add(_progressControl);
 
             string senderName = ((Button)sender).Name.Split('_')[1];
-            ProgressControl.updateProgressLabel(String.Format("Removing plugin: {0}", senderName));
+            ProgressControl.updateProgressLabel(string.Format("Removing plugin: {0}", senderName));
             await Task.Delay(500);
 
-            string x86_path = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", senderName + ".dll");
-            string x64_path = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64", "plugins", senderName + ".dll");
+            string x86_path = Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, senderName + ".dll");
 
             try
             {
@@ -802,23 +700,17 @@ namespace BnS_Multitool
                 else
                     if (File.Exists(x86_path + ".off"))
                     File.Delete(x86_path + ".off");
-
-                if (File.Exists(x64_path))
-                    File.Delete(x64_path);
-                else
-                    if (File.Exists(x64_path + ".off"))
-                    File.Delete(x64_path + ".off");
             }
             catch (Exception)
             { }
 
-            ProgressControl.updateProgressLabel(String.Format("{0} removed", senderName));
-            await checkOnlineVersions();
+            ProgressControl.updateProgressLabel(string.Format("{0} removed", senderName));
 
             ProgressGrid.Visibility = Visibility.Hidden;
             MainGrid.Visibility = Visibility.Visible;
             ProgressPanel.Children.Clear();
             _progressControl = null;
+            await checkOnlineVersions();
         }
     }
 }

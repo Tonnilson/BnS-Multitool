@@ -1,5 +1,4 @@
-﻿using Hardcodet.Wpf.TaskbarNotification;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -23,7 +22,7 @@ namespace BnS_Multitool
 {
     public partial class MainWindow : Window
     {
-        public static TaskbarIcon taskBar = new TaskbarIcon();
+        //public static TaskbarIcon taskBar = new TaskbarIcon();
         public static string Fingerprint;
         public static Frame mainWindowFrame;
         public static Button UpdateButtonObj;
@@ -33,11 +32,13 @@ namespace BnS_Multitool
         public static string currentPageText = "";
         public static List<CHANGELOG_STRUCT> ONLINE_CHANGELOG;
         public static bool isMinimized = false;
+        public static System.Windows.Forms.NotifyIcon notifyIcon;
         public class ONLINE_VERSION_STRUCT
         {
             public string VERSION { get; set; }
-            public List<string> QOL_HASH { get; set; }
+            public string QOL_HASH { get; set; }
             public string QOL_ARCHIVE { get; set; }
+            public int ANTI_CHEAT_ENABLED { get; set; }
             public List<CHANGELOG_STRUCT> CHANGELOG { get; set; }
         }
 
@@ -97,10 +98,13 @@ namespace BnS_Multitool
             }
 
             //Construct our taskbar icon
-            taskBar.Icon = Properties.Resources.AppIcon;
-            taskBar.ToolTipText = "BnS Multi Tool";
-            taskBar.TrayMouseDoubleClick += new RoutedEventHandler(OnNotifyDoubleClick);
-            taskBar.Visibility = Visibility.Hidden;
+            notifyIcon = new System.Windows.Forms.NotifyIcon();
+            notifyIcon.Visible = false;
+            notifyIcon.Icon = Properties.Resources.AppIcon;
+            notifyIcon.Text = "BnS Multi Tool";
+            notifyIcon.DoubleClick += NotifyIcon_DoubleClick;
+
+            Application.Current.Exit += Current_Exit;
 
             UpdateButtonObj = MultiTool_UPDATE;
 
@@ -128,19 +132,19 @@ namespace BnS_Multitool
                 qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
 
                 ToolTipService.ShowDurationProperty.OverrideMetadata(
-                    typeof(DependencyObject), new FrameworkPropertyMetadata(Int32.MaxValue));
+                    typeof(DependencyObject), new FrameworkPropertyMetadata(int.MaxValue));
             }
             catch (Exception) { }
 
             if (File.Exists("BnS-Multi-Tool-Updater.exe"))
                 File.Delete("BnS-Multi-Tool-Updater.exe");
 
-            if (String.IsNullOrEmpty(SystemConfig.SYS.BNS_DIR) || !Directory.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR,"bin")))
+            if (String.IsNullOrEmpty(SystemConfig.SYS.BNS_DIR) || !Directory.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR,"BNSR")))
             {
                 //First check the registry, see if we can find the correct path, if not prompt the user when catching the error.
                 try
                 {
-                    RegistryKey BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\NCWest\BnS");
+                    RegistryKey BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\NCWest\BnS_UE4");
 
                     if (BNS_REGISTRY != null)
                     {
@@ -150,7 +154,7 @@ namespace BnS_Multitool
                             SystemConfig.SYS.BNS_DIR += "\\";
                     } else
                     {
-                        BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\plaync\BNS_KOR");
+                        BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\plaync\BNS_LIVE");
 
                         if (BNS_REGISTRY == null)
                             throw new Exception("No registry entries for client");
@@ -164,10 +168,6 @@ namespace BnS_Multitool
                     }
 
                     SystemConfig.appendChangesToConfig();
-
-                    if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\"))
-                        throw new Exception("Directory doesn't eixst");
-
                 }
                 catch (Exception)
                 {
@@ -201,11 +201,9 @@ namespace BnS_Multitool
             }
         }
 
-        private void EXIT_BTN_Click(object sender, RoutedEventArgs e)
-        {
-            taskBar.Dispose();
-            this.Close();
-        }
+        private void Current_Exit(object sender, ExitEventArgs e) =>notifyIcon.Dispose();
+        private void NotifyIcon_DoubleClick(object sender, EventArgs e) => changeWindowState(true, true);
+        private void EXIT_BTN_Click(object sender, RoutedEventArgs e) => this.Close();
 
         private void setCurrentPage(string pageName)
         {
@@ -245,14 +243,14 @@ namespace BnS_Multitool
             GC.WaitForPendingFinalizers();
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             mainWindowFrame = MainFrame;
             mainWindow = this;
             //Load our main page.
             setCurrentPage("MainPage");
 
-            VERSION_LABEL.Text = String.Format("BnS Multi Tool Version: {0}", FileVersion());
+            VERSION_LABEL.Text = string.Format("BnS Multi Tool Version: {0}", FileVersion());
 
             //Check version in settings.json and overwrite if they don't match, means they probably updated manually...
             if(SystemConfig.SYS.VERSION != FileVersion())
@@ -261,29 +259,21 @@ namespace BnS_Multitool
                 SystemConfig.appendChangesToConfig();
             }
 
-           // await Task.Run(() => { });
+            //Log the megaAPI client in..
+            if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
+                await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
         }
 
-        private void CloseMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            Environment.Exit(0);
-        }
+        private void CloseMenuItem_Click(object sender, RoutedEventArgs e) => this.Close();
 
-        public static string FileVersion()
-        {
-            return FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
-        }
+        public static string FileVersion() =>
+             FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
 
-        private void OnNotifyDoubleClick(object sender, RoutedEventArgs e)
-        {
+        private void OnNotifyDoubleClick(object sender, RoutedEventArgs e) =>
             changeWindowState(true,true);
-        }
 
-        private void MAIN_CLICK(object sender, RoutedEventArgs e)
-        {
-            //PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
+        private void MAIN_CLICK(object sender, RoutedEventArgs e) =>
             setCurrentPage("MainPage");
-        }
 
         private void LAUNCHER_CLICK(object sender, RoutedEventArgs e)
         {
@@ -294,9 +284,7 @@ namespace BnS_Multitool
         public static void changeWindowState(bool state, bool overwrite = false)
         {
             if (SystemConfig.SYS.MINIMZE_ACTION == 0 && !overwrite)
-            {
                 mainWindow.WindowState = WindowState.Minimized;
-            }
             else
             {
                 mainWindow.Dispatcher.Invoke(new Action(() =>
@@ -307,11 +295,11 @@ namespace BnS_Multitool
                         mainWindow.Visibility = Visibility.Visible;
                         isMinimized = false;
                         Thread.Sleep(150);
-                        taskBar.Visibility = Visibility.Hidden;
+                        notifyIcon.Visible = false;
                     }
                     else
                     {
-                        taskBar.Visibility = Visibility.Visible;
+                        notifyIcon.Visible = true;
                         Application.Current.MainWindow.ShowInTaskbar = false;
                         Application.Current.MainWindow.Visibility = Visibility.Hidden;
                         isMinimized = true;
@@ -402,13 +390,7 @@ namespace BnS_Multitool
 
         private void GameUpdaterButton(object sender, RoutedEventArgs e)
         {
-            if((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.TW)
-            {
-                var dialog = new ErrorPrompt("This feature is only available for NA, EU and KR region");
-                dialog.ShowDialog();
-            }
-            else
-                setCurrentPage("Gameupdater");
+            setCurrentPage("Gameupdater");
         }
 
         private void SettingsBrowse(object sender, RoutedEventArgs e)
@@ -428,19 +410,56 @@ namespace BnS_Multitool
             {
                 //Get rid of compatibility options on Client.exe for both bin & bin64
                 RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers", true);
-                var keys = key.GetValueNames().Where(x => x.Contains(@"bin\Client.exe") || x.Contains(@"bin64\Client.exe"));
+                var keys = key.GetValueNames().Where(x => x.Contains(@"BNSR\Binaries\Win64\BNSR.exe"));
                 foreach (var v in keys)
                     key.DeleteValue(v);
 
                 key = Registry.LocalMachine.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers", true);
-                keys = key.GetValueNames().Where(x => x.Contains(@"bin\Client.exe") || x.Contains(@"bin64\Client.exe"));
+                keys = key.GetValueNames().Where(x => x.Contains(@"BNSR\Binaries\Win64\BNSR.exe"));
                 foreach (var v in keys)
                     key.DeleteValue(v);
 
+                new ErrorPrompt("Compatibility Options have been cleared for BNSR.exe", true).ShowDialog();
             }
             catch (Exception ex)
             {
                 Debug.WriteLine(ex.Message);
+            }
+        }
+
+        private void FTHExclusion(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                RegistryKey FTH = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\FTH", true);
+                var exclusionObj = FTH.GetValue("ExclusionList");
+                var exclusionList = new List<string>(exclusionObj as string[]);
+
+                if (!exclusionList.Any(exe => exe == Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR","Binaries","Win64","BNSR.exe")))
+                {
+                    exclusionList.Add(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
+                    FTH.SetValue("ExclusionList", exclusionList.ToArray());
+                    new ErrorPrompt("FTH Exclusion set for BNSR.exe", true).ShowDialog();
+                }
+            } catch (Exception ex)
+            {
+                new ErrorPrompt(ex.Message).ShowDialog();
+            }
+        }
+
+        private void ClearFTHState(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var state = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\FTH\State", true);
+                var stateobj = state.GetValue(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
+                if (stateobj != null)
+                    state.DeleteValue(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
+
+                new ErrorPrompt("Any FTH State for BNSR.exe has been cleared", true).ShowDialog();
+            } catch (Exception)
+            {
+
             }
         }
     }

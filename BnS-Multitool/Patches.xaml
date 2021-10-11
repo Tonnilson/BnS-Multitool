@@ -45,7 +45,7 @@
 
         </Button>
 
-        <Button x:Name="patches_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="393,11,233,448">
+        <Button x:Name="patches_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="393,10,233,449">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -58,7 +58,7 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button x:Name="patches_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="357,11,269,448" Click="handleToggle">
+        <Button x:Name="patches_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="357,10,269,449" Click="handleToggle">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
@@ -91,7 +91,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="46,10,580,449">
+        <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="44,10,582,449">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -104,7 +104,7 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="10,11,616,448" Click="handleToggle">
+        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="9,10,617,449" Click="handleToggle">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>

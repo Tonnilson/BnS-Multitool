@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Text;
+using CG.Web.MegaApiClient;
 
 namespace BnS_Multitool
 {
@@ -34,8 +36,11 @@ namespace BnS_Multitool
             EU,
             TW,
             KR,
-            TEST
+            TEST,
+            NAEU
         }
+
+        public static MegaApiClient MEGA_API_CLIENT = new MegaApiClient();
 
         private static void refreshServerVar()
         {
@@ -47,7 +52,7 @@ namespace BnS_Multitool
                     break;
                 case BnS_Region.TW:
                     loginServer = "up4svr.plaync.com.tw";
-                    loginServerVar = "BnS";
+                    loginServerVar = "TWBNSUE4";
                     break;
                 case BnS_Region.TEST:
                     loginServer = "up4svr.plaync.com";
@@ -55,7 +60,7 @@ namespace BnS_Multitool
                     break;
                 default:
                     loginServer = "updater.nclauncher.ncsoft.com";
-                    loginServerVar = "BnS";
+                    loginServerVar = "BnS_UE4";
                     break;
             }
         }
@@ -113,7 +118,7 @@ namespace BnS_Multitool
 
         public static void GameVersionCheck()
         {
-            IniHandler VersionInfo_BnS = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, (BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == BnS_Region.KR ? "VersionInfo_BNS_KOR.ini" : "VersionInfo_BnS.ini"));
+            IniHandler VersionInfo_BnS = new IniHandler(Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault());
             localBnSVersion = VersionInfo_BnS.Read("VersionInfo", "GlobalVersion");
             onlineBnSVersion = onlineVersionNumber();
 

@@ -19,7 +19,10 @@ namespace BnS_Multitool
             path = INIPath;
         }
 
-        public void Write(string Section, string Key, string Value) => WritePrivateProfileString(Section, Key, Value, this.path);
+        public void Write(string Section, string Key, string Value)
+        {
+            WritePrivateProfileString(Section, Key, Value, this.path);
+        }
 
         public string Read(string Section, string Key)
         {

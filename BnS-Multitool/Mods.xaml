@@ -26,7 +26,7 @@
                 <ListBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel  Orientation="Horizontal">
-                            <CheckBox IsChecked="{Binding isChecked, Mode=TwoWay}" />
+                            <CheckBox IsChecked="{Binding isChecked, Mode=TwoWay}" Checked="OnModChecked"/>
                             <TextBlock Text="{Binding Path=Name}"
                            Foreground="White" FontFamily="Arial" FontSize="14" FontWeight="Normal" />
                         </StackPanel>
@@ -78,7 +78,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Content="Local Dat" Margin="483,187,51,276" FontFamily="Arial Black" FontSize="16" Click="OpenLocalDatEditor" RenderTransformOrigin="0.5,0.753"/>
+            <Button IsEnabled="False" Content="Local Dat" Margin="483,187,51,276" FontFamily="Arial Black" FontSize="16" Click="OpenLocalDatEditor" RenderTransformOrigin="0.5,0.753"/>
         </Grid>
         <Grid x:Name="LocalDatGrid" Visibility="Hidden">
             <Label Content="Filter Name:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="0,20,512,432"/>

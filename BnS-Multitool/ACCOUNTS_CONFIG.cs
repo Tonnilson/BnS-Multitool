@@ -28,6 +28,7 @@ namespace BnS_Multitool
                     AUTPATCH_QOL = 0,
                     MEMORY_CLEANER = 0,
                     ADDITIONAL_PARAMS = "",
+                    LAST_USED_ACCOUNT = -1,
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
                 };
 
@@ -77,6 +78,7 @@ namespace BnS_Multitool
             public int AUTPATCH_QOL { get; set; }
             public string ADDITIONAL_PARAMS { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
+            public int LAST_USED_ACCOUNT { get; set; }
         }
 
         public class BNS_SAVED_ACCOUNTS_STRUCT

@@ -90,6 +90,16 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
+        internal static byte[] class_removes {
+            get {
+                object obj = ResourceManager.GetObject("class_removes", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to # target hp
         ///UI.Gauge.CurMax
         ///
@@ -116,7 +126,7 @@ namespace BnS_Multitool.Properties {
         ///UI.DamageMeter.Name.Pc
         ///
         ///# challengemode stuff
-        ///UI.ChallengeParty.*
+        ///UI.ChallengeParty*
         ///
         ///# chat tab
         ///UI.Hypertext.*.
@@ -136,6 +146,8 @@ namespace BnS_Multitool.Properties {
         ///        &lt;option name=&quot;useMarketplace&quot; enable=&quot;0&quot; /&gt;
         ///        &lt;option name=&quot;AutoCombat&quot; enable=&quot;0&quot; useRange=&quot;0&quot; range=&quot;30&quot;/&gt;
         ///        &lt;option name=&quot;useNoCameraLock&quot; enable=&quot;0&quot; /&gt;
+        ///        &lt;option name=&quot;useNoWallRunStamina&quot; enable=&quot;0&quot; /&gt;
+        ///        &lt;option name=&quot;useDebug&quot; enable=&quot;0&quot; /&gt;
         ///    &lt;/options&gt;
         ///    &lt;gcd enable=&quot;0&quot;&gt;
         ///    &lt;/gcd&gt;

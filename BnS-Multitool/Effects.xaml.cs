@@ -2,7 +2,9 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -18,7 +20,8 @@ namespace BnS_Multitool
     {
         private ProgressControl _progressControl;
         private static bool _isInitialized = false; //logic for toggles cause there isn't a fucking click event
-        private static string backupLocation = SystemConfig.SYS.BNS_DIR + @"\contents\bns\backup\";
+        private static string removalDirectory;
+        private static string removalPath;
 
         public class toggleStruct
         {
@@ -29,23 +32,28 @@ namespace BnS_Multitool
 
         private static List<toggleStruct> systemToggles;
 
+        [DllImport("kernel32.dll")]
+        static extern bool CreateSymbolicLink(
+        string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
+
+        enum SymbolicLink
+        {
+            File = 0,
+            Directory = 1
+        }
+
         private bool DoesFilesExist(string className, bool section)
         {
             //true for effects, false for animations
             if (section)
-                return SystemConfig.SYS.CLASSES.Where(x => x.CLASS == className).SelectMany(upk => upk.EFFECTS).Any(file => File.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\" + file));
+                return SystemConfig.SYS.CLASS.Where(x => x.CLASS == className).SelectMany(upk => upk.EFFECTS).Any(file => File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content","Paks","Removes", file)));
             else
-                return SystemConfig.SYS.CLASSES.Where(x => x.CLASS == className).SelectMany(upk => upk.ANIMATIONS).Any(file => File.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\" + file));
+                return SystemConfig.SYS.CLASS.Where(x => x.CLASS == className).SelectMany(upk => upk.ANIMATIONS).Any(file => File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Removes", file)));
         }
 
         public Effects()
         {
             InitializeComponent();
-
-            //Make sure the BnS directory is valid and create the backup directory if it does not exist
-            if (Directory.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\"))
-                if (!Directory.Exists(backupLocation))
-                    Directory.CreateDirectory(backupLocation);
 
             systemToggles = new List<toggleStruct>()
             {
@@ -61,12 +69,43 @@ namespace BnS_Multitool
                 new toggleStruct() {className = "Astromancer", animToggle = astro_anim_toggle, fxToggle = astro_fx_toggle},
                 new toggleStruct() {className = "Warlock", animToggle = wl_anim_toggle, fxToggle = wl_fx_toggle},
                 new toggleStruct() {className = "Warden", animToggle = wd_anim_toggle, fxToggle = wd_fx_toggle},
-                new toggleStruct() {className = "Archer", animToggle = arc_anim_toggle, fxToggle = arc_fx_toggle}
+                new toggleStruct() {className = "Archer", animToggle = arc_anim_toggle, fxToggle = arc_fx_toggle},
+                new toggleStruct() {className = "Dualblade", animToggle = dualblade_anim_toggle, fxToggle = dualblade_fx_toggle}
             };
+        }
+
+        private void ExtractPakFiles()
+        {
+            try
+            {
+                using (var memoryStream = new MemoryStream(Properties.Resources.class_removes))
+                {
+                    ZipArchive archive = new ZipArchive(memoryStream);
+                    foreach(ZipArchiveEntry entry in archive.Entries)
+                        using (var fs = new FileStream(Path.Combine(removalDirectory, entry.FullName), FileMode.Create, FileAccess.Write))
+                            entry.Open().CopyTo(fs);
+                }
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.Message);
+            }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            if (Directory.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content")))
+            {
+                removalDirectory = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Removes");
+                removalPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Removes");
+
+                if (!Directory.Exists(removalPath)) Directory.CreateDirectory(removalPath);
+                if (!Directory.Exists(removalDirectory))
+                {
+                    Directory.CreateDirectory(removalDirectory);
+                    ExtractPakFiles();
+                }
+            }
+
             refreshToggles();
 
             GC.Collect();
@@ -76,19 +115,13 @@ namespace BnS_Multitool
         {
             _isInitialized = false;
             //Loop through individual classes and check if their animation upk's and effect upk's exist, if so flip their toggles to on.
-            foreach (var classData in SystemConfig.SYS.CLASSES)
+            foreach (var classData in SystemConfig.SYS.CLASS)
             {
                 var curClass = systemToggles.Where(x => x.className == classData.CLASS).FirstOrDefault();
-                if (DoesFilesExist(classData.CLASS, true))
-                    curClass.fxToggle.IsChecked = true;
 
-                if (DoesFilesExist(classData.CLASS, false))
-                    curClass.animToggle.IsChecked = true;
+                curClass.fxToggle.IsChecked = DoesFilesExist(classData.CLASS, true) ? false : true;
+                curClass.animToggle.IsChecked = DoesFilesExist(classData.CLASS, false) ? false : true;
             }
-
-            //Check if any of the other effects are present, if so toggle on.
-            if (SystemConfig.SYS.MAIN_UPKS.Any(file => File.Exists(SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\" + file)))
-                otherEffectsToggle.IsChecked = true;
 
             _isInitialized = true;
         }
@@ -102,7 +135,7 @@ namespace BnS_Multitool
                 if (!_isInitialized)
                     return;
 
-                if (Process.GetProcessesByName("Client").Length >= 1)
+                if (Process.GetProcessesByName("BNSR").Where(proc => !proc.HasExited).Count() >= 1)
                 {
                     peepoWtfText.Text = "You can't do that when Blade & Soul is already running!";
                     ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
@@ -121,25 +154,17 @@ namespace BnS_Multitool
                     if (currentToggle.Name.Contains("_fx_"))
                     {
                         sysToggle = systemToggles.Where(x => x.fxToggle.Name == currentToggle.Name).FirstOrDefault();
-                        upkfiles = SystemConfig.SYS.CLASSES.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.EFFECTS).FirstOrDefault();
+                        upkfiles = SystemConfig.SYS.CLASS.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.EFFECTS).FirstOrDefault();
                     }
                     else
                     {
                         sysToggle = systemToggles.Where(x => x.animToggle.Name == currentToggle.Name).FirstOrDefault();
-                        upkfiles = SystemConfig.SYS.CLASSES.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.ANIMATIONS).FirstOrDefault();
+                        upkfiles = SystemConfig.SYS.CLASS.Where(x => x.CLASS == sysToggle.className).Select(upk => upk.ANIMATIONS).FirstOrDefault();
                     }
 
-                    //We're restoring
-                    if (currentToggle.IsChecked)
-                    {
-                        sourceDirectory = backupLocation;
-                        destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                    }
-                    else
-                    {
-                        sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                        destinationDirectory = backupLocation;
-                    }
+                    sourceDirectory = removalPath;
+                    destinationDirectory = removalDirectory;
+
 
                     // _isInitialized = false;
                     if (upkfiles.Count() > 0)
@@ -149,12 +174,17 @@ namespace BnS_Multitool
                             try
                             {
                                 //Move our target file to our new destination
-                                if (File.Exists(sourceDirectory + file))
+                                if (File.Exists(Path.Combine(destinationDirectory, file)))
                                 {
-                                    if (!File.Exists(destinationDirectory + file))
-                                        File.Move(sourceDirectory + file, destinationDirectory + file);
-                                    else
-                                        File.Delete(sourceDirectory + file);
+                                    if(!File.Exists(Path.Combine(sourceDirectory, file)))
+                                    {
+                                        CreateSymbolicLink(Path.Combine(sourceDirectory, file), Path.Combine(destinationDirectory, file), SymbolicLink.File);
+                                        CreateSymbolicLink(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))), Path.Combine(destinationDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))), SymbolicLink.File);
+                                    } else
+                                    {
+                                        if (File.Exists(Path.Combine(sourceDirectory, file))) File.Delete(Path.Combine(sourceDirectory, file));
+                                        if (File.Exists(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))))) File.Delete(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))));
+                                    }
                                 }
                             }
                             catch (Exception)
@@ -185,19 +215,18 @@ namespace BnS_Multitool
                     if (currentToggle.IsChecked)
                     {
                         ProgressControl.errorSadPeepo(Visibility.Hidden);
-                        ProgressControl.updateProgressLabel("Restoring files");
+                        ProgressControl.updateProgressLabel("Enabling Effects");
                         await Task.Delay(150);
-                        sourceDirectory = backupLocation;
-                        destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
                     }
                     else
                     {
                         ProgressControl.errorSadPeepo(Visibility.Hidden);
-                        ProgressControl.updateProgressLabel("Removing files");
+                        ProgressControl.updateProgressLabel("Removing Effects");
                         await Task.Delay(150);
-                        sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                        destinationDirectory = backupLocation;
                     }
+
+                    sourceDirectory = removalPath;
+                    destinationDirectory = removalDirectory;
 
                     if (upkFiles.Count() > 0)
                     {
@@ -205,18 +234,19 @@ namespace BnS_Multitool
                         {
                             try
                             {
-                                ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
-                                await Task.Delay(25);
-                                //Move our target file to our new destination
-                                if (File.Exists(sourceDirectory + file))
+                                if (File.Exists(Path.Combine(destinationDirectory, file)))
                                 {
-                                    ProgressControl.updateProgressLabel(String.Format("{0} {1}", (currentToggle.IsChecked) ? "Restoring" : "Removing", file));
-                                    if (!File.Exists(destinationDirectory + file))
-                                        File.Move(sourceDirectory + file, destinationDirectory + file);
+                                    if (!File.Exists(Path.Combine(sourceDirectory, file)))
+                                    {
+                                        CreateSymbolicLink(Path.Combine(sourceDirectory, file), Path.Combine(destinationDirectory, file), SymbolicLink.File);
+                                        CreateSymbolicLink(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))), Path.Combine(destinationDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))), SymbolicLink.File);
+                                    }
                                     else
-                                        File.Delete(sourceDirectory + file);
+                                    {
+                                        if (File.Exists(Path.Combine(sourceDirectory, file))) File.Delete(Path.Combine(sourceDirectory, file));
+                                        if (File.Exists(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))))) File.Delete(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))));
+                                    }
                                 }
-
                             }
                             catch (Exception ex)
                             {
@@ -264,7 +294,7 @@ namespace BnS_Multitool
             {
                 Debug.WriteLine("Animation Toggle");
                 _isInitialized = false;
-                upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.ANIMATIONS).ToArray();
+                upkFiles = SystemConfig.SYS.CLASS.SelectMany(entries => entries.ANIMATIONS).ToArray();
                 foreach (var fuckass in systemToggles)
                     fuckass.animToggle.IsChecked = currentState;
                 _isInitialized = true;
@@ -273,7 +303,7 @@ namespace BnS_Multitool
             {
                 Debug.WriteLine("effect Toggle");
                 _isInitialized = false;
-                upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.EFFECTS).ToArray();
+                upkFiles = SystemConfig.SYS.CLASS.SelectMany(entries => entries.EFFECTS).ToArray();
                 foreach (var fuckass in systemToggles)
                     fuckass.fxToggle.IsChecked = currentState;
                 _isInitialized = true;
@@ -283,9 +313,9 @@ namespace BnS_Multitool
                 _isInitialized = false;
 
                 //Put all animations and stuff into one big array, I'm sure there is a better way to do this but it's 6am and I can't be bothered to think efficient.
-                upkFiles = SystemConfig.SYS.CLASSES.SelectMany(entries => entries.ANIMATIONS).ToArray();
-                upkFiles = upkFiles.Concat(SystemConfig.SYS.CLASSES.SelectMany(entries => entries.EFFECTS)).ToArray();
-                upkFiles =  upkFiles.Concat(SystemConfig.SYS.MAIN_UPKS).ToArray();
+                upkFiles = SystemConfig.SYS.CLASS.SelectMany(entries => entries.ANIMATIONS).ToArray();
+                upkFiles = upkFiles.Concat(SystemConfig.SYS.CLASS.SelectMany(entries => entries.EFFECTS)).ToArray();
+                //upkFiles =  upkFiles.Concat(SystemConfig.SYS.MAIN_UPKS).ToArray();
 
                 foreach (var fuckass in systemToggles)
                 {
@@ -308,19 +338,18 @@ namespace BnS_Multitool
             if (currentState)
             {
                 ProgressControl.errorSadPeepo(Visibility.Hidden);
-                ProgressControl.updateProgressLabel("Restoring files");
+                ProgressControl.updateProgressLabel("Enabling");
                 await Task.Delay(150);
-                sourceDirectory = backupLocation;
-                destinationDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
             }
             else
             {
                 ProgressControl.errorSadPeepo(Visibility.Hidden);
-                ProgressControl.updateProgressLabel("Removing files");
+                ProgressControl.updateProgressLabel("Disabling");
                 await Task.Delay(150);
-                sourceDirectory = SystemConfig.SYS.BNS_DIR + @"\contents\bns\CookedPC\";
-                destinationDirectory = backupLocation;
             }
+
+            sourceDirectory = removalPath;
+            destinationDirectory = removalDirectory;
 
             if (upkFiles.Count() > 0)
             {
@@ -331,13 +360,20 @@ namespace BnS_Multitool
                         ProgressControl.updateProgressLabel(String.Format("Checking for {0}", file));
                         await Task.Delay(25);
                         //Move our target file to our new destination
-                        if (File.Exists(sourceDirectory + file))
+                        if (File.Exists(Path.Combine(destinationDirectory, file)))
                         {
-                            ProgressControl.updateProgressLabel(String.Format("{0} {1}", currentState ? "Restoring" : "Removing", file));
-                            if (!File.Exists(destinationDirectory + file))
-                                File.Move(sourceDirectory + file, destinationDirectory + file);
-                            else
-                                File.Delete(sourceDirectory + file);
+                            if (!File.Exists(Path.Combine(sourceDirectory, file)) && !currentState)
+                            {
+                                CreateSymbolicLink(Path.Combine(sourceDirectory, file), Path.Combine(destinationDirectory, file), SymbolicLink.File);
+                                CreateSymbolicLink(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))), Path.Combine(destinationDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))), SymbolicLink.File);
+                            }
+                            else if(currentState)
+                            {
+                                if (File.Exists(Path.Combine(sourceDirectory, file)))
+                                    File.Delete(Path.Combine(sourceDirectory, file));
+                                if (File.Exists(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file)))))
+                                    File.Delete(Path.Combine(sourceDirectory, string.Format("{0}.sig", Path.GetFileNameWithoutExtension(file))));
+                            }
                         }
 
                     }

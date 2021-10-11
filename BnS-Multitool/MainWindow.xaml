@@ -5,8 +5,12 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BnS_Multitool"
         mc:Ignorable="d"
-        Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="True" Background="#FF151617" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
+        Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="False" Background="#FF151617" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Grid>
+        <Grid.Effect>
+        <DropShadowEffect BlurRadius="10" Direction="-90"
+                              RenderingBias="Quality" ShadowDepth="1"/>
+        </Grid.Effect>
         <DockPanel LastChildFill="False" Opacity="0.95">
             <StackPanel DockPanel.Dock="Left" Width="200" Background="#161a1f">
                 <StackPanel>
@@ -54,6 +58,10 @@
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#FF242E3C"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="Gray"/>
+                                        <Setter Property="Background" Value="#FF111417"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -105,6 +113,10 @@
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#FF242E3C"/>
                                     </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="Gray"/>
+                                        <Setter Property="Background" Value="#FF111417"/>
+                                    </Trigger>
                                 </Style.Triggers>
                             </Style>
                         </Button.Style>
@@ -129,6 +141,10 @@
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#FF242E3C"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="Gray"/>
+                                        <Setter Property="Background" Value="#FF111417"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -156,6 +172,10 @@
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
                                         <Setter Property="Background" Value="#FF242E3C"/>
+                                    </Trigger>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="Gray"/>
+                                        <Setter Property="Background" Value="#FF111417"/>
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
@@ -217,6 +237,9 @@
                     <Label Content="Game Updater" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,86,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
                     <Label Content="Updater threads" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,121,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
                     <ComboBox x:Name="lstBoxUpdaterThreads" Margin="176,121,285,338" FontWeight="Bold" FontSize="14">
+                        <ComboBoxItem>1</ComboBoxItem>
+                        <ComboBoxItem>2</ComboBoxItem>
+                        <ComboBoxItem>3</ComboBoxItem>
                         <ComboBoxItem>4</ComboBoxItem>
                         <ComboBoxItem>5</ComboBoxItem>
                         <ComboBoxItem>6</ComboBoxItem>
@@ -242,6 +265,41 @@
                     </ComboBox>
                     <Label Content="Enable Ping Check" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,315,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
                     <Button Content="Remove Compatibility Options" FontWeight="Bold" Click="CompatibilityOptions_Click" Margin="38,346,285,109" />
+                    <Button Content="Add FTH Exclusion" FontWeight="Bold" Click="FTHExclusion" Margin="241,346,144,109">
+                        <Button.ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Add FTH Exclusion for BNSR</TextBlock>
+                                <TextBlock>
+                                       Adds exclusion for BNSR.exe to FTH
+                                        <LineBreak/>
+                                        FTH (Fault Tolerant Heap) is a subsystem introduced in Windows 7 that is responsible for monitoring application
+                                         <LineBreak/>
+                                          crashes and attempts to apply mitigations to prevent the application from crashing in the future
+                                          <LineBreak/>
+                                    <LineBreak/>
+                                           Normally it is not a problem but it has caused issues with BNS in the past from performance issues to game not launching.
+                                    <LineBreak/>
+                                    If you are having issues with the game launching even with normal nclauncher try this
+                                </TextBlock>
+                                <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
+                    <Button Content="Clear FTH" FontWeight="Bold" Click="ClearFTHState" Margin="382,346,52,109">
+                        <Button.ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Clear FTH State for BNSR</TextBlock>
+                                <TextBlock>
+                                       Checks and clears the FTH state for BNSR, if you are having issues launching the game
+                                    <LineBreak/>
+                                    try this option first and see if the game launches, if it does you can think about adding
+                                    <LineBreak/>
+                                    an FTH exclusion if it continues to happen
+                                </TextBlock>
+                                <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
                     <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="38,406,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
                     <Button Margin="396,446,10,10" Content="Close" FontWeight="Bold" Click="SettingsCancel" />
                     <Label Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,197,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
