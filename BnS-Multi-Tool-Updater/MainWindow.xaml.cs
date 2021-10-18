@@ -21,6 +21,7 @@ using System.Threading;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using MiscUtil.Compression.Vcdiff;
+using Newtonsoft.Json.Linq;
 
 namespace BnS_Multi_Tool_Updater
 {
@@ -34,6 +35,7 @@ namespace BnS_Multi_Tool_Updater
             public string VERSION { get; set; }
             public string[] MAIN_UPKS { get; set; }
             public string HASH { get; set; }
+            public int ANTI_CHEAT_ENABLED { get; set; }
         }
 
         public struct SYSConfig
@@ -73,12 +75,12 @@ namespace BnS_Multi_Tool_Updater
             try
             {
                 string settingsText = File.ReadAllText("settings.json");
-                var SYS = JsonConvert.DeserializeObject<SYSConfig>(settingsText);
+                var SYS = JObject.Parse(settingsText);
 
-                LocalVersion.Content = "Local: " + SYS.VERSION;
+                LocalVersion.Content = "Local: " + SYS["VERSION"];
 
                 WebClient client = new WebClient();
-                var json = client.DownloadString("http://multitool.tonic.pw/version.json");
+                var json = client.DownloadString("http://multitool.tonic.pw/version_UE4.json");
                 onlineJson = JsonConvert.DeserializeObject<WEB_VERSION_CLASS>(json);
             }
             catch (Exception) { }
@@ -194,21 +196,21 @@ namespace BnS_Multi_Tool_Updater
                     if (localHash == onlineJson.HASH)
                     {
                         string jsonString = File.ReadAllText("settings.json");
-                        var SYS = JsonConvert.DeserializeObject<SYSConfig>(jsonString);
+                        var SYS = JObject.Parse(jsonString);
 
-                        SYS.VERSION = onlineJson.VERSION;
+                        SYS["VERSION"] = onlineJson.VERSION;
 
                         //Append new UPKs to our main list
                         if (onlineJson.MAIN_UPKS.Count() > 0)
                         {
-                            List<string> _MAIN_UPKS = SYS.MAIN_UPKS.ToList();
+                            JArray _MAIN_UPKS = (JArray)SYS["MAIN_UPKS"];
                             foreach (string UPK in onlineJson.MAIN_UPKS)
                             {
-                                if (!SYS.MAIN_UPKS.Contains(UPK))
+                                if (!SYS["MAIN_UPKS"].Contains(UPK))
                                     _MAIN_UPKS.Add(UPK);
                             }
 
-                            SYS.MAIN_UPKS = _MAIN_UPKS.ToArray();
+                            SYS["MAIN_UPKS"] = _MAIN_UPKS;
                         }
 
                         jsonString = JsonConvert.SerializeObject(SYS, Formatting.Indented);
@@ -328,21 +330,21 @@ namespace BnS_Multi_Tool_Updater
                     if (localHash == onlineJson.HASH)
                     {
                         string jsonString = File.ReadAllText("settings.json");
-                        var SYS = JsonConvert.DeserializeObject<SYSConfig>(jsonString);
+                        var SYS = JObject.Parse(jsonString);
 
-                        SYS.VERSION = onlineJson.VERSION;
+                        SYS["VERSION"] = onlineJson.VERSION;
 
                         //Append new UPKs to our main list
                         if (onlineJson.MAIN_UPKS.Count() > 0)
                         {
-                            List<string> _MAIN_UPKS = SYS.MAIN_UPKS.ToList();
+                            JArray _MAIN_UPKS = (JArray)SYS["MAIN_UPKS"];
                             foreach (string UPK in onlineJson.MAIN_UPKS)
                             {
-                                if (!SYS.MAIN_UPKS.Contains(UPK))
+                                if (!SYS["MAIN_UPKS"].Contains(UPK))
                                     _MAIN_UPKS.Add(UPK);
                             }
 
-                            SYS.MAIN_UPKS = _MAIN_UPKS.ToArray();
+                            SYS["MAIN_UPKS"] = _MAIN_UPKS;
                         }
 
                         jsonString = JsonConvert.SerializeObject(SYS, Formatting.Indented);

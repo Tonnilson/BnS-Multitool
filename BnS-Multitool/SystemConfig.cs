@@ -12,7 +12,7 @@ namespace BnS_Multitool
         public static SYSConfig SYS;
         static SystemConfig()
         {
-            string[] ihatemylife = new string[] { "00009393.upk", "00010869.upk", "00009812.upk", "00003814.upk", "00007242.upk", "00008904.upk", "00024690.upk", "00059534.upk", "00010772.upk", "00011949.upk", "00012009.upk", "00026129.upk", "00061144.upk" };
+            string[] ihatemylife = new string[] { };
 
             if (!File.Exists(CONFIG_FILE))
             {
@@ -24,6 +24,7 @@ namespace BnS_Multitool
                     BNS_DIR = "",
                     MAIN_UPKS = ihatemylife,
                     DELTA_PATCHING = 1,
+                    THEME = 0,
                     NEW_GAME_OPTION = 0,
                     UPDATER_THREADS = 0,
                     MINIMZE_ACTION = 1,
@@ -261,6 +262,7 @@ namespace BnS_Multitool
         {
             public string VERSION { get; set; }
             public string FINGERPRINT { get; set; }
+            public int THEME { get; set; }
             public int ADDITIONAL_EFFECTS { get; set; }
             public int UPDATER_THREADS { get; set; }
             public int NEW_GAME_OPTION { get; set; }

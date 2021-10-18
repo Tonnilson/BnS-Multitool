@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Text;
-using CG.Web.MegaApiClient;
 
 namespace BnS_Multitool
 {
@@ -39,8 +38,6 @@ namespace BnS_Multitool
             TEST,
             NAEU
         }
-
-        public static MegaApiClient MEGA_API_CLIENT = new MegaApiClient();
 
         private static void refreshServerVar()
         {

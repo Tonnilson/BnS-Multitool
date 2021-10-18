@@ -14,7 +14,7 @@
         <DockPanel LastChildFill="False" Opacity="0.95">
             <StackPanel DockPanel.Dock="Left" Width="200" Background="#161a1f">
                 <StackPanel>
-                    <Image Source="BnS_LOGO.png"/>
+                    <Image x:Name="BANNER_ICON" Source="Images/agon/ue4agon.png" Height="87"/>
                 </StackPanel>
                 <StackPanel>
                     <Button Height="60" Click="MAIN_CLICK">
@@ -38,8 +38,8 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="peepoWtf.png" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Center" Height="136"/>
-                            <TextBlock Margin="0,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="73">Main</TextBlock>
+                            <Image x:Name="MENU_MAIN_ICON" Source="Images/agon/agonDepressed.png"  HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="121"/>
+                            <TextBlock Margin="0,5,0,0" FontFamily="Arial" TextAlignment="right" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="73">Main</TextBlock>
                         </StackPanel>
                     </Button>
                     <Button Height="60" Click="LAUNCHER_CLICK">
@@ -67,7 +67,7 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="467303591695089664.png" Stretch="None" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="105"/>
+                            <Image x:Name="MENU_LAUNCHER_ICON" Source="Images/agon/agonWicked.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="105"/>
                             <TextBlock Margin="0,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="123">Launcher</TextBlock>
                         </StackPanel>
                     </Button>
@@ -92,7 +92,7 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="worryDealWithIt.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="105"/>
+                            <Image x:Name="MENU_PATCHES_ICON" Source="Images/agon/agonKnife.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="105"/>
                             <TextBlock Margin="10,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="123">Patches</TextBlock>
                         </StackPanel>
                     </Button>
@@ -121,7 +121,7 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="worryDodge.png" Height="64" Width="76"/>
+                            <Image x:Name="MENU_EFFECTS_ICON" Source="Images/agon/agonDColon.png" Height="64" Width="76"/>
                             <TextBlock Margin="50,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="123"><Run Text="Effects"/></TextBlock>
                         </StackPanel>
                     </Button>
@@ -150,7 +150,7 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="worryYay.png" Height="64" Width="71"/>
+                            <Image x:Name="MENU_MODS_ICON" Source="Images/agon/agonWokeage.png" Height="64" Width="71"/>
                             <TextBlock Margin="70,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="83">
                                 <TextBlock>
                                 </TextBlock><Run Text="Mods"/></TextBlock>
@@ -181,7 +181,7 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="modpolice_btn.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="97"/>
+                            <Image x:Name="MENU_MODPOLICE_ICON" Source="Images/agon/AgonModMan.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="97"/>
                             <TextBlock Margin="0,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="118"><Run Text="Modpolice"/></TextBlock>
                         </StackPanel>
                     </Button>
@@ -206,7 +206,7 @@
                             </Style>
                         </Button.Style>
                         <StackPanel Orientation="Horizontal">
-                            <Image Source="Images/BnSIcon.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="42" Width="54"/>
+                            <Image x:Name="MENU_BNSUPDATER_ICON" Source="Images/agon/agonCopium.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="54"/>
                             <TextBlock Margin="20,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="144" Text="BnS Updater"/>
                         </StackPanel>
                     </Button>
@@ -306,6 +306,11 @@
                     <Button Margin="396,406,34,54" Content="Browse" FontWeight="Bold" Click="SettingsBrowse" />
                     <Button Margin="276,446,130,10" Content="Confirm" FontWeight="Bold" Click="SaveSettings" />
                     <Label Content="Blade &amp; Soul Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,377,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+                    <Label Content="Theme:" Margin="309,39,48,389" Foreground="White" FontWeight="Bold" FontSize="18" />
+                    <ComboBox HorizontalContentAlignment="Center" x:Name="ICON_THEME_CB" Margin="382,47,10,417" SelectionChanged="THEME_CHANGED" FontWeight="Bold">
+                        <ComboBoxItem>Worry and Pepe</ComboBoxItem>
+                        <ComboBoxItem>Agon</ComboBoxItem>
+                    </ComboBox>
                 </Grid>
             </Border>
         </Grid>

@@ -134,14 +134,11 @@ namespace BnS_Multitool
 
             try
             {
-                if (Globals.MEGA_API_CLIENT == null)
-                    Globals.MEGA_API_CLIENT = new MegaApiClient();
+                MegaApiClient client = new MegaApiClient();
+                await client.LoginAnonymousAsync();
 
-                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
-                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
-
-                IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA")); //Modpolice / Pilao Repo
-                IEnumerable<INode> nodes2 = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw")); //My repo
+                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA")); //Modpolice / Pilao Repo
+                IEnumerable<INode> nodes2 = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw")); //My repo
 
                 INode parent_node = nodes.Single(x => x.Type == NodeType.Root);
                 INode bnspatch_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnspatch_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
@@ -149,6 +146,7 @@ namespace BnS_Multitool
                 INode cutscene_node = nodes2.Where(x => x.Type == NodeType.File && x.Name.Contains("UE4_cutscene_removal")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
                 INode bnsnogg_node = nodes.Where(x => x.Type == NodeType.File && x.ParentId == parent_node.Id && new Regex(@"^bnsnogg_UE4_(?<date>[\d\\.|-]{10}).*$").IsMatch(x.Name)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
                 INode highpriority_node = nodes2.Where(x => x.Type == NodeType.File && x.Name.Contains("highpriority")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
+                await client.LogoutAsync();
 
                 //Format date based off file name.
                 Regex pattern = new Regex(@"^(?<fileName>[\w\\.]+)_(?<date>[\d\\.|-]{10})(?<ext>[\w\\.]+)");
@@ -163,8 +161,6 @@ namespace BnS_Multitool
                 Dispatchers.labelContent(CutsceneremovalOnlineLbl, string.Format("Online: {0}", cutscene_date.ToString("MM-dd-yy")));
                 Dispatchers.labelContent(bnsnoggOnlineLabel, string.Format("Online: {0}", bnsnogg_date.ToString("MM-dd-yy")));
                 Dispatchers.labelContent(HighpriorityOnlineLbl, string.Format("Online: {0}", highpriority_date.ToString("MM-dd-yy")));
-
-                await Globals.MEGA_API_CLIENT.LogoutAsync();
 
             } catch (Exception ex)
             {
@@ -250,17 +246,17 @@ namespace BnS_Multitool
 
                 ProgressControl.updateProgressLabel("Logging into Mega");
 
-                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
-                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
+                MegaApiClient client = new MegaApiClient();
+                await client.LoginAnonymousAsync();
 
                 ProgressControl.updateProgressLabel("Retrieving file list...");
 
                 IEnumerable<INode> nodes;
 
                 if (pluginName == "UE4_cutscene_removal" || pluginName == "highpriority" || pluginName == "fpsbooster")
-                    nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw"));
+                    nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/ypUTSAzK#LgpImLcfY8ZX86NfSaqmqw"));
                 else
-                    nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                    nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
 
                 INode currentNode = null;
                 IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(string.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
@@ -280,7 +276,7 @@ namespace BnS_Multitool
                     File.Delete(@"modpolice\" + pluginNode.Name);
 
                 currentNode = pluginNode;
-                await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + pluginNode.Name, progress);
+                await client.DownloadFileAsync(currentNode, @"modpolice\" + pluginNode.Name, progress);
 
                 ProgressControl.updateProgressLabel("Unzipping: " + pluginNode.Name);
                 await Task.Delay(750);
@@ -306,6 +302,7 @@ namespace BnS_Multitool
                 MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
 
                 ProgressControl.updateProgressLabel("All done");
+                await client.LogoutAsync();
                 await Task.Delay(750);
 
             } catch (Exception ex)
@@ -315,6 +312,7 @@ namespace BnS_Multitool
                 Debug.WriteLine(ex.ToString());
                 await Task.Delay(7000);
             }
+
             try
             {
                 ProgressGrid.Visibility = Visibility.Hidden;
@@ -418,14 +416,14 @@ namespace BnS_Multitool
                 try
                 {
                     ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                    if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
-                        await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
+                    MegaApiClient client = new MegaApiClient();
+                    await client.LoginAnonymousAsync();
 
                     if (!Directory.Exists("modpolice"))
                         Directory.CreateDirectory("modpolice");
 
                     ProgressControl.updateProgressLabel("Retrieving file list...");
-                    IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                    IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
 
                     INode currentNode = null;
                     IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(string.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
@@ -447,7 +445,7 @@ namespace BnS_Multitool
                             File.Delete(@"modpolice\" + pluginloader_node.Name);
 
                         ProgressControl.errorSadPeepo(Visibility.Hidden);
-                        await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + pluginloader_node.Name, progress);
+                        await client.DownloadFileAsync(currentNode, @"modpolice\" + pluginloader_node.Name, progress);
                     }
 
                     if (pluginloader_node == null)
@@ -462,10 +460,11 @@ namespace BnS_Multitool
                             File.Delete(@"modpolice\" + bnspatch_node.Name);
 
                         ProgressControl.errorSadPeepo(Visibility.Hidden);
-                        await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + bnspatch_node.Name, progress);
+                        await client.DownloadFileAsync(currentNode, @"modpolice\" + bnspatch_node.Name, progress);
                     }
 
                     ProgressControl.updateProgressLabel("All done, logging out...");
+                    await client.LogoutAsync();
                 }
                 catch (Exception ex)
                 {
@@ -499,29 +498,6 @@ namespace BnS_Multitool
 
                 MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
 
-                /*
-                //pluginloader x86
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + bin_path + "winmm.dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + bin_path + "winmm.dll");
-
-                ProgressControl.updateProgressLabel("Installing Loader3");
-                await Task.Delay(750);
-
-                File.Move(Path.Combine(Directory.GetCurrentDirectory(), "modpolice", bin_path, "winmm.dll"), SystemConfig.SYS.BNS_DIR + bin_path + "winmm.dll");
-
-                //bnspatch x86
-                ProgressControl.updateProgressLabel("Checking if plugins folder exists");
-                await Task.Delay(500);
-
-                if (!Directory.Exists(SystemConfig.SYS.BNS_DIR + plugins_path))
-                    Directory.CreateDirectory(SystemConfig.SYS.BNS_DIR + plugins_path);
-
-                ProgressControl.updateProgressLabel("Installing bnspatch");
-                if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_path + "bnspatch.dll"))
-                    File.Delete(SystemConfig.SYS.BNS_DIR + plugins_path + "bnspatch.dll");
-
-                File.Move(Path.Combine(Directory.GetCurrentDirectory(), "modpolice", plugins_path, "bnspatch.dll"), Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, "bnspatch.dll"));
-                */
                 ProgressControl.updateProgressLabel("Searching for patches.xml");
                 await Task.Delay(500);
 
@@ -605,14 +581,14 @@ namespace BnS_Multitool
             try
             {
                 ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
-                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
+                MegaApiClient client = new MegaApiClient();
+                await client.LoginAnonymousAsync();
 
                 if (!Directory.Exists("modpolice"))
                     Directory.CreateDirectory("modpolice");
 
                 ProgressControl.updateProgressLabel("Retrieving file list...");
-                IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
+                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA"));
 
                 INode currentNode = null;
                 IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(string.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
@@ -633,7 +609,7 @@ namespace BnS_Multitool
                         File.Delete(@"modpolice\" + bnsnogg_node.Name);
 
                     ProgressControl.errorSadPeepo(Visibility.Hidden);
-                    await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + bnsnogg_node.Name, progress);
+                    await client.DownloadFileAsync(currentNode, @"modpolice\" + bnsnogg_node.Name, progress);
                 }
 
                 ProgressControl.updateProgressLabel("All done, logging out...");
@@ -655,6 +631,7 @@ namespace BnS_Multitool
                 Directory.GetFiles(Path.Combine(Directory.GetCurrentDirectory(), "modpolice", plugins_path)).ToList().ForEach(f => File.Move(f, Path.Combine(SystemConfig.SYS.BNS_DIR, plugins_path, Path.GetFileName(f))));
 
                 ProgressControl.updateProgressLabel("bnsnogg successfully installed");
+                await client.LogoutAsync();
                 await Task.Delay(2000);
             }
             catch (Exception ex)

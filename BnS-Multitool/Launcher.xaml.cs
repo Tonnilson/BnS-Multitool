@@ -214,36 +214,40 @@ namespace BnS_Multitool
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            //Check if loginhelper is installed
-            loginHelper_installed = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
-            modpolice_installed = File.Exists(Path.Combine(bin_path, "winmm.dll")) && File.Exists(Path.Combine(plugins_path, "bnspatch.dll"));
-
-            if (loginHelper_installed)
-                del_loginhelper.Visibility = Visibility.Visible;
-            else
-                del_loginhelper.Visibility = Visibility.Hidden;
-
-            Task.Run(new Action(() =>
+            try
             {
-                if (ACCOUNT_CONFIG.ACCOUNTS.REGION < 2 || (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR)
-                {
-                    Globals.GameVersionCheck();
-                    Globals.isLoginAvailable();
-                    Application.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        Debug.WriteLine("{0}", Globals.onlineBnSVersion);
-                        if (Globals.localBnSVersion != Globals.onlineBnSVersion || !Globals.loginAvailable)
-                        {
-                            var dialog = new ErrorPrompt(String.Format("{0}\n{1}", (!Globals.loginAvailable) ? "The server is currently undergoing maintenance." : "", (Globals.localBnSVersion != Globals.onlineBnSVersion) ? "A game update is available" : ""));
-                            dialog.Owner = MainWindow.mainWindow;
-                            dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                            dialog.ShowDialog();
-                        }
-                    });
-                }
-            }));
+                //Check if loginhelper is installed
+                loginHelper_installed = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
+                modpolice_installed = File.Exists(Path.Combine(bin_path, "winmm.dll")) && File.Exists(Path.Combine(plugins_path, "bnspatch.dll"));
 
-            await Task.Run(async () => await checkOnlineVersion());
+                if (loginHelper_installed)
+                    del_loginhelper.Visibility = Visibility.Visible;
+                else
+                    del_loginhelper.Visibility = Visibility.Hidden;
+
+                Task.Run(new Action(() =>
+                {
+                    if (ACCOUNT_CONFIG.ACCOUNTS.REGION < 2 || (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR)
+                    {
+                        Globals.GameVersionCheck();
+                        Globals.isLoginAvailable();
+                        Application.Current.Dispatcher.Invoke((Action)delegate
+                        {
+                            Debug.WriteLine("{0}", Globals.onlineBnSVersion);
+                            if (Globals.localBnSVersion != Globals.onlineBnSVersion || !Globals.loginAvailable)
+                            {
+                                var dialog = new ErrorPrompt(String.Format("{0}\n{1}", (!Globals.loginAvailable) ? "The server is currently undergoing maintenance." : "", (Globals.localBnSVersion != Globals.onlineBnSVersion) ? "A game update is available" : ""));
+                                dialog.Owner = MainWindow.mainWindow;
+                                dialog.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                                dialog.ShowDialog();
+                            }
+                        });
+                    }
+                }));
+
+                await Task.Run(async () => await CheckOnlineVersion());
+            } catch (Exception)
+            { }
         }
 
         private void saveAccount(object sender, RoutedEventArgs e)
@@ -597,35 +601,30 @@ namespace BnS_Multitool
         TaskCompletionSource<bool> downloadComplete = new TaskCompletionSource<bool>();
 
         #region pluginstuff
-        private async Task checkOnlineVersion()
+        private async Task CheckOnlineVersion()
         {
             loginhelperPlugin = null;
             if (loginHelper_installed)
                 loginhelperPlugin = new Modpolice.pluginFileInfo(Path.Combine(plugins_path, "loginhelper.dll"));
 
-            Dispatchers.labelContent(loginhelperLocalLbl, String.Format("Current: {0}", (loginhelperPlugin != null) ? loginhelperPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
+            Dispatchers.labelContent(loginhelperLocalLbl, string.Format("Current: {0}", (loginhelperPlugin != null) ? loginhelperPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
 
             try
             {
-                if (Globals.MEGA_API_CLIENT == null)
-                    Globals.MEGA_API_CLIENT = new MegaApiClient();
+                MegaApiClient client = new MegaApiClient();
+                await client.LoginAnonymousAsync();
 
-                if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
-                    await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
-
-                IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
+                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
+                await client.LogoutAsync();
                 INode loginhelper_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("loginhelper")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
 
                 if (loginhelper_node != null)
-                    Dispatchers.labelContent(loginhelperOnlineLbl, String.Format("Online: {0}", loginhelper_node.ModificationDate.Value.ToString("MM-dd-yy")));
+                    Dispatchers.labelContent(loginhelperOnlineLbl, string.Format("Online: {0}", loginhelper_node.ModificationDate.Value.ToString("MM-dd-yy")));
             }
             catch (Exception ex)
             {
+                
                 Dispatchers.labelContent(loginhelperOnlineLbl, ex.Message == "Timed out" ? "Online: " + ex.Message : "Online: Error!");
-            }
-            finally
-            {
-                await Globals.MEGA_API_CLIENT.LogoutAsync();
             }
         }
 
@@ -648,14 +647,14 @@ namespace BnS_Multitool
                         Directory.CreateDirectory("modpolice");
 
                     ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                    if (!Globals.MEGA_API_CLIENT.IsLoggedIn)
-                        await Globals.MEGA_API_CLIENT.LoginAnonymousAsync();
+                    MegaApiClient client = new MegaApiClient();
+                    await client.LoginAnonymousAsync();
 
                     if (!Directory.Exists("modpolice"))
                         Directory.CreateDirectory("modpolice");
 
                     ProgressControl.updateProgressLabel("Retrieving file list...");
-                    IEnumerable<INode> nodes = await Globals.MEGA_API_CLIENT.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
+                    IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
 
                     INode currentNode = null;
                     IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
@@ -675,7 +674,7 @@ namespace BnS_Multitool
                         File.Delete(@"modpolice\" + loginhelper_node.Name);
 
                     currentNode = loginhelper_node;
-                    await Globals.MEGA_API_CLIENT.DownloadFileAsync(currentNode, @"modpolice\" + loginhelper_node.Name, progress);
+                    await client.DownloadFileAsync(currentNode, @"modpolice\" + loginhelper_node.Name, progress);
 
                     ProgressControl.updateProgressLabel("Unzipping: " + loginhelper_node.Name);
                     await Task.Delay(750);
@@ -697,7 +696,7 @@ namespace BnS_Multitool
                     File.Move(@".\modpolice\BNSR\Binaries\Win64\plugins\" + pluginName + ".dll", Path.Combine(plugins_path, pluginName + ".dll"));
 
                     ProgressControl.updateProgressLabel("All done, just tidying up.");
-
+                    await client.LogoutAsync();
                 }
                 catch (Exception ex)
                 {
@@ -720,7 +719,7 @@ namespace BnS_Multitool
             else
                 del_loginhelper.Visibility = Visibility.Hidden;
 
-            await Task.Run(async () => await checkOnlineVersion());
+            await Task.Run(async () => await CheckOnlineVersion());
         }
 
         private void DownloadCompleted(object sender, AsyncCompletedEventArgs e)
@@ -836,7 +835,7 @@ namespace BnS_Multitool
         {
             DispatcherTimer timer = (DispatcherTimer)sender;
             Debug.WriteLine("Cleaning Memory...");
-            Process[] allProcesses = Process.GetProcessesByName("Client");
+            Process[] allProcesses = Process.GetProcessesByName("BNSR");
             if (allProcesses.Count() >= 0)
             {
                 foreach (var process in allProcesses)
@@ -875,7 +874,7 @@ namespace BnS_Multitool
 
         private void manualMemoryclean(object sender, RoutedEventArgs e)
         {
-            Process[] allProcesses = Process.GetProcessesByName("Client");
+            Process[] allProcesses = Process.GetProcessesByName("BNSR");
             if (allProcesses.Count() >= 0)
             {
                 foreach (var process in allProcesses)
@@ -1147,7 +1146,7 @@ namespace BnS_Multitool
 
             await Task.Delay(500);
 
-            await Task.Run(async () => await checkOnlineVersion());
+            await Task.Run(async () => await CheckOnlineVersion());
 
             ProgressGrid.Visibility = Visibility.Hidden;
             MainGrid.Visibility = Visibility.Visible;

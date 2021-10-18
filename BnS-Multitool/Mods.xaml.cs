@@ -23,7 +23,6 @@ namespace BnS_Multitool
         private static string modPath;
         private static string modDestination;
         private static int lastSelectedMod = -1;
-        private static BackgroundWorker worker;
         public List<MODS_CLASS> userMods = new List<MODS_CLASS>();
 
         [DllImport("kernel32.dll")]
@@ -55,7 +54,7 @@ namespace BnS_Multitool
             //FilterList.AppendText(Properties.Resources.playable_ncwest);
         }
 
-        private void RefreshModList(object sender, DoWorkEventArgs e)
+        private async Task ShowModList()
         {
             if (!Directory.Exists(modPath))
                 Directory.CreateDirectory(modPath);
@@ -65,6 +64,15 @@ namespace BnS_Multitool
 
             string[] MOD_DIRECTORIES = Directory.GetDirectories(modPath);
             string[] MODS_INSTALLED = Directory.GetDirectories(modDestination);
+
+            //Cleanup of bad links
+            var mod_directories = Directory.GetDirectories(modDestination);
+            foreach (var mod in mod_directories)
+            {
+                DirectoryInfo di = new DirectoryInfo(mod);
+                if (di.IsSymbolicLink() && !Directory.Exists(di.GetSymbolicLinkTarget()))
+                    di.Delete(true);
+            }
 
             userMods = new List<MODS_CLASS>();
 
@@ -86,13 +94,13 @@ namespace BnS_Multitool
             }
 
             //We need to invoke on the UI thread to access the control, we're targeting the control specifically to leave other controls alone.
-            this.ModsListBox.Dispatcher.Invoke(new Action(() =>
+            await this.ModsListBox.Dispatcher.BeginInvoke(new Action(() =>
             {
                 ModsListBox.DataContext = userMods;
             }));
         }
 
-        private void launchInfoSelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void launchInfoSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             string region = regionFromSelection();
 
@@ -111,7 +119,7 @@ namespace BnS_Multitool
             ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE = currentIndex;
             ACCOUNT_CONFIG.appendChangesToConfig();
 
-            RefreshModList(sender, new DoWorkEventArgs(sender));
+            await ShowModList();
         }
 
         private void AddonsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -206,10 +214,7 @@ namespace BnS_Multitool
             ((Storyboard)FindResource("animate")).Begin(successStatePicture);
         }
 
-        private void refreshMods(object sender, RoutedEventArgs e)
-        {
-            worker.RunWorkerAsync();
-        }
+        private async void refreshMods(object sender, RoutedEventArgs e) => await ShowModList();
 
         private void openModFolder(object sender, RoutedEventArgs e)
         {
@@ -1061,36 +1066,8 @@ namespace BnS_Multitool
             if (!Directory.Exists(modDestination))
                 Directory.CreateDirectory(modDestination);
 
-            worker = new BackgroundWorker();
-            worker.DoWork += new DoWorkEventHandler(RefreshModList);
-            worker.RunWorkerAsync(); LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
-
-            //https://mega.nz/folder/Sk9B0QTI#IdIJnQ9qaCU5H71djC25zg
-            sigbypasserInstalled = ((File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", "SigBypasser.dll"))) && (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", "SigBypasser.dll"))));
-            if (sigbypasserInstalled)
-                sigbypasserPlugin = new Modpolice.pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", "SigBypasser.dll"));
-            else
-                sigbypasserPlugin = null;
-
-            sigbypasserLabel.Content = String.Format("Installed: {0}", (sigbypasserPlugin != null) ? sigbypasserPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed");
-
-            try
-            {
-                var client = new MegaApiClient();
-                await client.LoginAnonymousAsync();
-                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/6lUDWQRB#08LQQAjiqfgo7tGWGd2QEg"));
-
-                INode currentNode = null;
-                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
-
-                //Find our latest nodes for download
-                INode sigbypasser_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("SigBypasser")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-
-                System.Text.RegularExpressions.Regex pattern = new System.Text.RegularExpressions.Regex(@"^(?<fileName>[\w\\.]+)_(?<date>[\w\\.]{10})(?<ext>[\w\\.]+)");
-                DateTime sigbypasser_date = DateTime.Parse(pattern.Match(sigbypasser_node.Name).Groups["date"].Value);
-                Dispatchers.labelContent(SigBypasserrOnlineLbl, String.Format("Online: {0}", sigbypasser_date.ToString("MM-dd-yy")));
-            } catch (Exception)
-            { }
+            await ShowModList();
+            LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
         }
 
         private void PatchBit(object sender, RoutedEventArgs e)

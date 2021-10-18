@@ -104,6 +104,9 @@ namespace BnS_Multitool
                     Directory.CreateDirectory(removalDirectory);
                     ExtractPakFiles();
                 }
+
+                if (Directory.GetFiles(removalDirectory).Length == 0)
+                    ExtractPakFiles();
             }
 
             refreshToggles();

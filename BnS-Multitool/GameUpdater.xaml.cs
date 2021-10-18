@@ -138,7 +138,7 @@ namespace BnS_Multitool
                 DltPLbl.Dispatcher.BeginInvoke(new Action(() => { DltPLbl.Visibility = (deltaPatch) ? Visibility.Visible : Visibility.Hidden; }));
 
                 if (!RemoteFileExists(PatchInfoURL))
-                    throw new Exception("Patch #: " + onlineVersion + " not found");
+                    throw new Exception(String.Format("PatchFileInfo for build #{0} could not be reached", onlineVersion));
 
                 if (!Directory.Exists(PatchDirectory))
                     Directory.CreateDirectory(PatchDirectory);
@@ -174,7 +174,7 @@ namespace BnS_Multitool
 
                     if (deltaPatch)
                     {
-                        foreach (var file in PatchInfoMap.Where(f => f.Contains(FilePath) && f.DatFilePathMatches(FilePath) && (f.EndsWith(PatchFile_FlagType.ChangedDiff) || (f.EndsWith(PatchFile_FlagType.Added)))))
+                        foreach (var file in PatchInfoMap.Where(f => f.Contains(FilePath) && f.DatFilePathMatches(FilePath) && (f.EndsWith(PatchFile_FlagType.ChangedDiff) || f.EndsWith(PatchFile_FlagType.Added))))
                         {
                             string[] lData = file.Split(new char[] { ':' });
                             BnSInfoMap.Add(new BnSFileInfo { path = lData[0], size = lData[1], hash = lData[2], flag = lData[3] });

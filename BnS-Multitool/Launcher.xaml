@@ -18,7 +18,7 @@
         <Grid x:Name="MainGrid" Grid.ColumnSpan="2">
             <GroupBox Header="Accounts" BorderThickness="0.2" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="309" Margin="10,190,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <Button x:Name="LAUNCH_BTN" Content="Launch" Margin="5,37,200,33" Click="LaunchGameClientClick"/>
+                    <Button x:Name="LAUNCH_BTN" Content="Launch" Margin="5,37,200,33" Click="LaunchGameClientClick" Foreground="#FF00FF0B"/>
                     <ComboBox x:Name="ACCOUNT_LIST_BOX" HorizontalAlignment="Left" VerticalAlignment="Top" Width="260" Margin="28,10,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" SelectionChanged="ACCOUNT_LIST_BOX_SelectionChanged" MouseEnter="MouseEnterSetFocus" Height="22"/>
                     <Button x:Name="KILL_BTN" Content="Kill" Margin="102,37,119,33" Click="killGameProcess"/>
                     <Button x:Name="DELETE_ACC" FontFamily="Segoe UI Symbol" Content="&#xe106;" Margin="5,10,272,58" Click="removeAccount" Foreground="#FFF00000"/>
@@ -120,20 +120,19 @@
                     <Button x:Name="LOGINHELPER_INSTALL_Copy" FontFamily="Segoe UI Symbol" Width="76" Content="Clean" Margin="205,27,16,15" Click="manualMemoryclean"/>
                 </Grid>
             </GroupBox>
+            <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Center" Height="175" VerticalAlignment="Top" Width="310" Margin="10,10,340,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+                <Grid>
+
+                    <TextBox x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <PasswordBox x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,73,0,0" VerticalAlignment="Top" Width="212" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <TextBox x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="116" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <Label Content="Email" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
+                    <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
+                    <Label Content="Pin Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,97,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
+                    <Button x:Name="MultiTool_UPDATE" Margin="145,121,77,10" Width="76" Content="Save" Click="saveAccount"/>
+                </Grid>
+            </GroupBox>
         </Grid>
-        <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Center" Height="175" VerticalAlignment="Top" Width="310" Margin="10,10,340,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
-            <Grid>
-
-                <TextBox x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                <PasswordBox x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,73,0,0" VerticalAlignment="Top" Width="212" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                <TextBox x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="116" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                <Label Content="Email" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                <Label Content="Pin Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,97,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                <Button x:Name="MultiTool_UPDATE" Margin="145,121,77,10" Width="76" Content="Save" Click="saveAccount"/>
-            </Grid>
-        </GroupBox>
-
         <Grid x:Name="LaunchOptions" Visibility="Hidden" Margin="55,10,64,22" Background="#FF161A1F">
             <Border BorderBrush="#FF454547" BorderThickness=".6" CornerRadius="5">
                 <Grid>

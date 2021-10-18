@@ -12,11 +12,11 @@
     <Grid>
         <Border BorderBrush="#FF343E4B" Margin="-2,-3,284,341" BorderThickness="0,2,2,2" />
         <Label Content="Made by Tonic#1356" FontFamily="Arial" FontWeight="Bold" FontSize="18" Margin="0,0,417,462" Foreground="#FF99B4D1"/>
-        <TextBlock Foreground="#FFDAE1EA" TextWrapping="WrapWithOverflow" FontFamily="Arial" FontWeight="Bold" Margin="4,33,287,388">
+        <TextBlock Foreground="#FFDAE1EA" TextWrapping="WrapWithOverflow" FontFamily="Arial" FontWeight="Bold" Margin="5,30,287,393">
             Made for myself and clan members as a drop in replacement for BnS Buddy but releasing to everyone to enjoy
             the peepos and worry's. If you want to support me in cheese burgers there's a button. This is only possible because of pilao and Hora so please share the love with them.
         </TextBlock>
-        <Image x:Name="PictureBox" gif:AnimationBehavior.SourceUri="Resources/peepoLaptopHappy.gif" Margin="-2,84,586,341"/>
+        <Image x:Name="MAINPAGE_ABOUT_ICON" gif:AnimationBehavior.SourceUri="Images/agon/agonHuggie.gif" Margin="2,100,603,343"/>
         <Label Content="Changelog" Background="{x:Null}" Foreground="White" Margin="10,182,467,275" FontFamily="Arial" FontWeight="Bold" FontSize="20"/>
         <RichTextBox IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
         <Grid Margin="226,65,284,339">
