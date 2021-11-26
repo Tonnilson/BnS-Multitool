@@ -1,21 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Xml.Linq;
 
 namespace BnS_Multitool
@@ -30,33 +23,27 @@ namespace BnS_Multitool
         public static string MANAGER_DIR = Path.Combine(BNS_DIR, "manager");
         public static string ADDON_DIR = Path.Combine(BNS_DIR, "addons");
         public static string PATCHES_DIR = Path.Combine(BNS_DIR, "patches");
-        public List<AddonsAndPatches> Addons = new List<AddonsAndPatches>();
-        public List<AddonsAndPatches> PatchesXML = new List<AddonsAndPatches>();
         public static int lastSelectedAddon = -1;
         public static int lastSelectedPatch = -1;
 
-        [DllImport("kernel32.dll")]
-        static extern bool CreateSymbolicLink(
-        string lpSymlinkFileName, string lpTargetFileName, SymbolicLink dwFlags);
+        private ObservableCollection<AddonsAndPatches> _XmlViewCollection = new ObservableCollection<AddonsAndPatches>();
+        public ObservableCollection<AddonsAndPatches> XML_View_Collection { get { return _XmlViewCollection; } }
 
-        enum SymbolicLink
-        {
-            File = 0,
-            Directory = 1
-        }
+        private ObservableCollection<AddonsAndPatches> _AddonsViewCollection = new ObservableCollection<AddonsAndPatches>();
+        public ObservableCollection<AddonsAndPatches> ADDON_View_Collection { get { return _AddonsViewCollection; } }
 
         public class AddonsAndPatches
         {
             public string Name { get; set; }
             public bool isChecked { get; set; }
             public string File { get; set; }
+            public string directory { get; set; }
+            public string DisplayName { get; set; }
         }
 
         public Patches()
         {
             InitializeComponent();
-
-            bgWorker.DoWork += new DoWorkEventHandler(updateAddonsAndPatches);
 
             //Check if any of our directories are missing
             if (!Directory.Exists(MANAGER_DIR))
@@ -68,54 +55,77 @@ namespace BnS_Multitool
             if (!Directory.Exists(PATCHES_DIR))
                 Directory.CreateDirectory(PATCHES_DIR);
 
-            //bgWorker.RunWorkerAsync();
+            if (!Directory.Exists(Path.Combine(MANAGER_DIR, "sync")))
+                Directory.CreateDirectory(Path.Combine(MANAGER_DIR, "sync"));
         }
 
-        private void Page_Loaded(object sender, RoutedEventArgs e)
-        {
-            bgWorker.RunWorkerAsync();
-        }
+        private async void Page_Loaded(object sender, RoutedEventArgs e) =>
+            await UpdateListing();
 
-        private void updateAddonsAndPatches(object sender, DoWorkEventArgs e)
+        /// <summary>
+        /// This could be done a bit better but i'm done trying to work with old code
+        /// and don't feel like redoing it entirely right now.
+        /// </summary>
+        private async Task UpdateListing()
         {
-            Addons = new List<AddonsAndPatches>();
-            PatchesXML = new List<AddonsAndPatches>();
-
-            foreach(var file in Directory.EnumerateFiles(MANAGER_DIR).Where(x => x.EndsWith("xml", StringComparison.InvariantCultureIgnoreCase) || x.EndsWith("patch", StringComparison.InvariantCultureIgnoreCase)))
+            try
             {
-                if (Path.GetExtension(file) == ".patch")
-                    Addons.Add(new AddonsAndPatches() { Name = Path.GetFileNameWithoutExtension(file), isChecked = (File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(file)))), File = file });
-                else if(Path.GetExtension(file) == ".xml")
+                _AddonsViewCollection.Clear();
+                _XmlViewCollection.Clear();
+                var _sync = new SyncClient("");
+
+                foreach (var file in Directory.EnumerateFiles(MANAGER_DIR, "*.*", SearchOption.AllDirectories).
+                    Where(x => x.EndsWith("xml", StringComparison.InvariantCultureIgnoreCase) || x.EndsWith("patch", StringComparison.InvariantCultureIgnoreCase)).
+                    OrderBy(x => Path.GetFileName(x)))
                 {
-                    if (isBNSPatchXML(file))
-                        PatchesXML.Add(new AddonsAndPatches() { Name = Path.GetFileNameWithoutExtension(file), isChecked = (File.Exists(Path.Combine(PATCHES_DIR, Path.GetFileName(file)))), File = file });
+                    string fileName = Path.GetFileNameWithoutExtension(file);
+                    string fileExt = Path.GetExtension(file);
+                    string directory = Path.GetDirectoryName(file);
+                    string DisplayName = fileName;
+
+                    if(directory.Contains("\\sync\\"))
+                    {
+                        //We need to make sure the user synced with this file
+                        if (SyncConfig.Synced == null || !SyncConfig.Synced.Any(x => x.Name == fileName && x.Type == fileExt.Replace(".",""))) continue;
+                        DisplayName = await _sync.Base64UrlDecodeAsync(SyncConfig.Synced.First(x => x.Name == fileName).Title); //If everything is fine set the Display Name
+                    }
+
+                    if (fileExt == ".patch")
+                    {
+                        if (_AddonsViewCollection.Any(x => Path.GetFileName(x.File) == Path.GetFileName(file))) continue;
+                        _AddonsViewCollection.Add(new AddonsAndPatches() { directory = directory, DisplayName = DisplayName, File = file, isChecked = File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(file))) });
+                    }
                     else
-                        Addons.Add(new AddonsAndPatches() { Name = Path.GetFileNameWithoutExtension(file), isChecked = (File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(file)))), File = file });
+                    {
+                        if (isBNSPatchXML(file))
+                        {
+                            if (_XmlViewCollection.Any(x => Path.GetFileName(x.File) == Path.GetFileName(file))) continue;
+                            _XmlViewCollection.Add(new AddonsAndPatches() { directory = directory, DisplayName = DisplayName, File = file, isChecked = File.Exists(Path.Combine(PATCHES_DIR, Path.GetFileName(file))) });
+                        }
+                        else
+                        {
+                            if (_AddonsViewCollection.Any(x => Path.GetFileName(x.File) == Path.GetFileName(file))) continue;
+                            _AddonsViewCollection.Add(new AddonsAndPatches() { directory = directory, DisplayName = DisplayName, File = file, isChecked = File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(file))) });
+                        }
+                    }
                 }
+            } catch (Exception)
+            {
+                new ErrorPrompt("An error occured, check your anti-virus settings for Controlled Folder Access and either turn it off or whitelist this app to have folder access.").ShowDialog();
             }
-
-            this.AddonsListBox.Dispatcher.Invoke(new Action(() =>
-            {
-                AddonsListBox.DataContext = Addons;
-            }));
-
-            this.PatchesListBox.Dispatcher.Invoke(new Action(() =>
-            {
-                PatchesListBox.DataContext = PatchesXML;
-            }));
         }
 
         private void applyPatchesAndAddons(object sender, RoutedEventArgs e)
         {
             try
             {
-                foreach (var addon in Addons)
+                foreach (var addon in _AddonsViewCollection)
                 {
                     if (addon.isChecked)
                     {
                         if (!File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File))))
                             if (File.Exists(addon.File))
-                                CreateSymbolicLink(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File)), addon.File, SymbolicLink.File);
+                                SymbolicLinkSupport.SymbolicLink.CreateFileLink(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File)), addon.File);
                     }
                     else
                     {
@@ -124,13 +134,13 @@ namespace BnS_Multitool
                     }
                 }
 
-                foreach (var addon in PatchesXML)
+                foreach (var addon in _XmlViewCollection)
                 {
                     if (addon.isChecked)
                     {
                         if (!File.Exists(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File))))
                             if (File.Exists(addon.File))
-                                CreateSymbolicLink(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File)), addon.File, SymbolicLink.File);
+                                SymbolicLinkSupport.SymbolicLink.CreateFileLink(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File)), addon.File);
                     }
                     else
                     {
@@ -147,10 +157,7 @@ namespace BnS_Multitool
             }
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            bgWorker.RunWorkerAsync();
-        }
+        private async void Button_Click(object sender, RoutedEventArgs e) => await UpdateListing();
 
         //This shit is jank AF
         private void AddonsListBox_MouseDoubleClick(object sender, MouseButtonEventArgs e)
@@ -166,7 +173,7 @@ namespace BnS_Multitool
                     AddonEntry.isChecked = true;
 
                 AddonsListBox.SelectedItem = AddonEntry;
-                CollectionViewSource.GetDefaultView(AddonsListBox.DataContext).Refresh();
+                AddonsListBox.Items.Refresh();
                 AddonsListBox.SelectedIndex = lastSelectedAddon;
             } catch (Exception ex)
             {
@@ -187,7 +194,7 @@ namespace BnS_Multitool
                     AddonEntry.isChecked = true;
 
                 AddonsListBox.SelectedItem = AddonEntry;
-                CollectionViewSource.GetDefaultView(AddonsListBox.DataContext).Refresh();
+                AddonsListBox.Items.Refresh();
                 AddonsListBox.SelectedIndex = lastSelectedAddon;
                 e.Handled = true;
             }
@@ -206,7 +213,7 @@ namespace BnS_Multitool
                     AddonEntry.isChecked = true;
 
                 PatchesListBox.SelectedItem = AddonEntry;
-                CollectionViewSource.GetDefaultView(PatchesListBox.DataContext).Refresh();
+                PatchesListBox.Items.Refresh();
                 PatchesListBox.SelectedIndex = lastSelectedPatch;
             } catch (Exception ex) {
                 var dialog = new ErrorPrompt(ex.Message);
@@ -226,7 +233,7 @@ namespace BnS_Multitool
                     AddonEntry.isChecked = true;
 
                 PatchesListBox.SelectedItem = AddonEntry;
-                CollectionViewSource.GetDefaultView(PatchesListBox.DataContext).Refresh();
+                PatchesListBox.Items.Refresh();
                 PatchesListBox.SelectedIndex = lastSelectedPatch;
                 e.Handled = true;
             }
@@ -239,7 +246,8 @@ namespace BnS_Multitool
         {
             try
             {
-                XDocument xmlFile = XDocument.Load(file, LoadOptions.None);
+                XDocument xmlFile = XDocument.Parse(File.ReadAllText(file)); //Allows us to load all text files regardless of encoding
+                //XDocument xmlFile = XDocument.Load(file, LoadOptions.None);
                 return xmlFile.Root.Name == "patches";
             } catch (Exception ex)
             {
@@ -252,24 +260,25 @@ namespace BnS_Multitool
             }
         }
 
-        private void handleToggle(object sender, RoutedEventArgs e)
+        private void HandleToggle(object sender, RoutedEventArgs e)
         {
             bool state = ((Button)sender).Name.Contains("_on_");
             if(((Button)sender).Name.Contains("addons_"))
             {
-                foreach (var b in Addons)
+                foreach (var b in _AddonsViewCollection)
                     b.isChecked = state;
 
-                CollectionViewSource.GetDefaultView(AddonsListBox.DataContext).Refresh();
+                AddonsListBox.Items.Refresh();
             } else
             {
-                foreach (var b in PatchesXML)
+                foreach (var b in _XmlViewCollection)
                     b.isChecked = state;
 
-                CollectionViewSource.GetDefaultView(PatchesListBox.DataContext).Refresh();
+                PatchesListBox.Items.Refresh();
             }
-
-            applyPatchesAndAddons(sender, e);
         }
+
+        private void OpenSyncPage(object sender, RoutedEventArgs e) =>
+            MainWindow.mainWindow.SetCurrentPage("Sync");
     }
 }

@@ -209,7 +209,7 @@ namespace BnS_Multitool
             }
 
             if (MainWindow.isMinimized)
-                MainWindow.changeWindowState(true);
+                MainWindow.ChangeWindowState(true);
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
@@ -388,7 +388,7 @@ namespace BnS_Multitool
                         Application.Current.MainWindow.WindowState = WindowState.Minimized;
                         break;
                     case 2:
-                        MainWindow.changeWindowState(false, true);
+                        MainWindow.ChangeWindowState(false, true);
                         break;
                     case 3:
                         Environment.Exit(0);
@@ -455,7 +455,7 @@ namespace BnS_Multitool
                 }
                 else if (!pluginloaderBit)
                 {
-                    var dialog = new ErrorPrompt("Loader3 is missing, install loader3 before continuing", false, true);
+                    var dialog = new ErrorPrompt("Loader3 is missing, You can install loader3 under Modpolice->Modpolicec Core", false, true);
                     dialog.ShowDialog();
                     return;
                 }
@@ -611,7 +611,7 @@ namespace BnS_Multitool
 
             try
             {
-                MegaApiClient client = new MegaApiClient();
+                MegaApiClient client = new MegaApiClient(new WebClient(Globals.MEGAAPI_TIMEOUT));
                 await client.LoginAnonymousAsync();
 
                 IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
@@ -976,18 +976,6 @@ namespace BnS_Multitool
             }
         }
 
-        static string CalculateMD5(string fileName)
-        {
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            {
-                using (var stream = File.OpenRead(fileName))
-                {
-                    var hash = md5.ComputeHash(stream);
-                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
-            }
-        }
-
         private static void KillProcessAndChildrens(int pid)
         {
             ManagementObjectSearcher processSearcher = new ManagementObjectSearcher
@@ -1026,7 +1014,7 @@ namespace BnS_Multitool
                 if (MainPage.onlineJson.QOL_HASH == null)
                     throw new Exception("QOL Hash was null");
 
-                if (File.Exists(_pluginPath) && CalculateMD5(_pluginPath) == MainPage.onlineJson.QOL_HASH.ToLower())
+                if (File.Exists(_pluginPath) && Globals.CalculateMD5(_pluginPath) == MainPage.onlineJson.QOL_HASH.ToLower())
                     return;
                 else
                 {

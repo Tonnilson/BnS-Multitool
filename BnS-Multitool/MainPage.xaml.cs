@@ -19,7 +19,7 @@ namespace BnS_Multitool
         protected override WebRequest GetWebRequest(Uri address)
         {
             HttpWebRequest request = (HttpWebRequest)base.GetWebRequest(address);
-            ((HttpWebRequest)request).ReadWriteTimeout = 6000;
+            request.ReadWriteTimeout = 6000;
             request.Timeout = 6000;
             request.AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate;
             return request;
@@ -52,7 +52,7 @@ namespace BnS_Multitool
             //MainWindow.versionWorker.RunWorkerAsync();
         }
 
-        private static async Task checkForUpdate()
+        private static async Task CheckForUpdate()
         {
             WebClient client = new GZipWebClient();
            
@@ -61,6 +61,7 @@ namespace BnS_Multitool
                 var json = client.DownloadString(Globals.MAIN_SERVER_ADDR + "version_UE4.json");
                 onlineJson = JsonConvert.DeserializeObject<MainWindow.ONLINE_VERSION_STRUCT>(json);
 
+#if !DEBUG
                 if (onlineJson.VERSION != MainWindow.FileVersion())
                 {
                      Application.Current.Dispatcher.BeginInvoke((Action)delegate
@@ -70,10 +71,11 @@ namespace BnS_Multitool
                     });
 
                     SystemConfig.SYS.VERSION = MainWindow.FileVersion();
-                    SystemConfig.appendChangesToConfig();
+                    SystemConfig.Save();
 
                     Dispatchers.buttonVisibility(MainWindow.UpdateButtonObj, Visibility.Visible);
                 }
+#endif
 
             } catch (WebException ex)
             {
@@ -205,7 +207,7 @@ namespace BnS_Multitool
             {
                 try
                 {
-                    await checkForUpdate();
+                    await CheckForUpdate();
 
                     foreach (var version in onlineJson.CHANGELOG)
                         appendToChangelog(string.Format("Version: {0}\r{1}\r\r", version.VERSION, version.NOTES));
@@ -220,7 +222,7 @@ namespace BnS_Multitool
                         if (SystemConfig.SYS.FINGERPRINT == null)
                         {
                             SystemConfig.SYS.FINGERPRINT = Security.FingerPrint.Value();
-                            SystemConfig.appendChangesToConfig();
+                            SystemConfig.Save();
                         }
 
                         onlineUsersTimer.IsEnabled = true;

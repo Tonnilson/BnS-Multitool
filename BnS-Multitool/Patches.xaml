@@ -6,16 +6,17 @@
       xmlns:local="clr-namespace:BnS_Multitool"
       mc:Ignorable="d" 
       d:DesignHeight="490" d:DesignWidth="660"
-      Title="Patches" Loaded="Page_Loaded" KeepAlive="True">
+      Title="Patches" Loaded="Page_Loaded" KeepAlive="True"
+      DataContext="{Binding RelativeSource={RelativeSource Self}}">
 
     <Grid>
         <Label HorizontalContentAlignment="Center" Background="#FF2D3F5D" Margin="10,10,354,448" Content="Addons" FontFamily="Arial Black" FontSize="20" Foreground="White"/>
-        <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"  x:Name="AddonsListBox" Margin="9,42,353,80" Background="#FF1E2021" BorderBrush="{x:Null}" MouseDoubleClick="AddonsListBox_MouseDoubleClick" KeyUp="AddonsListBox_KeyUp">
+        <ListBox ItemsSource="{Binding ADDON_View_Collection}" ScrollViewer.HorizontalScrollBarVisibility="Disabled"  x:Name="AddonsListBox" Margin="9,42,353,80" Background="#FF1E2021" BorderBrush="{x:Null}" MouseDoubleClick="AddonsListBox_MouseDoubleClick" KeyUp="AddonsListBox_KeyUp">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel  Orientation="Horizontal">
-                        <CheckBox IsChecked="{Binding isChecked, Mode=TwoWay}" />
-                        <TextBlock Text="{Binding Path=Name}"
+                        <CheckBox VerticalAlignment="Center" IsChecked="{Binding isChecked, Mode=TwoWay}" />
+                        <TextBlock VerticalAlignment="Center" Text="{Binding Path=DisplayName}"
                            Foreground="White" FontFamily="Arial" FontSize="14" FontWeight="Normal" />
                     </StackPanel>
                 </DataTemplate>
@@ -23,29 +24,29 @@
         </ListBox>
 
         <Label HorizontalContentAlignment="Center" Background="#FF2D3F5D" Margin="357,10,22,448" Content="Patches" FontFamily="Arial Black" FontSize="20" Foreground="White"/>
-        <ListBox ItemsSource="{Binding}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="PatchesListBox" Margin="356,42,21,80" Background="#FF1E2021" BorderBrush="{x:Null}" MouseDoubleClick="PatchesListBox_MouseDoubleClick" KeyUp="PatchesListBox_KeyUp">
+        <ListBox ItemsSource="{Binding XML_View_Collection}" ScrollViewer.HorizontalScrollBarVisibility="Disabled" x:Name="PatchesListBox" Margin="356,42,21,80" Background="#FF1E2021" BorderBrush="{x:Null}" MouseDoubleClick="PatchesListBox_MouseDoubleClick" KeyUp="PatchesListBox_KeyUp">
             <ListBox.ItemTemplate>
                 <DataTemplate>
                     <StackPanel  Orientation="Horizontal">
                         <CheckBox IsChecked="{Binding isChecked, Mode=TwoWay}" />
-                        <TextBlock Text="{Binding Path=Name}"
+                        <TextBlock Text="{Binding Path=DisplayName}"
                            Foreground="White" FontFamily="Arial" FontSize="14" FontWeight="Normal" />
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Button Content="Apply" Margin="167,428,397,28" FontFamily="Arial Black" FontSize="16" Click="applyPatchesAndAddons">
+        <Button Content="Apply" Margin="124,428,440,28" FontFamily="Arial Black" FontSize="16" Click="applyPatchesAndAddons">
 
         </Button>
-        <Button Content="Refresh" Margin="278,428,286,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click">
+        <Button Content="Refresh" Margin="227,428,337,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click">
 
         </Button>
-        <Button Content="Manager" Margin="386,428,178,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click_1">
+        <Button Content="Manager" Margin="329,428,235,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click_1">
 
         </Button>
 
-        <Button x:Name="patches_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="393,10,233,449">
+        <Button x:Name="patches_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="HandleToggle" Margin="393,10,233,449">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -58,7 +59,7 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button x:Name="patches_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="357,10,269,449" Click="handleToggle">
+        <Button x:Name="patches_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="357,10,269,449" Click="HandleToggle">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
@@ -91,7 +92,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="44,10,582,449">
+        <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="HandleToggle" Margin="44,10,582,449">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -104,7 +105,7 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="9,10,617,449" Click="handleToggle">
+        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="9,10,617,449" Click="HandleToggle">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
@@ -117,5 +118,6 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
+        <Button Content="Sync" Margin="432,428,132,28" FontFamily="Arial Black" FontSize="16" Click="OpenSyncPage"/>
     </Grid>
 </Page>

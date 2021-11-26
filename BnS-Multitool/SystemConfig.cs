@@ -12,8 +12,6 @@ namespace BnS_Multitool
         public static SYSConfig SYS;
         static SystemConfig()
         {
-            string[] ihatemylife = new string[] { };
-
             if (!File.Exists(CONFIG_FILE))
             {
                 SYS = new SYSConfig
@@ -22,22 +20,20 @@ namespace BnS_Multitool
                     FINGERPRINT = null,
                     ADDITIONAL_EFFECTS = 0,
                     BNS_DIR = "",
-                    MAIN_UPKS = ihatemylife,
                     DELTA_PATCHING = 1,
                     THEME = 0,
                     NEW_GAME_OPTION = 0,
                     UPDATER_THREADS = 0,
                     MINIMZE_ACTION = 1,
+                    PATCH_412 = true,
                     PING_CHECK = 1,
-                    patch32 = 1,
-                    patch64 = 1,
                     CLASS = new List<BNS_CLASS_STRUCT>
                     {
                         new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Assassin",
                                 EFFECTS = new string[] { "Mod_Remove_Assassin_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { }
+                                ANIMATIONS = new string[] { "Mod_Remove_Assassin_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -48,7 +44,7 @@ namespace BnS_Multitool
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "KungFuMaster",
-                                EFFECTS = new string[] { "Mod_Remove_Cestus_05_SF_p.pak" },
+                                EFFECTS = new string[] { "Mod_Remove_KungfuFighter_05_SF_p.pak" },
                                 ANIMATIONS = new string[] { "Mod_Remove_KungfuFighter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
@@ -61,12 +57,12 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Destroyer",
                                 EFFECTS = new string[] { "Mod_Remove_Destroyer_05_SF_p.pak"},
-                                ANIMATIONS = new string[] {  }
+                                ANIMATIONS = new string[] { "Mod_Remove_Destroyer_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Forcemaster",
-                                EFFECTS = new string[] { "Mod_Remove_AuraMaster_05_SF_p.pak", "Mod_Remove_AureaMaster_05_SF_p.pak" },
+                                EFFECTS = new string[] { "Mod_Remove_ForceMaster_05_SF_p.pak" },
                                 ANIMATIONS = new string[] { "Mod_Remove_ForceMaster_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
@@ -79,19 +75,19 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Archer",
                                 EFFECTS = new string[] { "Mod_Remove_Archer_05_SF_p.pak" },
-                                ANIMATIONS = new string[] {  }
+                                ANIMATIONS = new string[] { "Mod_Remove_Archer_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Blademaster",
-                                EFFECTS = new string[] {  },
-                                ANIMATIONS = new string[] {  }
+                                EFFECTS = new string[] { "Mod_Remove_Fencer_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Fencer_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Bladedancer",
                                 EFFECTS = new string[] { "Mod_Remove_SwordMaster_05_SF_p.pak" },
-                                ANIMATIONS = new string[] {  }
+                                ANIMATIONS = new string[] { "Mod_Remove_SwordMaster_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -136,7 +132,7 @@ namespace BnS_Multitool
                         SYS.CLASS = new List<BNS_CLASS_STRUCT>() { };
 
                     //Hotfix
-                    if(SYS.CLASS.Count < 1)
+                    if (!SYS.PATCH_412)
                     {
                         changesToConfig = true;
                         SYS.CLASS = new List<BNS_CLASS_STRUCT>
@@ -145,7 +141,7 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Assassin",
                                 EFFECTS = new string[] { "Mod_Remove_Assassin_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { }
+                                ANIMATIONS = new string[] { "Mod_Remove_Assassin_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -156,7 +152,7 @@ namespace BnS_Multitool
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "KungFuMaster",
-                                EFFECTS = new string[] { "Mod_Remove_Cestus_05_SF_p.pak" },
+                                EFFECTS = new string[] { "Mod_Remove_KungfuFighter_05_SF_p.pak" },
                                 ANIMATIONS = new string[] { "Mod_Remove_KungfuFighter_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
@@ -169,12 +165,12 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Destroyer",
                                 EFFECTS = new string[] { "Mod_Remove_Destroyer_05_SF_p.pak"},
-                                ANIMATIONS = new string[] {  }
+                                ANIMATIONS = new string[] { "Mod_Remove_Destroyer_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Forcemaster",
-                                EFFECTS = new string[] { "Mod_Remove_AuraMaster_05_SF_p.pak", "Mod_Remove_AureaMaster_05_SF_p.pak" },
+                                EFFECTS = new string[] { "Mod_Remove_ForceMaster_05_SF_p.pak" },
                                 ANIMATIONS = new string[] { "Mod_Remove_ForceMaster_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
@@ -187,19 +183,19 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Archer",
                                 EFFECTS = new string[] { "Mod_Remove_Archer_05_SF_p.pak" },
-                                ANIMATIONS = new string[] {  }
+                                ANIMATIONS = new string[] { "Mod_Remove_Archer_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Blademaster",
-                                EFFECTS = new string[] {  },
-                                ANIMATIONS = new string[] {  }
+                                EFFECTS = new string[] { "Mod_Remove_Fencer_05_SF_p.pak" },
+                                ANIMATIONS = new string[] { "Mod_Remove_Fencer_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
                                 CLASS = "Bladedancer",
                                 EFFECTS = new string[] { "Mod_Remove_SwordMaster_05_SF_p.pak" },
-                                ANIMATIONS = new string[] {  }
+                                ANIMATIONS = new string[] { "Mod_Remove_SwordMaster_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -226,10 +222,12 @@ namespace BnS_Multitool
                                 ANIMATIONS = new string[] { "Mod_Remove_DualBlade_Animset_p.pak", "Mod_Remove_DualBlader_Animset_p.pak" }
                             }
                         };
+                        Effects.ExtractPakFiles();
+                        SYS.PATCH_412 = true;
                     }
                     
                     if(changesToConfig)
-                        appendChangesToConfig();
+                        Save();
 
                 } catch (Exception)
                 {
@@ -240,7 +238,7 @@ namespace BnS_Multitool
             }
         }
 
-        public static void appendChangesToConfig()
+        public static void Save()
         {
             try
             {
@@ -269,10 +267,8 @@ namespace BnS_Multitool
             public int MINIMZE_ACTION { get; set; }
             public int PING_CHECK { get; set; }
             public int DELTA_PATCHING { get; set; }
-            public int patch64 { get; set; }
-            public int patch32 { get; set; }
             public string BNS_DIR { get; set; }
-            public string[] MAIN_UPKS { get; set; }
+            public bool PATCH_412 { get; set; }
             public List<BNS_CLASS_STRUCT> CLASS { get; set; }
         }
 

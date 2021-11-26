@@ -18,5 +18,10 @@ namespace BnS_Multitool.Extensions
         {
             return input.Substring(input.IndexOf('\\') + 1).Split(new char[] { ':' })[0].StartsWith(compare);
         }
+
+        public static bool IsNullOrEmpty(this string value)
+        {
+            return string.IsNullOrEmpty(value);
+        }
     }
 }

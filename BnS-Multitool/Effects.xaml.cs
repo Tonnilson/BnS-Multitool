@@ -74,7 +74,7 @@ namespace BnS_Multitool
             };
         }
 
-        private void ExtractPakFiles()
+        public static void ExtractPakFiles()
         {
             try
             {
@@ -85,10 +85,8 @@ namespace BnS_Multitool
                         using (var fs = new FileStream(Path.Combine(removalDirectory, entry.FullName), FileMode.Create, FileAccess.Write))
                             entry.Open().CopyTo(fs);
                 }
-            } catch (Exception ex)
-            {
-                Debug.WriteLine(ex.Message);
-            }
+            } catch
+            {}
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -122,8 +120,8 @@ namespace BnS_Multitool
             {
                 var curClass = systemToggles.Where(x => x.className == classData.CLASS).FirstOrDefault();
 
-                curClass.fxToggle.IsChecked = DoesFilesExist(classData.CLASS, true) ? false : true;
-                curClass.animToggle.IsChecked = DoesFilesExist(classData.CLASS, false) ? false : true;
+                curClass.fxToggle.IsChecked = !DoesFilesExist(classData.CLASS, true);
+                curClass.animToggle.IsChecked = !DoesFilesExist(classData.CLASS, false);
             }
 
             _isInitialized = true;
@@ -205,7 +203,7 @@ namespace BnS_Multitool
                 else
                 {
                     string[] upkFiles;
-                    upkFiles = SystemConfig.SYS.MAIN_UPKS;
+                    upkFiles = new string[] { };
 
                     _progressControl = new ProgressControl();
                     MainWindow.mainWindowFrame.RemoveBackEntry();

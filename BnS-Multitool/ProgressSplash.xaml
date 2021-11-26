@@ -1,0 +1,18 @@
+﻿<UserControl x:Class="BnS_Multitool.ProgressSplash"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+             xmlns:local="clr-namespace:BnS_Multitool"
+             mc:Ignorable="d" 
+             d:DesignHeight="490" d:DesignWidth="660" Loaded="UserControl_Loaded">
+    <Grid x:Name="mainGrid">
+        <Grid Background="Black" Opacity="0.9" />
+        <Image
+               x:Name="PictureSource" gif:AnimationBehavior.SourceUri="Images/agon/agonRoll.gif"
+               Width="112"
+               Height="112" Margin="274,124,274,254"/>
+        <TextBlock TextAlignment="Center" x:Name="StatusText" HorizontalAlignment="Center" VerticalAlignment="Center" Text="Sample Text" TextWrapping="WrapWithOverflow" Foreground="White" FontWeight="Bold" FontSize="14" Height="239" Margin="81,241,77,10" Width="502"/>
+    </Grid>
+</UserControl>

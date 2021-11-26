@@ -45,12 +45,6 @@ namespace BnS_Multitool
         {
             InitializeComponent();
 
-            if (SystemConfig.SYS.patch32 == 1)
-                patch32bit.IsChecked = true;
-
-            if (SystemConfig.SYS.patch64 == 1)
-                patch64bit.IsChecked = true;
-
             //FilterList.AppendText(Properties.Resources.playable_ncwest);
         }
 
@@ -65,16 +59,22 @@ namespace BnS_Multitool
             string[] MOD_DIRECTORIES = Directory.GetDirectories(modPath);
             string[] MODS_INSTALLED = Directory.GetDirectories(modDestination);
 
-            //Cleanup of bad links
-            var mod_directories = Directory.GetDirectories(modDestination);
-            foreach (var mod in mod_directories)
+            try
             {
-                DirectoryInfo di = new DirectoryInfo(mod);
-                if (di.IsSymbolicLink() && !Directory.Exists(di.GetSymbolicLinkTarget()))
-                    di.Delete(true);
+                //Cleanup of bad links
+                var mod_directories = Directory.GetDirectories(modDestination);
+                foreach (var mod in mod_directories)
+                {
+                    DirectoryInfo di = new DirectoryInfo(mod);
+                    if (di.IsSymbolicLink() && !Directory.Exists(di.GetSymbolicLinkTarget()))
+                        di.Delete(true);
+                }
+            } catch (IOException)
+            {
+
             }
 
-            userMods = new List<MODS_CLASS>();
+                userMods = new List<MODS_CLASS>();
 
             foreach (string DIRECTORY in MOD_DIRECTORIES)
             {
@@ -434,6 +434,7 @@ namespace BnS_Multitool
 
         private async void PatchPreset_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if(presetFilters.SelectedIndex == -1)
             {
                 var dialog = new ErrorPrompt("You need to select a filter before attempting to patch!", false, true);
@@ -655,10 +656,12 @@ namespace BnS_Multitool
                await Task.Delay(50);
 
             ((Storyboard)FindResource("FadeOut")).Begin(PatchProgress);
+            */
         }
 
         private async void PatchCustom_Click(object sender, RoutedEventArgs e)
         {
+            /*
             if (customFilters.SelectedIndex == -1)
             {
                 var dialog = new ErrorPrompt("You need to select a filter before attempting to patch!", false, true);
@@ -865,10 +868,12 @@ namespace BnS_Multitool
                 await Task.Delay(50);
 
             ((Storyboard)FindResource("FadeOut")).Begin(PatchProgress);
+            */
         }
 
         private async void LoadDefaultDat(object sender, RoutedEventArgs e)
         {
+            /*
             ((Storyboard)FindResource("FadeIn")).Begin(PatchProgress);
             Dispatchers.labelContent(PatchingLabel, "Finding *.dat.bk");
             await Task.Delay(500);
@@ -939,6 +944,7 @@ namespace BnS_Multitool
             await Task.Delay(1000);
 
             ((Storyboard)FindResource("FadeOut")).Begin(PatchProgress);
+            */
         }
 
         private void Page_Unloaded(object sender, RoutedEventArgs e)
@@ -1074,12 +1080,8 @@ namespace BnS_Multitool
         {
             CheckBox currentCheckBox = (CheckBox)sender;
             int currentState = ((bool)currentCheckBox.IsChecked) ? 1 : 0;
-            if (currentCheckBox.Name == "patch64bit")
-                SystemConfig.SYS.patch64 = currentState;
-            else
-                SystemConfig.SYS.patch32 = currentState;
 
-            SystemConfig.appendChangesToConfig();
+            SystemConfig.Save();
         }
     }
 }

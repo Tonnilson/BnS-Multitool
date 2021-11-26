@@ -14,6 +14,7 @@ namespace BnS_Multitool
         public static bool loginAvailable;
         private static string loginServer;
         private static string loginServerVar;
+        public static int MEGAAPI_TIMEOUT = 10000; //Centralized variable for MegaAPI Timeout
         public static string MAIN_SERVER_ADDR = @"http://multitool.tonic.pw/";
 
         public class BnS_Servers
@@ -37,6 +38,38 @@ namespace BnS_Multitool
             KR,
             TEST,
             NAEU
+        }
+
+        public static void MoveDirectory(string source, string target)
+        {
+            var sourcePath = source.TrimEnd('\\', ' ');
+            var targetPath = target.TrimEnd('\\', ' ');
+            var files = Directory.EnumerateFiles(sourcePath, "*", SearchOption.AllDirectories)
+                                 .GroupBy(s => Path.GetDirectoryName(s));
+            foreach (var folder in files)
+            {
+                var targetFolder = folder.Key.Replace(sourcePath, targetPath);
+                Directory.CreateDirectory(targetFolder);
+                foreach (var file in folder)
+                {
+                    var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
+                    if (File.Exists(targetFile)) File.Delete(targetFile);
+                    File.Move(file, targetFile);
+                }
+            }
+            Directory.Delete(source, true);
+        }
+
+        public static string CalculateMD5(string fileName)
+        {
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                using (var stream = File.OpenRead(fileName))
+                {
+                    var hash = md5.ComputeHash(stream);
+                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
+                }
+            }
         }
 
         private static void refreshServerVar()

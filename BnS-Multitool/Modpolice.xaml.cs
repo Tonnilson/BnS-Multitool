@@ -134,7 +134,7 @@ namespace BnS_Multitool
 
             try
             {
-                MegaApiClient client = new MegaApiClient();
+                MegaApiClient client = new MegaApiClient(new WebClient(Globals.MEGAAPI_TIMEOUT));
                 await client.LoginAnonymousAsync();
 
                 IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/WXhzUZ7Y#XzlqkPa8DU4X8xrILQDdZA")); //Modpolice / Pilao Repo
@@ -246,7 +246,7 @@ namespace BnS_Multitool
 
                 ProgressControl.updateProgressLabel("Logging into Mega");
 
-                MegaApiClient client = new MegaApiClient();
+                MegaApiClient client = new MegaApiClient(new WebClient(Globals.MEGAAPI_TIMEOUT));
                 await client.LoginAnonymousAsync();
 
                 ProgressControl.updateProgressLabel("Retrieving file list...");
@@ -280,7 +280,7 @@ namespace BnS_Multitool
 
                 ProgressControl.updateProgressLabel("Unzipping: " + pluginNode.Name);
                 await Task.Delay(750);
-                Modpolice.ExtractZipFileToDirectory(@".\modpolice\" + pluginNode.Name, @".\modpolice", true);
+                ExtractZipFileToDirectory(@".\modpolice\" + pluginNode.Name, @".\modpolice", true);
 
                 if (pluginName == "UE4_cutscene_removal")
                     pluginName = "cutsceneremoval";
@@ -299,7 +299,7 @@ namespace BnS_Multitool
                 if (File.Exists(SystemConfig.SYS.BNS_DIR + plugins_path + pluginName + ".dll.off"))
                     File.Delete(SystemConfig.SYS.BNS_DIR + plugins_path + pluginName + ".dll.off");
 
-                MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
+                Globals.MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
 
                 ProgressControl.updateProgressLabel("All done");
                 await client.LogoutAsync();
@@ -371,27 +371,8 @@ namespace BnS_Multitool
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
+            //Debug.WriteLine(System.Net.ServicePointManager.SecurityProtocol);
             await Task.Run(async () => await checkOnlineVersions());
-        }
-
-        public static void MoveDirectory(string source, string target)
-        {
-            var sourcePath = source.TrimEnd('\\', ' ');
-            var targetPath = target.TrimEnd('\\', ' ');
-            var files = Directory.EnumerateFiles(sourcePath, "*", SearchOption.AllDirectories)
-                                 .GroupBy(s => Path.GetDirectoryName(s));
-            foreach (var folder in files)
-            {
-                var targetFolder = folder.Key.Replace(sourcePath, targetPath);
-                Directory.CreateDirectory(targetFolder);
-                foreach (var file in folder)
-                {
-                    var targetFile = Path.Combine(targetFolder, Path.GetFileName(file));
-                    if (File.Exists(targetFile)) File.Delete(targetFile);
-                    File.Move(file, targetFile);
-                }
-            }
-            Directory.Delete(source, true);
         }
 
         private void refreshSomeShit()
@@ -416,7 +397,7 @@ namespace BnS_Multitool
                 try
                 {
                     ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                    MegaApiClient client = new MegaApiClient();
+                    MegaApiClient client = new MegaApiClient(new WebClient(Globals.MEGAAPI_TIMEOUT));
                     await client.LoginAnonymousAsync();
 
                     if (!Directory.Exists("modpolice"))
@@ -496,7 +477,7 @@ namespace BnS_Multitool
                 ProgressControl.updateProgressLabel("Installing Modpolice Core");
                 await Task.Delay(750);
 
-                MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
+                Globals.MoveDirectory(@".\modpolice\BNSR", Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR"));
 
                 ProgressControl.updateProgressLabel("Searching for patches.xml");
                 await Task.Delay(500);
@@ -581,7 +562,7 @@ namespace BnS_Multitool
             try
             {
                 ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                MegaApiClient client = new MegaApiClient();
+                MegaApiClient client = new MegaApiClient(new WebClient(Globals.MEGAAPI_TIMEOUT));
                 await client.LoginAnonymousAsync();
 
                 if (!Directory.Exists("modpolice"))

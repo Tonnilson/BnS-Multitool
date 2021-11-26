@@ -1,27 +1,28 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Navigation;
-using Newtonsoft.Json;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Win32;
 using System.Threading;
 using System.Reflection;
 using System.Security.Principal;
-using System.Threading.Tasks;
 using System.Xml.Linq;
-using System.Xml.XPath;
 using System.Globalization;
+using System.Runtime.InteropServices;
 
 namespace BnS_Multitool
 {
     public partial class MainWindow : Window
     {
+        [DllImport("gdi32.dll", EntryPoint = "AddFontResourceW", SetLastError = true)]
+        public static extern int AddFontResource([In][MarshalAs(UnmanagedType.LPWStr)]
+                                         string lpFileName);
+
         public static string Fingerprint;
         public static Frame mainWindowFrame;
         public static Button UpdateButtonObj;
@@ -54,35 +55,56 @@ namespace BnS_Multitool
         }
 
         public static XDocument qol_xml;
+        private void RestartAsAdmin()
+        {
+            var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase)
+            {
+                UseShellExecute = true,
+                Verb = "runas"
+            };
 
+            // Start the new process
+            try
+            {
+                Process.Start(processInfo);
+            }
+            catch (Exception)
+            {
+                var dialog = new ErrorPrompt("Failed to auto start as admin, please launch with administrator rights.");
+                dialog.ShowDialog();
+            }
+
+            // Shut down the current process
+            Environment.Exit(0);
+        }
         public MainWindow()
         {
-            //Janky check to make sure the application is running as Administrator
-            bool runAsAdmin = new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
+            // Check if application is running as administrator, if not restart it as admin.
+            if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+                RestartAsAdmin();
 
-            if(!runAsAdmin)
+            // Check if Segoe MDL2 Assets or Segoe UI is installed, if not install and restart the application. I have no idea if this actually works lmao
+            /*
+            if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "SegMDL2.tff")) ||
+                !File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Fonts), "segoeuib.ttf"))
+                )
             {
-                var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase)
+                string[] fontList = { "SegMDL2", "segoeui", "segoeuib", "segoeuil", "segoeuisl", "seguisb" }; // List of fonts we're installing
+                int fontsinstalled = 0;
+                foreach(var font in fontList)
                 {
-                    UseShellExecute = true,
-                    Verb = "runas"
-                };
-
-                // Start the new process
-                try
-                {
-                    Process.Start(processInfo);
+                    var result = AddFontResource(string.Format("Resources/Fonts/{0}.ttf", font));
+                    var errno = Marshal.GetLastWin32Error();
+                    // If no error reported to windows and result > 0 = installed so increment installed fonts
+                    if (errno == 0 && result != 0)
+                        fontsinstalled++;
                 }
-                catch (Exception)
-                {
-                    var dialog = new ErrorPrompt("Failed to auto start as admin, please launch with administrator rights.");
-                    dialog.ShowDialog();
-                }
-
-                // Shut down the current process
-                Environment.Exit(0);
+                // If fonts were installed then do a restart.
+                if (fontsinstalled > 0)
+                    RestartAsAdmin();
             }
-            
+            */
+
             InitializeComponent();
 
             CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name);
@@ -94,7 +116,7 @@ namespace BnS_Multitool
                 Thread.CurrentThread.CurrentUICulture = ci;
             }
 
-            //Construct our taskbar icon
+            // Construct our taskbar icon
             notifyIcon = new System.Windows.Forms.NotifyIcon
             {
                 Visible = false,
@@ -109,12 +131,12 @@ namespace BnS_Multitool
             this.MouseDown += delegate { try { DragMove(); } catch (Exception) { } }; //Mousedown event to enable dragging of the window
             ICON_THEME_CB.SelectedIndex = SystemConfig.SYS.THEME; //Set our selected theme for menu icons
 
-            //Required enforcement for MegaAPIClient
+            // Required enforcement for MegaAPIClient
             ServicePointManager.SecurityProtocol |= SecurityProtocolType.Tls12;
 
             try
             {
-                //Check for .NET Framework 4.7.2 or higher
+                // Check for .NET Framework 4.7.2 or higher
                 const string subkey = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full\";
                 using (var ndpKey = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry32).OpenSubKey(subkey))
                 {
@@ -126,29 +148,38 @@ namespace BnS_Multitool
                     }
                 }
 
-                //Check if multitool_qol.xml exists in Documents\BnS if not create it and write our default-template
+                // Check if multitool_qol.xml exists in Documents\BnS if not create it and write our default-template
                 if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
                 {
                     using (StreamWriter output = File.CreateText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
                         output.Write(Properties.Resources.multitool_qol);
                 }
 
-                //Load XML contents into memory
+                // Load XML contents into memory
                 qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
 
-                //Make the tooltip stay on screen till hover is over.
+                // Make the tooltip stay on screen till hover is over.
                 ToolTipService.ShowDurationProperty.OverrideMetadata(
                     typeof(DependencyObject), new FrameworkPropertyMetadata(int.MaxValue));
 
-                FTHRelativeCheck(); //Will eventually delete this just a temporary call
-            }
-            catch (Exception) { }
+                new SyncConfig();
+                if (string.IsNullOrEmpty(SyncConfig.AUTH_KEY))
+                    SyncConfig.AUTH_KEY = "";
 
-            //Remove updater executable if it exists
+                // Code that needs to be removed after next patch, meant to move directories for testers
+                if (Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync")))
+                    Globals.MoveDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync"), Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync"));
+            }
+            catch
+            {
+
+            }
+
+            // Remove updater executable if it exists
             if (File.Exists("BnS-Multi-Tool-Updater.exe"))
                 File.Delete("BnS-Multi-Tool-Updater.exe");
 
-            //Check if game path was set (first-time setup) if it was not check known registry points for a game version
+            // Check if game path was set (first-time setup) if it was not check known registry points for a game version
             if (string.IsNullOrEmpty(SystemConfig.SYS.BNS_DIR))
             {
                 try
@@ -160,7 +191,8 @@ namespace BnS_Multitool
                         SystemConfig.SYS.BNS_DIR = BNS_REGISTRY.GetValue("BaseDir").ToString();
                         if (SystemConfig.SYS.BNS_DIR.Last() != '\\')
                             SystemConfig.SYS.BNS_DIR += "\\";
-                    } else
+                    }
+                    else
                     {
                         BNS_REGISTRY = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\plaync\BNS_LIVE"); //KR version
 
@@ -175,7 +207,7 @@ namespace BnS_Multitool
                         ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE = 5;
                     }
 
-                    SystemConfig.appendChangesToConfig();
+                    SystemConfig.Save();
                 }
                 catch (Exception)
                 {
@@ -187,7 +219,7 @@ namespace BnS_Multitool
                         if (RESULT == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(FOLDER.SelectedPath))
                         {
                             SystemConfig.SYS.BNS_DIR = FOLDER.SelectedPath + "\\";
-                            SystemConfig.appendChangesToConfig();
+                            SystemConfig.Save();
                         }
                     }
                 }
@@ -199,27 +231,19 @@ namespace BnS_Multitool
             DeltaPatching_Checkbox.IsChecked = SystemConfig.SYS.DELTA_PATCHING == 1;
             PingCheckTick.IsChecked = SystemConfig.SYS.PING_CHECK == 1;
             BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
-
-            //Cheap lazy fix because I'm done really doing anything with this.
-            if(SystemConfig.SYS.patch64 == 0)
-            {
-                SystemConfig.SYS.patch64 = 1;
-                SystemConfig.SYS.patch32 = 1;
-                SystemConfig.appendChangesToConfig();
-            }
         }
 
         private void Current_Exit(object sender, ExitEventArgs e) => notifyIcon.Dispose();
-        private void NotifyIcon_DoubleClick(object sender, EventArgs e) => changeWindowState(true, true);
+        private void NotifyIcon_DoubleClick(object sender, EventArgs e) => ChangeWindowState(true, true);
         private void EXIT_BTN_Click(object sender, RoutedEventArgs e) => this.Close();
 
-        private void SetCurrentPage(string pageName)
+        public void SetCurrentPage(string pageName)
         {
             var cachedPage = navigationPages.FirstOrDefault(x => x.PageName == pageName);
 
-            if(cachedPage == null)
+            if (cachedPage == null)
             {
-                switch(pageName)
+                switch (pageName)
                 {
                     case "MainPage":
                         navigationPages.Add(new Page_Navigation() { PageName = pageName, PageSource = new MainPage() });
@@ -242,6 +266,9 @@ namespace BnS_Multitool
                     case "Gameupdater":
                         navigationPages.Add(new Page_Navigation() { PageName = pageName, PageSource = new GameUpdater() });
                         break;
+                    case "Sync":
+                        navigationPages.Add(new Page_Navigation() { PageName = pageName, PageSource = new Sync() });
+                        break;
                 }
                 cachedPage = navigationPages.FirstOrDefault(x => x.PageName == pageName);
             }
@@ -255,16 +282,16 @@ namespace BnS_Multitool
         {
             mainWindowFrame = MainFrame;
             mainWindow = this;
-            //Load our main page.
+            // Load our main page.
             SetCurrentPage("MainPage");
 
             VERSION_LABEL.Text = string.Format("BnS Multi Tool Version: {0}", FileVersion());
 
-            //Check version in settings.json and overwrite if they don't match, means they probably updated manually...
-            if(SystemConfig.SYS.VERSION != FileVersion())
+            // Check version in settings.json and overwrite if they don't match, why the fuck do I still do this? will probably remove later
+            if (SystemConfig.SYS.VERSION != FileVersion())
             {
                 SystemConfig.SYS.VERSION = FileVersion();
-                SystemConfig.appendChangesToConfig();
+                SystemConfig.Save();
             }
         }
 
@@ -274,7 +301,7 @@ namespace BnS_Multitool
              FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
 
         private void OnNotifyDoubleClick(object sender, RoutedEventArgs e) =>
-            changeWindowState(true,true);
+            ChangeWindowState(true, true);
 
         private void MAIN_CLICK(object sender, RoutedEventArgs e) =>
             SetCurrentPage("MainPage");
@@ -285,7 +312,7 @@ namespace BnS_Multitool
             SetCurrentPage("Launcher");
         }
 
-        public static void changeWindowState(bool state, bool overwrite = false)
+        public static void ChangeWindowState(bool state, bool overwrite = false)
         {
             if (SystemConfig.SYS.MINIMZE_ACTION == 0 && !overwrite)
                 mainWindow.WindowState = WindowState.Minimized;
@@ -314,7 +341,7 @@ namespace BnS_Multitool
 
         private void UPDATE_BTN_CLICK(object sender, RoutedEventArgs e)
         {
-            //Updater code
+            // Updater code
             File.WriteAllBytes(Environment.CurrentDirectory + @"\BnS-Multi-Tool-Updater.exe", Properties.Resources.BnS_Multi_Tool_Updater);
 
             ProcessStartInfo proc = new ProcessStartInfo();
@@ -330,7 +357,7 @@ namespace BnS_Multitool
                 MainFrame.RemoveBackEntry();
         }
 
-        //Navigation Button Clicks
+        // Navigation Button Clicks
         private void Button_Click(object sender, RoutedEventArgs e) =>
             SetCurrentPage("Patches");
 
@@ -338,7 +365,7 @@ namespace BnS_Multitool
             SetCurrentPage("Effects");
 
         private void Button_Click_3(object sender, RoutedEventArgs e) =>
-            changeWindowState(false);
+            ChangeWindowState(false);
 
         private void Button_Click_2(object sender, RoutedEventArgs e) =>
             SetCurrentPage("Mods");
@@ -366,7 +393,7 @@ namespace BnS_Multitool
             SystemConfig.SYS.PING_CHECK = ((bool)PingCheckTick.IsChecked) ? 1 : 0;
             SystemConfig.SYS.BNS_DIR = BNS_LOCATION_BOX.Text;
 
-            SystemConfig.appendChangesToConfig();
+            SystemConfig.Save();
             Settings_Closed();
         }
 
@@ -397,7 +424,7 @@ namespace BnS_Multitool
         {
             try
             {
-                //Get rid of compatibility options on BNSR.exe
+                // Get rid of compatibility options on BNSR.exe
                 RegistryKey key = Registry.CurrentUser.OpenSubKey(@"Software\Microsoft\Windows NT\CurrentVersion\AppCompatFlags\Layers", true);
                 var keys = key.GetValueNames().Where(x => x.Contains(@"BNSR\Binaries\Win64\BNSR.exe"));
                 foreach (var v in keys)
@@ -429,33 +456,19 @@ namespace BnS_Multitool
                     exclusionList.Add("BNSR.exe");
                     FTH.SetValue("ExclusionList", exclusionList.ToArray());
 
-                    //Purge the state for BNSR.exe (Requires full path to exe)
+                    // Purge the state for BNSR.exe (Requires full path to exe)
                     var state = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\FTH\State", true);
                     var stateobj = state.GetValue(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
                     if (stateobj != null)
                         state.DeleteValue(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
 
-                    //Prompt user that an exclusion was set, pass true for Poggies dialog
+                    // Prompt user that an exclusion was set, pass true for Poggies dialog
                     new ErrorPrompt("FTH Exclusion set for BNSR.exe", true).ShowDialog();
                 }
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 new ErrorPrompt(ex.Message).ShowDialog();
-            }
-        }
-
-        //Convert current FTH exclusions for BNSR.exe from exact path to relative name
-        private void FTHRelativeCheck()
-        {
-            RegistryKey FTH = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\Microsoft\FTH", true);
-            var exclusionObj = FTH.GetValue("ExclusionList");
-            var exclusionList = new List<string>(exclusionObj as string[]);
-
-            if(exclusionList.Any(exe => exe == Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe")))
-            {
-                exclusionList.Remove(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
-                exclusionList.Add("BNSR.exe");
-                FTH.SetValue("ExclusionList", exclusionList.ToArray());
             }
         }
 
@@ -469,7 +482,8 @@ namespace BnS_Multitool
                     state.DeleteValue(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
 
                 new ErrorPrompt("Any FTH State for BNSR.exe has been cleared", true).ShowDialog();
-            } catch (Exception)
+            }
+            catch (Exception)
             {
 
             }
@@ -510,9 +524,9 @@ namespace BnS_Multitool
             int current_selection = ((ComboBox)sender).SelectedIndex;
             List<MENU_THEME_STRUCT> theme = current_selection == 0 ? WORRY_THEME : AGON_THEME;
             SystemConfig.SYS.THEME = current_selection;
-            SystemConfig.appendChangesToConfig(); 
+            SystemConfig.Save();
 
-            foreach(var menu in theme)
+            foreach (var menu in theme)
             {
                 Image control = (Image)this.FindName(menu.IMAGE_CONTROL);
                 if (control != null)
