@@ -148,4 +148,7 @@
   <data name="translate" xml:space="preserve">
     <value />
   </data>
+  <data name="_7za" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\Resources\7za.dll;System.Byte[], mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
 </root>

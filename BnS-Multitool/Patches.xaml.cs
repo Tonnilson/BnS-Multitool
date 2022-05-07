@@ -109,8 +109,9 @@ namespace BnS_Multitool
                         }
                     }
                 }
-            } catch (Exception)
+            } catch (Exception ex)
             {
+                Logger.log.Error("Patches::UpdateListing\nType: {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 new ErrorPrompt("An error occured, check your anti-virus settings for Controlled Folder Access and either turn it off or whitelist this app to have folder access.").ShowDialog();
             }
         }
@@ -123,14 +124,14 @@ namespace BnS_Multitool
                 {
                     if (addon.isChecked)
                     {
-                        if (!File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File))))
-                            if (File.Exists(addon.File))
-                                SymbolicLinkSupport.SymbolicLink.CreateFileLink(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File)), addon.File);
+                        if (!File.Exists(Path.GetFullPath(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File)))))
+                            if (File.Exists(Path.GetFullPath(addon.File)))
+                                SymbolicLinkSupport.SymbolicLink.CreateFileLink(Path.GetFullPath(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File))), Path.GetFullPath(addon.File));
                     }
                     else
                     {
-                        if (File.Exists(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File))))
-                            File.Delete(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File)));
+                        if (File.Exists(Path.GetFullPath(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File)))))
+                            File.Delete(Path.GetFullPath(Path.Combine(ADDON_DIR, Path.GetFileName(addon.File))));
                     }
                 }
 
@@ -138,14 +139,17 @@ namespace BnS_Multitool
                 {
                     if (addon.isChecked)
                     {
-                        if (!File.Exists(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File))))
-                            if (File.Exists(addon.File))
-                                SymbolicLinkSupport.SymbolicLink.CreateFileLink(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File)), addon.File);
+                        if (!File.Exists(Path.GetFullPath(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File)))))
+                            if (File.Exists(Path.GetFullPath(addon.File)))
+                                SymbolicLinkSupport.SymbolicLink.CreateFileLink(Path.GetFullPath(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File))), Path.GetFullPath(addon.File));
                     }
                     else
                     {
-                        if (File.Exists(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File))))
-                            File.Delete(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File)));
+                        if (File.Exists(Path.GetFullPath(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File)))))
+                        {
+                            Debug.WriteLine(Path.GetFullPath(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File))));
+                            File.Delete(Path.GetFullPath(Path.Combine(PATCHES_DIR, Path.GetFileName(addon.File))));
+                        }
                     }
                 }
 
@@ -153,6 +157,7 @@ namespace BnS_Multitool
                 ((Storyboard)FindResource("animate")).Begin(PoggiesLabel);
             } catch (Exception ex)
             {
+                Logger.log.Error("Patches::ApplyPatches\nType: {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 new ErrorPrompt(String.Format("Something went wrong, could be an issue with Windows Defender. Check to see if Controlled Folder Access is turned on.\r\rAdditional Information: \r{0}", ex.Message)).ShowDialog();
             }
         }

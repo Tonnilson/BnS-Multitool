@@ -12,8 +12,15 @@ namespace BnS_Multitool
     /// </summary>
     public partial class ErrorPrompt : Window
     {
+        public string StatusIcon { get; set; }
         public ErrorPrompt(string Message, bool good = false, bool useBoldFont = false)
         {
+            // New theme control
+            if (SystemConfig.SYS.THEME == 0)
+                StatusIcon = good ? "poggies.png" : "Images\\feelsworry.png";
+            else
+                StatusIcon = good ? "Images\\agon\\agonHappy.png" : "Images\\agon\\agonSob.png";
+
             InitializeComponent();
             ErrorLabel.Text = Message;
 
@@ -26,7 +33,6 @@ namespace BnS_Multitool
 
             if (good)
             {
-                PromptIcon2.Visibility = Visibility.Visible;
                 ErrorLabel.FontSize = 16;
                 ErrorLabel.FontWeight = FontWeights.Bold;
             }

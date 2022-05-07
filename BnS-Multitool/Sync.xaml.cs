@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Windows.Documents;
 using System.Windows.Input;
+using static BnS_Multitool.Functions.Crypto;
 
 namespace BnS_Multitool
 {
@@ -215,7 +216,7 @@ namespace BnS_Multitool
                 // Gzip compress the string then do a Base64 encode on the returned bytes and make it Urlsafe
                 string compressedDescription = await _sync.Base64UrlEncode(description);
                 string compressedTitle = await _sync.Base64UrlEncode(SyncPublish_TitleBox.Text);
-                string md5 = Globals.CalculateMD5(_sync.File);
+                string md5 = MD5_File(_sync.File);
                 int category = categoryBox.SelectedIndex;
 
                 // POST data that we need to send, serialize it as json-format.
@@ -600,12 +601,12 @@ namespace BnS_Multitool
                     if (!_sync.IsSynced(xml_data))
                     {
                         _splash.ProgressText = string.Format("Updating {0}", xml.Name);
-                        if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync", xml.Discord_id.ToString())))
-                            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync", xml.Discord_id.ToString()));
+                        if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString())))
+                            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString()));
 
                         var dataResult = await client.GetAsync(string.Format("http://sync.bns.tools/xml_data/{0}/{1}.{2}", xml.Discord_id, xml.Name, xml.Type));
                         using (var stream = await dataResult.Content.ReadAsStreamAsync())
-                        using (var filestream = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type), FileMode.Create))
+                        using (var filestream = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type), FileMode.Create))
                             await stream.CopyToAsync(filestream);
 
                         // Update synced entry with data from server

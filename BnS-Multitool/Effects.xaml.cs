@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -10,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Animation;
 using ToggleSwitch;
+using static BnS_Multitool.Functions.FileExtraction;
 
 namespace BnS_Multitool
 {
@@ -20,8 +20,8 @@ namespace BnS_Multitool
     {
         private ProgressControl _progressControl;
         private static bool _isInitialized = false; //logic for toggles cause there isn't a fucking click event
-        private static string removalDirectory;
-        private static string removalPath;
+        private static string removalDirectory = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Removes");
+        private static string removalPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Removes");
 
         public class toggleStruct
         {
@@ -78,15 +78,16 @@ namespace BnS_Multitool
         {
             try
             {
+                // Cleanup the removal directory incase we change file names later on.
+                if (Directory.Exists(removalPath))
+                    Directory.Delete(removalPath, true);
+
                 using (var memoryStream = new MemoryStream(Properties.Resources.class_removes))
-                {
-                    ZipArchive archive = new ZipArchive(memoryStream);
-                    foreach(ZipArchiveEntry entry in archive.Entries)
-                        using (var fs = new FileStream(Path.Combine(removalDirectory, entry.FullName), FileMode.Create, FileAccess.Write))
-                            entry.Open().CopyTo(fs);
-                }
-            } catch
-            {}
+                    ExtractZipFileToDirectory(memoryStream, removalDirectory, true, true);
+            } catch (Exception ex)
+            {
+                Logger.log.Error("Effects::ExtractPackFiles\n{0}", ex.ToString());
+            }
         }
 
         private void Page_Loaded(object sender, RoutedEventArgs e)
@@ -188,8 +189,9 @@ namespace BnS_Multitool
                                     }
                                 }
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                Logger.log.Error("Effects::handleToggleChange\n{0}", ex.ToString());
                                 //ProgressControl.updateProgressLabel(ex.Message);
                             }
                         }
@@ -251,6 +253,7 @@ namespace BnS_Multitool
                             }
                             catch (Exception ex)
                             {
+                                Logger.log.Error("Effects::handleToggleChange\n{0}", ex.ToString());
                                 ProgressControl.updateProgressLabel(ex.Message);
                                 await Task.Delay(500);
                             }
@@ -265,6 +268,7 @@ namespace BnS_Multitool
                 }
             } catch (Exception ex)
             {
+                Logger.log.Error("Effects::handleToggleChange\n{0}", ex.ToString());
                 var dialog = new ErrorPrompt("Something went wrong, \r\rAddition information: \r" + ex.Message);
                 dialog.ShowDialog();
             }
@@ -380,6 +384,7 @@ namespace BnS_Multitool
                     }
                     catch (Exception ex)
                     {
+                        Logger.log.Error("Effects::handleToggle\n{0}", ex.ToString());
                         ProgressControl.updateProgressLabel(ex.Message);
                         await Task.Delay(500);
                     }
@@ -391,6 +396,12 @@ namespace BnS_Multitool
             MainGrid.Visibility = Visibility.Visible;
             ProgressPanel.Children.Clear();
             _progressControl = null;
+        }
+
+        private void ExtendedOptions_Click(object sender, RoutedEventArgs e)
+        {
+            MainGrid.Visibility=Visibility.Collapsed;
+            ExtendedOptionsGrid.Visibility=Visibility.Visible;
         }
     }
 }

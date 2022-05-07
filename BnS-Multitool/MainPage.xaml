@@ -12,21 +12,30 @@
     <Grid>
         <Border BorderBrush="#FF343E4B" Margin="-2,-3,284,341" BorderThickness="0,2,2,2" />
         <Label Content="Made by Tonic#1356" FontFamily="Arial" FontWeight="Bold" FontSize="18" Margin="0,0,417,462" Foreground="#FF99B4D1"/>
-        <TextBlock Foreground="#FFDAE1EA" TextWrapping="WrapWithOverflow" FontFamily="Arial" FontWeight="Bold" Margin="5,30,287,393">
-            Made for myself and clan members as a drop in replacement for BnS Buddy but releasing to everyone to enjoy
-            the peepos and worry's. If you want to support me in cheese burgers there's a button. This is only possible because of pilao and Hora so please share the love with them.
+        <TextBlock Foreground="#FFDAE1EA" TextWrapping="WrapWithOverflow" FontFamily="Arial" FontWeight="Bold" Margin="5,25,287,378">
+            I originally created this for myself and friends, over time it has evolved so much and became a vital tool to mod and play BnS with
+            as little hassle as possible. People have asked for more ways to support me besides PayPal, so now I have a Patreon. Thanks to Hora, Pilao and others for
+            making this possible.
         </TextBlock>
         <Image x:Name="MAINPAGE_ABOUT_ICON" gif:AnimationBehavior.SourceUri="Images/agon/agonHuggie.gif" Margin="2,100,603,343"/>
         <Label Content="Changelog" Background="{x:Null}" Foreground="White" Margin="10,182,467,275" FontFamily="Arial" FontWeight="Bold" FontSize="20"/>
-        <RichTextBox IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
-        <Grid Margin="226,65,284,339">
-            <Button HorizontalAlignment="Left" Style="{StaticResource PayPalButton}" VerticalAlignment="Top" Width="112" Height="55"
-                Click="Button_Click" Margin="35,27,0,0">
-                <Button.Background>
-                    <ImageBrush ImageSource="PayPal.png"/>
-                </Button.Background>
-            </Button>
-        </Grid>
+        <RichTextBox BorderThickness="0" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="ChangeLog" Margin="10,215,10,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"></RichTextBox>
+        <Button HorizontalAlignment="Center" VerticalAlignment="Top" Width="82" Height="36"
+                Click="Button_Click" Margin="0,108,0,0">
+            <Button.Template>
+                <ControlTemplate>
+                    <Image Source="PayPal.png" Stretch="Uniform"/>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
+        <Button HorizontalAlignment="Left" VerticalAlignment="Top" Width="106" Height="34"
+                Click="PatreonClick" Margin="178,108,0,0">
+            <Button.Template>
+                <ControlTemplate>
+                    <Image Source="Patreon_btn.png" Stretch="Uniform" Margin="0,2,0,0"/>
+                </ControlTemplate>
+            </Button.Template>
+        </Button>
         <Label x:Name="PingLabel" Content="Ping Offline" HorizontalAlignment="Left" Margin="391,10,0,0" VerticalAlignment="Top" Width="176" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
         <Label x:Name="usersOnlineLbl" Content="Users Online: Fetching.." HorizontalAlignment="Left" Margin="391,41,0,0" VerticalAlignment="Top" Width="259" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
     </Grid>

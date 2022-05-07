@@ -14,7 +14,10 @@
 
             </StackPanel>
         </Grid>
-        <Grid x:Name="MainGrid">
+        <Grid x:Name="ExtendedOptionsGrid">
+            
+        </Grid>
+        <Grid x:Name="MainGrid" Visibility="Visible">
             <Label x:Name="label_Copy2" Content="Animation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="211,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
             <Label x:Name="label_Copy" Content="Effects" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="387,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
             <Label x:Name="label_Copy1" Content="Class" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="32,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
@@ -58,7 +61,8 @@
             <toggle:HorizontalToggleSwitch Unchecked="handleToggleChange" Checked="handleToggleChange" x:Name="arc_fx_toggle" Margin="396,381,203,84" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="61" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6"/>
             <toggle:HorizontalToggleSwitch Unchecked="handleToggleChange" Checked="handleToggleChange" x:Name="arc_anim_toggle" Margin="230,381,369,84" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="61" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6"/>
             <toggle:HorizontalToggleSwitch Visibility="Hidden" ToolTip="This removes sound, environmental and other misc effects shared by classes." x:Name="otherEffectsToggle" Margin="544,75,42,390" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="74" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="handleToggleChange" Unchecked="handleToggleChange"/>
-            <Label HorizontalContentAlignment="Center" x:Name="label_Copy16" Content="Some effects&#xD;&#xA;and animations&#xD;&#xA;won't remove&#xD;&#xA;this is a wip&#xD;&#xA;from Hora&#xD;&#xA;" Margin="506,41,0,0" Height="178" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Center" x:Name="label_Copy16" Text="Extended Options&#xA;" Margin="506,10,0,0" Height="45" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="Configure" Margin="526,60,30,402" FontWeight="Bold" Click="ExtendedOptions_Click"/>
             <Label HorizontalContentAlignment="Center" x:Name="label_Copy17" Content="All Animations" Margin="506,181,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
             <Label HorizontalContentAlignment="Center" x:Name="label_Copy18" Content="All Effects" Margin="506,275,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
             <Separator Margin="0,35,163,451" Background="#FF2D415D" RenderTransformOrigin="0.5,0.445" MinHeight="5" Height="7.4" />
@@ -69,7 +73,7 @@
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="#FF2D415D" Width="2" Margin="2,34,2,-10"/>
             </StackPanel>
             <Label HorizontalContentAlignment="Center" x:Name="label_Copy19" Content="All" Margin="506,360,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-            <Button x:Name="animations_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,212,34,247">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="animations_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,212,34,247">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
@@ -78,7 +82,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button x:Name="animations_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,212,85,247" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="animations_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,212,85,247" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
@@ -87,7 +91,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button x:Name="effects_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,305,34,154">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="effects_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,305,34,154">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
@@ -96,7 +100,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button x:Name="effects_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,305,85,154" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="effects_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,305,85,154" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
@@ -105,7 +109,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button x:Name="all_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,391,34,68">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="all_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,391,34,68">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
@@ -114,7 +118,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button x:Name="all_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,391,85,68" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="all_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,391,85,68" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>

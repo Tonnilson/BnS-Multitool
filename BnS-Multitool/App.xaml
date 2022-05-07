@@ -5,6 +5,18 @@
              xmlns:local="clr-namespace:BnS_Multitool"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
+        <Style x:Key="DataGrid_Content_Centering"
+        TargetType="{x:Type DataGridCell}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Grid Background="{TemplateBinding Background}">
+                            <ContentPresenter VerticalAlignment="Center" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
         <Style x:Key="ScrollThumbs" TargetType="{x:Type Thumb}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -377,7 +389,137 @@
             </Setter>
         </Style>
 
-        <Style x:Name="MainButtonStyle" TargetType="{x:Type Button}">
+        <Style x:Key="DEES" TargetType="CheckBox" BasedOn="{x:Static DataGridCheckBoxColumn.DefaultEditingElementStyle}">
+            <Setter Property="SnapsToDevicePixels" Value="False" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="ToolTip" Value="Check if you want skills to not have Auto bias calculations"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <BulletDecorator Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Border x:Name="Border"
+                                    Width="20"
+                                    Height="20"
+                                    Background="#FF263447"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="0.2"
+                                    ClipToBounds="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="5" ShadowDepth="2"/>
+                                    </Border.Effect>
+                                    <Path x:Name="CheckMark"
+                                      Width="15"
+                                      Height="15"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Stretch="Fill"
+                                      Stroke="#FF8EABD1"
+                                      StrokeEndLineCap="Round"
+                                      StrokeStartLineCap="Round"
+                                      StrokeThickness="2"
+                                      Data="F1 M 0.468732,4.66838L 3.03345,7.95443L 7.28127,0.420569"/>
+                                </Border>
+                            </BulletDecorator.Bullet>
+                            <ContentPresenter Margin="5,0,0,0"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </BulletDecorator>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="BorderBrush" Value="#FFA2A2A2"/>
+                            </Trigger>
+
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                <Setter Property="BorderBrush" Value="#FFA2A2A2"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#FFA2A2A2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="BorderBrush" Value="Gray"/>
+                                <Setter TargetName="CheckMark" Property="Stroke" Value="#FF3D3B44"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="DES" TargetType="CheckBox" BasedOn="{x:Static DataGridCheckBoxColumn.DefaultElementStyle}">
+            <Setter Property="SnapsToDevicePixels" Value="False" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="OverridesDefaultStyle" Value="True"/>
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="ToolTip" Value="Check if you want skills to not have Auto bias calculations"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <BulletDecorator Background="Transparent">
+                            <BulletDecorator.Bullet>
+                                <Border x:Name="Border"
+                                    Width="20"
+                                    Height="20"
+                                    Background="#FF263447"
+                                    BorderBrush="{TemplateBinding BorderBrush}"
+                                    BorderThickness="0.2"
+                                    ClipToBounds="True">
+                                    <Border.Effect>
+                                        <DropShadowEffect BlurRadius="5" ShadowDepth="2"/>
+                                    </Border.Effect>
+                                    <Path x:Name="CheckMark"
+                                      Width="15"
+                                      Height="15"
+                                      HorizontalAlignment="Center"
+                                      VerticalAlignment="Center"
+                                      Stretch="Fill"
+                                      Stroke="#FF8EABD1"
+                                      StrokeEndLineCap="Round"
+                                      StrokeStartLineCap="Round"
+                                      StrokeThickness="2"
+                                      Data="F1 M 0.468732,4.66838L 3.03345,7.95443L 7.28127,0.420569"/>
+                                </Border>
+                            </BulletDecorator.Bullet>
+                            <ContentPresenter Margin="5,0,0,0"
+                                              HorizontalAlignment="Left"
+                                              VerticalAlignment="Center"
+                                              RecognizesAccessKey="True"/>
+                        </BulletDecorator>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="False">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Collapsed"/>
+                                <Setter Property="BorderBrush" Value="#FFA2A2A2"/>
+                            </Trigger>
+
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                                <Setter Property="BorderBrush" Value="#FFA2A2A2"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="BorderBrush" Value="#FFA2A2A2"/>
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="BorderBrush" Value="Gray"/>
+                                <Setter TargetName="CheckMark" Property="Stroke" Value="#FF3D3B44"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MainButtonStyle" TargetType="{x:Type Button}">
             <Setter Property="Background" Value="#FF2D3F5D"/>
             <Setter Property="BorderBrush" Value="#FF3F6AA6"/>
             <Setter Property="Foreground" Value="White"/>

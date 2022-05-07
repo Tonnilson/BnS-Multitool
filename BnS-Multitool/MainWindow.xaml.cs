@@ -14,6 +14,7 @@ using System.Security.Principal;
 using System.Xml.Linq;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using BnS_Multitool.Functions;
 
 namespace BnS_Multitool
 {
@@ -77,6 +78,7 @@ namespace BnS_Multitool
             // Shut down the current process
             Environment.Exit(0);
         }
+
         public MainWindow()
         {
             // Check if application is running as administrator, if not restart it as admin.
@@ -104,6 +106,15 @@ namespace BnS_Multitool
                     RestartAsAdmin();
             }
             */
+
+            // Setup NLog Configuration
+            string LogFileName = Path.Combine("logs", $"{DateTime.Now.ToString("yyyy-MM-dd")}.txt");
+            var config = new NLog.Config.LoggingConfiguration();
+            config.AddRule(NLog.LogLevel.Info, NLog.LogLevel.Fatal, new NLog.Targets.ConsoleTarget("logconsole"));
+            config.AddRule(NLog.LogLevel.Debug, NLog.LogLevel.Fatal, new NLog.Targets.FileTarget("logfile") { FileName = LogFileName});
+            NLog.LogManager.Configuration = config;
+
+            Logger.log.Info("Initialized Logger");
 
             InitializeComponent();
 
@@ -151,17 +162,21 @@ namespace BnS_Multitool
                 // Check if multitool_qol.xml exists in Documents\BnS if not create it and write our default-template
                 if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
                 {
+                    Logger.log.Info("multitool_qol.xml does not exist, writing file");
                     using (StreamWriter output = File.CreateText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
                         output.Write(Properties.Resources.multitool_qol);
                 }
 
+                Logger.log.Info("Loading multitool_qol.xml from Documents\\BnS");
                 // Load XML contents into memory
                 qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
 
+                Logger.log.Info("Adjusting Tool-tip Service");
                 // Make the tooltip stay on screen till hover is over.
                 ToolTipService.ShowDurationProperty.OverrideMetadata(
                     typeof(DependencyObject), new FrameworkPropertyMetadata(int.MaxValue));
 
+                Logger.log.Info("Validating Sync AUTH_KEY");
                 new SyncConfig();
                 if (string.IsNullOrEmpty(SyncConfig.AUTH_KEY))
                     SyncConfig.AUTH_KEY = "";
@@ -170,9 +185,9 @@ namespace BnS_Multitool
                 if (Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync")))
                     Globals.MoveDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync"), Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync"));
             }
-            catch
+            catch (Exception ex)
             {
-
+                Logger.log.Error("Error occured in initialization\nType: {0}\n{1}\n{2}", ex.ToString(), ex.GetType().Name, ex.StackTrace);
             }
 
             // Remove updater executable if it exists
@@ -231,14 +246,39 @@ namespace BnS_Multitool
             DeltaPatching_Checkbox.IsChecked = SystemConfig.SYS.DELTA_PATCHING == 1;
             PingCheckTick.IsChecked = SystemConfig.SYS.PING_CHECK == 1;
             BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
+
+            try
+            {
+                if (!Directory.Exists("modpolice"))
+                    Directory.CreateDirectory("modpolice");
+
+                // Extract 7za.dll from resources if it does not exist
+                if (!File.Exists("7za.dll"))
+                    File.WriteAllBytes("7za.dll", Properties.Resources._7za);
+
+                // Set the library path that we'll be using
+                SevenZip.SevenZipBase.SetLibraryPath("7za.dll");
+            } catch (Exception ex)
+            {
+                Logger.log.Error(ex.ToString());
+            }
+            Logger.log.Info("Initialized");
+
+            // Get rid of this next patch
+            if(SystemConfig.SYS.THEME == 2)
+            {
+                ICON_THEME_CB.SelectedIndex = 1;
+            }
         }
 
-        private void Current_Exit(object sender, ExitEventArgs e) => notifyIcon.Dispose();
-        private void NotifyIcon_DoubleClick(object sender, EventArgs e) => ChangeWindowState(true, true);
-        private void EXIT_BTN_Click(object sender, RoutedEventArgs e) => this.Close();
+        private void Current_Exit(object sender, ExitEventArgs e) => notifyIcon.Dispose(); // Dispose of task tray icon on app exit
+        private void NotifyIcon_DoubleClick(object sender, EventArgs e) => ChangeWindowState(true, true); // Unminimize app when task tray double click triggered
+        private void EXIT_BTN_Click(object sender, RoutedEventArgs e) => this.Close(); // Close application
 
-        public void SetCurrentPage(string pageName)
+        public void SetCurrentPage(string pageName, bool cleanMemory = false)
         {
+            // Clear working-set for app
+            if(cleanMemory) PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
             var cachedPage = navigationPages.FirstOrDefault(x => x.PageName == pageName);
 
             if (cachedPage == null)
@@ -275,7 +315,7 @@ namespace BnS_Multitool
 
             MainFrame.Content = cachedPage.PageSource;
             currentPageText = pageName;
-            GC.WaitForPendingFinalizers();
+            GC.WaitForPendingFinalizers(); // Force garbage collection
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -306,11 +346,8 @@ namespace BnS_Multitool
         private void MAIN_CLICK(object sender, RoutedEventArgs e) =>
             SetCurrentPage("MainPage");
 
-        private void LAUNCHER_CLICK(object sender, RoutedEventArgs e)
-        {
-            PoormanCleaner.EmptyWorkingSet(Process.GetCurrentProcess().Handle);
-            SetCurrentPage("Launcher");
-        }
+        private void LAUNCHER_CLICK(object sender, RoutedEventArgs e) =>
+            SetCurrentPage("Launcher", true);
 
         public static void ChangeWindowState(bool state, bool overwrite = false)
         {
@@ -358,19 +395,19 @@ namespace BnS_Multitool
         }
 
         // Navigation Button Clicks
-        private void Button_Click(object sender, RoutedEventArgs e) =>
+        private void CustomPatchesClick(object sender, RoutedEventArgs e) =>
             SetCurrentPage("Patches");
 
-        private void Button_Click_1(object sender, RoutedEventArgs e) =>
+        private void EffectsClick(object sender, RoutedEventArgs e) =>
             SetCurrentPage("Effects");
 
         private void Button_Click_3(object sender, RoutedEventArgs e) =>
             ChangeWindowState(false);
 
-        private void Button_Click_2(object sender, RoutedEventArgs e) =>
+        private void ModsClick(object sender, RoutedEventArgs e) =>
             SetCurrentPage("Mods");
 
-        private void Button_Click_4(object sender, RoutedEventArgs e) =>
+        private void PluginsClick(object sender, RoutedEventArgs e) =>
             SetCurrentPage("Modpolice");
 
         private void GameUpdaterButton(object sender, RoutedEventArgs e) =>
@@ -439,7 +476,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Logger.log.Error("CompatibilityOptionS_Click\n{0}", ex.ToString());
             }
         }
 
@@ -451,9 +488,9 @@ namespace BnS_Multitool
                 var exclusionObj = FTH.GetValue("ExclusionList");
                 var exclusionList = new List<string>(exclusionObj as string[]);
 
-                if (!exclusionList.Any(exe => exe == "BNSR.exe"))
+                if (!exclusionList.Any(exe => exe.Contains("BNSR.exe")))
                 {
-                    exclusionList.Add("BNSR.exe");
+                    exclusionList.Add(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe"));
                     FTH.SetValue("ExclusionList", exclusionList.ToArray());
 
                     // Purge the state for BNSR.exe (Requires full path to exe)
@@ -468,6 +505,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
+                Logger.log.Error("FTHExclusion\nType: {0}\n{0}", ex.GetType().Name, ex.ToString());
                 new ErrorPrompt(ex.Message).ShowDialog();
             }
         }
@@ -483,9 +521,9 @@ namespace BnS_Multitool
 
                 new ErrorPrompt("Any FTH State for BNSR.exe has been cleared", true).ShowDialog();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
+                Logger.log.Error("ClearFTHState\nType: {0}\n{0}", ex.GetType().Name, ex.ToString());
             }
         }
 
@@ -497,8 +535,8 @@ namespace BnS_Multitool
 
         private static readonly List<MENU_THEME_STRUCT> AGON_THEME = new List<MENU_THEME_STRUCT>()
         {
-            new MENU_THEME_STRUCT { PATH = "Images/agon/ue4agon.png", IMAGE_CONTROL = "BANNER_ICON" },
-            new MENU_THEME_STRUCT { PATH = "Images/agon/agonDepressed.png", IMAGE_CONTROL = "MENU_MAIN_ICON" },
+            new MENU_THEME_STRUCT { PATH = "Images/agon/ue4agonhigh.png", IMAGE_CONTROL = "BANNER_ICON" },
+            new MENU_THEME_STRUCT { PATH = "Images/agon/agonHype.png", IMAGE_CONTROL = "MENU_MAIN_ICON" },
             new MENU_THEME_STRUCT { PATH = "Images/agon/agonWicked.png", IMAGE_CONTROL = "MENU_LAUNCHER_ICON" },
             new MENU_THEME_STRUCT { PATH = "Images/agon/agonKnife.png", IMAGE_CONTROL = "MENU_PATCHES_ICON" },
             new MENU_THEME_STRUCT { PATH = "Images/agon/agonDColon.png", IMAGE_CONTROL = "MENU_EFFECTS_ICON" },
@@ -522,7 +560,20 @@ namespace BnS_Multitool
         private void THEME_CHANGED(object sender, SelectionChangedEventArgs e)
         {
             int current_selection = ((ComboBox)sender).SelectedIndex;
-            List<MENU_THEME_STRUCT> theme = current_selection == 0 ? WORRY_THEME : AGON_THEME;
+            List<MENU_THEME_STRUCT> theme = null;
+
+            switch(current_selection)
+            {
+                case 0:
+                    theme = WORRY_THEME;
+                    break;
+                case 1:
+                    theme = AGON_THEME;
+                    break;
+                case 2:
+                    theme = AGON_THEME;
+                    break;
+            }
             SystemConfig.SYS.THEME = current_selection;
             SystemConfig.Save();
 
@@ -530,8 +581,26 @@ namespace BnS_Multitool
             {
                 Image control = (Image)this.FindName(menu.IMAGE_CONTROL);
                 if (control != null)
+                {
+                    if (SystemConfig.SYS.THEME == 2 && menu.IMAGE_CONTROL == "BANNER_ICON")
+                        control.Stretch = System.Windows.Media.Stretch.None;
+                    else if (menu.IMAGE_CONTROL == "BANNER_ICON")
+                        control.Stretch = System.Windows.Media.Stretch.Uniform;
+
                     control.Source = new System.Windows.Media.Imaging.BitmapImage(new Uri(menu.PATH, UriKind.Relative));
+                }
             }
+        }
+
+        private void NavigationSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                var control = sender as ListView;
+                if (control != null && control.SelectedIndex == -1) return;
+                if (control == null) return;
+                control.SelectedIndex = -1;
+            } catch { }
         }
     }
 }

@@ -17,199 +17,297 @@
                     <Image x:Name="BANNER_ICON" Source="Images/agon/ue4agon.png" Height="87"/>
                 </StackPanel>
                 <StackPanel>
-                    <Button Height="60" Click="MAIN_CLICK">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
+                    <ListView Background="{x:Null}" Width="200" x:Name="MenuNavigation" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" BorderThickness="0" BorderBrush="{x:Null}" SelectionChanged="NavigationSelectionChanged">
+                        <ListView.ItemContainerStyle>
+                            <Style TargetType="{x:Type ListViewItem}">
+                                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                <Setter Property="BorderBrush" Value="Transparent"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                    </Trigger>
+                                    <Trigger Property="IsSelected" Value="True">
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
                                     </Trigger>
                                 </Style.Triggers>
                             </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_MAIN_ICON" Source="Images/agon/agonDepressed.png"  HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="121"/>
-                            <TextBlock Margin="0,5,0,0" FontFamily="Arial" TextAlignment="right" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="73">Main</TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Button Height="60" Click="LAUNCHER_CLICK">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Foreground" Value="Gray"/>
-                                        <Setter Property="Background" Value="#FF111417"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_LAUNCHER_ICON" Source="Images/agon/agonWicked.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="105"/>
-                            <TextBlock Margin="0,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="123">Launcher</TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Button Height="60" Click="Button_Click">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_PATCHES_ICON" Source="Images/agon/agonKnife.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="105"/>
-                            <TextBlock Margin="10,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="123">Patches</TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Button Height="60" Click="Button_Click_1">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Foreground" Value="Gray"/>
-                                        <Setter Property="Background" Value="#FF111417"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_EFFECTS_ICON" Source="Images/agon/agonDColon.png" Height="64" Width="76"/>
-                            <TextBlock Margin="50,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="123"><Run Text="Effects"/></TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Button Height="60" Click="Button_Click_2">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Foreground" Value="Gray"/>
-                                        <Setter Property="Background" Value="#FF111417"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_MODS_ICON" Source="Images/agon/agonWokeage.png" Height="64" Width="71"/>
-                            <TextBlock Margin="70,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="83">
-                                <TextBlock>
-                                </TextBlock><Run Text="Mods"/></TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Button Height="60" Click="Button_Click_4">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
-                                    </Trigger>
-                                    <Trigger Property="IsEnabled" Value="False">
-                                        <Setter Property="Foreground" Value="Gray"/>
-                                        <Setter Property="Background" Value="#FF111417"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_MODPOLICE_ICON" Source="Images/agon/AgonModMan.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="97"/>
-                            <TextBlock Margin="0,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="118"><Run Text="Modpolice"/></TextBlock>
-                        </StackPanel>
-                    </Button>
-                    <Button Height="60" Click="GameUpdaterButton">
-                        <Button.Style>
-                            <Style TargetType="{x:Type Button}">
-                                <Setter Property="Background" Value="#161a1f"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="{x:Type Button}">
-                                            <Border Background="{TemplateBinding Background}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                                <Style.Triggers>
-                                    <Trigger Property="IsMouseOver" Value="True">
-                                        <Setter Property="Background" Value="#FF242E3C"/>
-                                    </Trigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                        <StackPanel Orientation="Horizontal">
-                            <Image x:Name="MENU_BNSUPDATER_ICON" Source="Images/agon/agonCopium.png" HorizontalAlignment="Left" VerticalAlignment="Center" Height="64" Width="54"/>
-                            <TextBlock Margin="20,5,0,0" FontFamily="Arial" Height="23" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold" Width="144" Text="BnS Updater"/>
-                        </StackPanel>
-                    </Button>
+                        </ListView.ItemContainerStyle>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                <Button Click="MAIN_CLICK">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                        <Setter Property="Background" Value="#161a1f"/>
+                                        <Setter Property="Template">
+                                            <Setter.Value>
+                                                <ControlTemplate TargetType="{x:Type Button}">
+                                                    <Border Background="{TemplateBinding Background}">
+                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                    </Border>
+                                                </ControlTemplate>
+                                            </Setter.Value>
+                                        </Setter>
+                                        <Style.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Background" Value="#FF242E3C"/>
+                                            </Trigger>
+                                            <Trigger Property="IsEnabled" Value="False">
+                                                <Setter Property="Foreground" Value="Gray"/>
+                                                <Setter Property="Background" Value="#FF111417"/>
+                                            </Trigger>
+                                        </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_MAIN_ICON" Source="Images/agon/agonDepressed.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">News</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="60" Width="190">
+                                <Button Click="LAUNCHER_CLICK">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_LAUNCHER_ICON" Source="Images/agon/agonWicked.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Play</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                <Button Click="CustomPatchesClick">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_PATCHES_ICON" Source="Images/agon/agonKnife.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Patches</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                <Button Click="EffectsClick">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_EFFECTS_ICON" Source="Images/agon/agonDColon.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Effects</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                <Button Click="ModsClick">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_MODS_ICON" Source="Images/agon/agonWokeage.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Mods</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                <Button Click="PluginsClick">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_MODPOLICE_ICON" Source="Images/agon/AgonModMan.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Plugins</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem>
+                            <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                <Button Click="GameUpdaterButton">
+                                    <Button.Style>
+                                        <Style TargetType="{x:Type Button}">
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                    <StackPanel Orientation="Horizontal" Width="190">
+                                        <Grid Width="188" Height="60">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="65"/>
+                                                <ColumnDefinition/>
+                                            </Grid.ColumnDefinitions>
+                                            <Image Grid.Column="0" x:Name="MENU_BNSUPDATER_ICON" Source="Images/agon/agonCopium.png" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                            <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">BnS Updater</TextBlock>
+                                        </Grid>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ListViewItem>
+                    </ListView>
                 </StackPanel>
             </StackPanel>
             <StackPanel DockPanel.Dock="Top">
@@ -264,8 +362,8 @@
                         <ComboBoxItem>Minimize to system tray</ComboBoxItem>
                     </ComboBox>
                     <Label Content="Enable Ping Check" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,315,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
-                    <Button Content="Remove Compatibility Options" FontWeight="Bold" Click="CompatibilityOptions_Click" Margin="38,346,285,109" />
-                    <Button Content="Add FTH Exclusion" FontWeight="Bold" Click="FTHExclusion" Margin="241,346,144,109">
+                    <Button Style="{StaticResource MainButtonStyle}" Content="Remove Compatibility Options" FontWeight="Bold" Click="CompatibilityOptions_Click" Margin="38,346,285,109" />
+                    <Button Style="{StaticResource MainButtonStyle}" Content="Add FTH Exclusion" FontWeight="Bold" Click="FTHExclusion" Margin="241,346,144,109">
                         <Button.ToolTip>
                             <StackPanel>
                                 <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Add FTH Exclusion for BNSR</TextBlock>
@@ -285,7 +383,7 @@
                             </StackPanel>
                         </Button.ToolTip>
                     </Button>
-                    <Button Content="Clear FTH" FontWeight="Bold" Click="ClearFTHState" Margin="382,346,52,109">
+                    <Button Style="{StaticResource MainButtonStyle}" Content="Clear FTH" FontWeight="Bold" Click="ClearFTHState" Margin="382,346,52,109">
                         <Button.ToolTip>
                             <StackPanel>
                                 <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Clear FTH State for BNSR</TextBlock>
@@ -301,10 +399,10 @@
                         </Button.ToolTip>
                     </Button>
                     <TextBox x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="38,406,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-                    <Button Margin="396,446,10,10" Content="Close" FontWeight="Bold" Click="SettingsCancel" />
+                    <Button Style="{StaticResource MainButtonStyle}" Margin="396,446,10,10" Content="Close" FontWeight="Bold" Click="SettingsCancel" />
                     <Label Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,197,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
-                    <Button Margin="396,406,34,54" Content="Browse" FontWeight="Bold" Click="SettingsBrowse" />
-                    <Button Margin="276,446,130,10" Content="Confirm" FontWeight="Bold" Click="SaveSettings" />
+                    <Button Style="{StaticResource MainButtonStyle}" Margin="396,406,34,54" Content="Browse" FontWeight="Bold" Click="SettingsBrowse" />
+                    <Button Style="{StaticResource MainButtonStyle}" Margin="276,446,130,10" Content="Confirm" FontWeight="Bold" Click="SaveSettings" />
                     <Label Content="Blade &amp; Soul Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,377,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
                     <Label Content="Theme:" Margin="309,39,48,389" Foreground="White" FontWeight="Bold" FontSize="18" />
                     <ComboBox HorizontalContentAlignment="Center" x:Name="ICON_THEME_CB" Margin="382,47,10,417" SelectionChanged="THEME_CHANGED" FontWeight="Bold">

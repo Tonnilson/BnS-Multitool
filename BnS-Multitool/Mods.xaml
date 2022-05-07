@@ -43,16 +43,16 @@
                 <ComboBoxItem>KOREAN</ComboBoxItem>
             </ComboBox>
 
-            <Button Content="Apply" Margin="483,86,51,377" FontFamily="Arial Black" FontSize="16" Click="applyMods">
+            <Button Style="{StaticResource MainButtonStyle}" Content="Apply" Margin="483,86,51,377" FontFamily="Arial Black" FontSize="16" Click="applyMods">
 
             </Button>
-            <Button Content="Refresh" Margin="483,120,51,343" FontFamily="Arial Black" FontSize="16" Click="refreshMods">
+            <Button Style="{StaticResource MainButtonStyle}" Content="Refresh" Margin="483,120,51,343" FontFamily="Arial Black" FontSize="16" Click="refreshMods">
 
             </Button>
-            <Button Content="Mod Folder" Margin="483,154,51,309" FontFamily="Arial Black" FontSize="16" Click="openModFolder">
+            <Button Style="{StaticResource MainButtonStyle}" Content="Mod Folder" Margin="483,154,51,309" FontFamily="Arial Black" FontSize="16" Click="openModFolder">
 
             </Button>
-            <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="423,47,203,412">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="423,47,203,412">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -65,7 +65,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="423,11,203,448" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="423,11,203,448" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
@@ -78,13 +78,13 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button IsEnabled="False" Content="Local Dat" Margin="483,187,51,276" FontFamily="Arial Black" FontSize="16" Click="OpenLocalDatEditor" RenderTransformOrigin="0.5,0.753"/>
+            <Button Style="{StaticResource MainButtonStyle}" IsEnabled="False" Content="Local Dat" Margin="483,187,51,276" FontFamily="Arial Black" FontSize="16" Click="OpenLocalDatEditor" RenderTransformOrigin="0.5,0.753"/>
         </Grid>
         <Grid x:Name="LocalDatGrid" Visibility="Hidden">
             <Label Content="Filter Name:" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="0,20,512,432"/>
             <Label Content="Preset Filters" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="472,10,15,442"/>
             <TextBox x:Name="FilterName" Style="{StaticResource TextBoxStyle1}" Text="new filter" Foreground="White" FontFamily="Arial" FontSize="16" Margin="153,31,371,439" BorderBrush="#FF2D3F5D" Background="#FF2D3F5D"/>
-            <Button Content="Save" Margin="300,24,275,439" FontFamily="Arial Black" FontSize="16" Click="SaveCustomPreset"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="Save" Margin="300,24,275,439" FontFamily="Arial Black" FontSize="16" Click="SaveCustomPreset"/>
             <RichTextBox x:Name="FilterList" VerticalScrollBarVisibility="Visible" Margin="0,60,214,10" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" SelectionBrush="#FF76BDF5"/>
 
             <ComboBox x:Name="presetFilters" Margin="477,48,16,420" SelectionChanged="PresetSelectionChanged" FontFamily="Arial" FontWeight="Bold">
@@ -95,10 +95,10 @@
             <Label Content="Custom Filters" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="472,113,8,339"/>
             <ComboBox x:Name="customFilters" Margin="477,151,16,317" SelectionChanged="customSelectionChanged" FontFamily="Arial" FontWeight="Bold">
             </ComboBox>
-            <Button x:Name="PatchCustom" Content="Patch" Margin="477,178,98,285" FontFamily="Arial Black" FontSize="16" Click="PatchCustom_Click"/>
-            <Button x:Name="PatchPreset" Content="Patch" Margin="477,75,98,388" FontFamily="Arial Black" FontSize="16" Click="PatchPreset_Click"/>
-            <Button Content="Load Default" Margin="488,453,43,10" FontFamily="Arial" FontSize="16" FontWeight="Bold" Click="LoadDefaultDat"/>
-            <Button Content="&#xe10a;" Margin="622,453,8,10" FontFamily="Segoe UI Symbol" FontSize="16" FontWeight="Bold" Click="CloseLocalDat"/>
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="PatchCustom" Content="Patch" Margin="477,178,98,285" FontFamily="Arial Black" FontSize="16" Click="PatchCustom_Click"/>
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="PatchPreset" Content="Patch" Margin="477,75,98,388" FontFamily="Arial Black" FontSize="16" Click="PatchPreset_Click"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="Load Default" Margin="488,453,43,10" FontFamily="Arial" FontSize="16" FontWeight="Bold" Click="LoadDefaultDat"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="&#xe10a;" Margin="622,453,8,10" FontFamily="Segoe UI Symbol" FontSize="16" FontWeight="Bold" Click="CloseLocalDat"/>
             <CheckBox x:Name="patch32bit" Content="Patch 32-bit" Margin="509,402,21,68" Foreground="White" FontFamily="Arial" FontWeight="Bold" Click="PatchBit"/>
             <CheckBox x:Name="patch64bit" Content="Patch 64-bit" Margin="509,428,21,42" FontFamily="Arial" FontWeight="Bold" Foreground="White" Click="PatchBit"/>
             <Label Content="Sigbypasser" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="24" Margin="470,223,10,229">
@@ -114,7 +114,6 @@
                     </StackPanel>
                 </Label.ToolTip>
             </Label>
-            <Button x:Name="InstallSigBypasser" Content="Install" Margin="477,310,98,153" FontFamily="Arial" FontSize="16" Click="InstallSigbypasser" FontWeight="Bold"/>
             <Label x:Name="sigbypasserLabel" Content="Installed: Not Installed" Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="470,262,10,203" FontSize="14"/>
             <Label x:Name="SigBypasserrOnlineLbl" Content="Online: Fetching.." Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="470,284,10,180" FontSize="14"/>
         </Grid>

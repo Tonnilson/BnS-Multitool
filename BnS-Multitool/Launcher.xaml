@@ -18,12 +18,12 @@
         <Grid x:Name="MainGrid" Grid.ColumnSpan="2">
             <GroupBox Header="Accounts" BorderThickness="0.2" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="309" Margin="10,190,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <Button x:Name="LAUNCH_BTN" Content="Launch" Margin="5,37,200,33" Click="LaunchGameClientClick" Foreground="#FF00FF0B"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="LAUNCH_BTN" Content="Launch" Margin="5,37,200,33" Click="LaunchGameClientClick" Foreground="#FF00FF0B"/>
                     <ComboBox x:Name="ACCOUNT_LIST_BOX" HorizontalAlignment="Left" VerticalAlignment="Top" Width="260" Margin="28,10,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" SelectionChanged="ACCOUNT_LIST_BOX_SelectionChanged" MouseEnter="MouseEnterSetFocus" Height="22"/>
-                    <Button x:Name="KILL_BTN" Content="Kill" Margin="102,37,119,33" Click="killGameProcess"/>
-                    <Button x:Name="DELETE_ACC" FontFamily="Segoe UI Symbol" Content="&#xe106;" Margin="5,10,272,58" Click="removeAccount" Foreground="#FFF00000"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="KILL_BTN" Content="Kill" Margin="102,37,119,33" Click="killGameProcess"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="DELETE_ACC" FontFamily="Segoe UI Symbol" Content="&#xe106;" Margin="5,10,272,58" Click="removeAccount" Foreground="#FFF00000"/>
 
-                    <Button x:Name="Options_Button" Content="QoL &amp; GCD" Margin="183,37,10,33" Click="OpenOptionsMenu"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="Options_Button" Content="QoL &amp; GCD" Margin="183,37,10,33" Click="OpenOptionsMenu"/>
                     <Label Content="LANG:" Foreground="White" Margin="13,63,237,4"/>
                     <ComboBox x:Name="LANGUAGE_BOX" HorizontalContentAlignment="Center" SelectionChanged="LaunchInfoSelectionChanged" MouseEnter="MouseEnterSetFocus" Margin="59,64,171,5">
                         <ComboBoxItem>EN</ComboBoxItem>
@@ -39,13 +39,10 @@
                     <Label Content="REGION:" Foreground="White" Margin="160,63,74,4"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Login Helper" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="10,306,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+            <GroupBox Header="Required Plugins" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="10,306,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <TextBlock TextWrapping="WrapWithOverflow" Text="What is loginhelper? Login helper is used to automatically log in and submit a pin. This is required to use the launcher." Foreground="#FF68D349"/>
-                    <Button Visibility="Hidden" x:Name="del_loginhelper" FontFamily="Segoe UI Symbol" Content="&#xe106; Uninstall" Margin="211,36,10,66" Click="deletePlugin" Foreground="White"/>
-                    <Button x:Name="LOGINHELPER_INSTALL" FontFamily="Segoe UI Symbol" Width="76" Content="Install &#xE118;" Margin="211,58,10,24" Click="installLoginHelperClick"/>
-                    <Label x:Name="loginhelperLocalLbl" Content="Current: Not Installed" Margin="4,50,91,45" Background="{x:Null}" Foreground="White" FontSize="16" />
-                    <Label x:Name="loginhelperOnlineLbl" Content="Online: Fetching...." Margin="4,76,91,17" Background="{x:Null}" Foreground="White" FontSize="16" />
+                    <TextBlock x:Name="PluginInfoText" FontFamily="Segoe UI Symbol" TextWrapping="WrapWithOverflow" Foreground="#FFF3F3F3" FontSize="16" Margin="10,10,10,10"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="LOGINHELPER_INSTALL" FontFamily="Segoe UI Symbol" Width="76" Content="Install &#xE118;" Margin="211,84,10,10" Click="installLoginHelperClick"/>
                 </Grid>
             </GroupBox>
             <GroupBox Header="Client Launch Options" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="341,306,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
@@ -87,7 +84,7 @@
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <Button x:Name="KillAll_Btn" Margin="113,152,108,3" Width="76" Content="Kill All" Click="KillAllProcs"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="KillAll_Btn" Margin="113,152,108,3" Width="76" Content="Kill All" Click="KillAllProcs"/>
                 </Grid>
             </GroupBox>
 
@@ -95,7 +92,7 @@
                 <Grid>
                     <Label Content="Command Arguments" Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="4,123,200,32"/>
                     <TextBox x:Name="cmdArguments" HorizontalAlignment="Left" Height="23" TextWrapping="Wrap" VerticalAlignment="Top" Width="327" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" Margin="10,146,0,0"/>
-                    <Button Content="QoL Options" Margin="35,61,214,93" />
+                    <Button Style="{StaticResource MainButtonStyle}" Content="QoL Options" Margin="35,61,214,93" />
                 </Grid>
             </GroupBox>
             <GroupBox Header="Memory Cleaner" BorderThickness="0.2" HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="309" Margin="341,215,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
@@ -117,7 +114,7 @@
                         <ComboBoxItem>55 Minutes</ComboBoxItem>
                         <ComboBoxItem>60 Minutes</ComboBoxItem>
                     </ComboBox>
-                    <Button x:Name="LOGINHELPER_INSTALL_Copy" FontFamily="Segoe UI Symbol" Width="76" Content="Clean" Margin="205,27,16,15" Click="manualMemoryclean"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="LOGINHELPER_INSTALL_Copy" FontFamily="Segoe UI Symbol" Width="76" Content="Clean" Margin="205,27,16,15" Click="manualMemoryclean"/>
                 </Grid>
             </GroupBox>
             <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Center" Height="175" VerticalAlignment="Top" Width="310" Margin="10,10,340,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
@@ -129,14 +126,14 @@
                     <Label Content="Email" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
                     <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
                     <Label Content="Pin Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,97,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                    <Button x:Name="MultiTool_UPDATE" Margin="145,121,77,10" Width="76" Content="Save" Click="saveAccount"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="MultiTool_UPDATE" Margin="145,121,77,10" Width="76" Content="Save" Click="SaveAccount"/>
                 </Grid>
             </GroupBox>
         </Grid>
         <Grid x:Name="LaunchOptions" Visibility="Hidden" Margin="55,10,64,22" Background="#FF161A1F">
             <Border BorderBrush="#FF454547" BorderThickness=".6" CornerRadius="5">
                 <Grid>
-                    <Grid x:Name="MainOptions">
+                    <Grid x:Name="MainOptions" Visibility="Visible">
                         <Label FontFamily="Segoe UI Symbol" Content="&#xE115; Quality of Life" Margin="10,10,250,397" Foreground="White" FontSize="30"/>
                         <Separator Background="#FF353D4C" Margin="0,64,0,395"/>
                         <Label Background="#FF161A1F" Margin="0,68,0,1"/>
@@ -149,9 +146,13 @@
                                     <TextBlock>
                                        Checking this will disable the auto-patching feature of quality of life plugin.
                                         <LineBreak/>
-                                        Should be left unchecked to make sure the plugin is always up-to-date.
                                     </TextBlock>
                                     <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock>
+                                        <Run Foreground="Red" FontWeight="Bold" FontSize="14">THIS IS NOT INTENDED FOR YOU, THIS IS INTENDED FOR THE CREATOR OF THE APP.</Run>
+                                        <LineBreak/>
+                                        <Run Foreground="Red" FontWeight="Bold" FontSize="14">!!! IF YOU CHECK THIS BOX YOUR QOL STUFF WILL NOT WORK !!!</Run>
+                                    </TextBlock>
                                 </StackPanel>
                             </CheckBox.ToolTip>
                         </CheckBox>
@@ -188,18 +189,37 @@
                                 </StackPanel>
                             </CheckBox.ToolTip>
                         </CheckBox>
-                        <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="enableGCD" Content="Enabled" Margin="206,76,256,360" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                        <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="enableGCD" Content="Enabled" Margin="10,81,452,355" Foreground="White" FontWeight="Bold" FontFamily="Arial">
                             <CheckBox.ToolTip>
                                 <StackPanel>
                                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Enable GCD</TextBlock>
                                     <TextBlock>
-                                       Determines whether or not to hook functions related to GCD on launch.
+                                       Determines whether or not to use GCD
                                     </TextBlock>
                                     <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                                     <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
                                 </StackPanel>
                             </CheckBox.ToolTip>
                         </CheckBox>
+                        <Label Content="Ping Reduction:" Foreground="White" FontWeight="Bold" FontSize="12" FontFamily="Arial" Margin="98,79,337,347"/>
+                        <ComboBox x:Name="ignorePing" Margin="201,80,216,357" SelectionChanged="PingReductionChanged">
+                            <ComboBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Ping Reduction Mode</TextBlock>
+                                    <TextBlock>
+                                       This controls whether not GCD, Recycle or both undergo automatic ms reduction based off your current in-game ping.
+                                        <LineBreak/>
+                                        Setting this to disabled will make GCD / Recycle reduction work like it used to prior to 4.1.9
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </ComboBox.ToolTip>
+                            <ComboBoxItem>Both</ComboBoxItem>
+                            <ComboBoxItem>GCD Only</ComboBoxItem>
+                            <ComboBoxItem>Recycle Only</ComboBoxItem>
+                            <ComboBoxItem>None (Disabled)</ComboBoxItem>
+                        </ComboBox>
                         <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="useItemCap" Content="Raise received items cap" Margin="21,361,330,75" Foreground="White" FontWeight="Bold" FontFamily="Arial">
                             <CheckBox.ToolTip>
                                 <StackPanel>
@@ -241,7 +261,7 @@
                                 </StackPanel>
                             </CheckBox.ToolTip>
                         </CheckBox>
-                        <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="useNoCameraLock" Content="Remove Camera Lock" Margin="215,335,136,101" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                        <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="useNoCameraLock" Content="Remove Camera Lock" Margin="215,335,163,101" Foreground="White" FontWeight="Bold" FontFamily="Arial">
                             <CheckBox.ToolTip>
                                 <StackPanel>
                                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Remove Camera Lock</TextBlock>
@@ -249,6 +269,18 @@
                                        Removes camera lock from skills that would otherwise lock your camera. Skills that lock your character in place are not effected by this.
                                         <LineBreak/>
                                         Example: Astromancer stormweaver spec skills (2/3/4) lock your camera, preventing you from turning.
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="useWindowClipboard" Content="Enable Clipboard" Margin="151,301,244,135" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Enable Clipboard</TextBlock>
+                                    <TextBlock>
+                                       Enables the ability to use windows Clipboard in-game so you can copy-paste outside of the game into the game.
                                     </TextBlock>
                                     <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                                     <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
@@ -279,13 +311,30 @@
                                 </StackPanel>
                             </CheckBox.ToolTip>
                         </CheckBox>
-                        <Label Content="Range:           m" Margin="266,409,105,21" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                        <TextBox HorizontalContentAlignment="Center" x:Name="autoCombatRange" Text="30" Margin="316,413,196,26" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" PreviewTextInput="isNumericInput" LostFocus="autoCombatRange_LostFocus" FontFamily="Arial" FontWeight="Bold"/>
+                        <Label Content="Range:           m" Margin="408,386,-37,44" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
+                        <CheckBox Click="LaunchInfoCheckStateChanged" x:Name="autoCombatTurnOffOndeath" Content="Disable Auto Combat Respawn" Margin="215,413,108,23" Foreground="White" FontWeight="Bold" FontFamily="Arial">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Disable Resurrection</TextBlock>
+                                    <TextBlock>
+                                       Disables the auto-resurrection of Auto Combat so now when you die you will only auto-restore chi and not respawn.
+                                       <LineBreak/>
+                                        Can be changed while in-game with P config reload (Requires GCD to be ticked to Enabled!
+                                        <LineBreak/>
+                                       Don't ask me why people want this I won't understand
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <TextBox HorizontalContentAlignment="Center" x:Name="autoCombatRange" Text="30" Margin="458,390,54,49" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" PreviewTextInput="isNumericInput" LostFocus="autoCombatRange_LostFocus" FontFamily="Arial" FontWeight="Bold"/>
                         <Separator Margin="0,276,10,166" HorizontalAlignment="Right" Width="523" Background="#FF3A4253"/>
                         <!-- I suck ass and got lazy... don't mind this mess -->
-                        <DataGrid HorizontalScrollBarVisibility="Hidden" HeadersVisibility="Column"
+                        <DataGrid HorizontalScrollBarVisibility="Auto" HeadersVisibility="Column"
                               CanUserAddRows="True" CanUserDeleteRows="True"
                               x:Name="SkillDataGrid" AutoGenerateColumns="False"
+                              CellStyle="{StaticResource DataGrid_Content_Centering}"
                               ItemsSource="{Binding SkillData}" Margin="10,108,10,180" BorderBrush="{x:Null}" Background="#FF1D2630">
                             <DataGrid.Resources>
                                 <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF293642"/>
@@ -314,43 +363,130 @@
                                 </Style>
                             </DataGrid.Resources>
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="Skill ID" Binding="{Binding skillID}" Width="150"/>
-                                <DataGridTextColumn Header="Value" Binding="{Binding skillvalue}" Width="*"/>
-                                <DataGridTextColumn Header="Mode" Binding="{Binding mode}" Width="*"/>
+                                <DataGridTextColumn Header="Skill ID" Binding="{Binding skillID}" Width="75">
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="GCD Value" Binding="{Binding skillvalue}" Width="75">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="GCD Mode" Binding="{Binding mode}" Width="75">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Recycle Value" Binding="{Binding recycleTime}" Width="100">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Recycle Mode" Binding="{Binding recycleMode}" Width="100">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="No Auto Bias" Binding="{Binding ignoreAutoBias}" Width="100">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="TextAlignment" Value="Center" />
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
                                 <DataGridTextColumn Header="Description" Binding="{Binding description}" Width="250"/>
                             </DataGrid.Columns>
                         </DataGrid>
-                        <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content="(&#xE11B;) Custom Skills GCD" BorderBrush="{x:Null}" Click="ShowGcdInfo" FontSize="18" Margin="3,70,343,353" FontWeight="Bold"/>
-                        <Button Content="Close" Margin="451,424,10,10" FontWeight="Bold" Click="LaunchOptionsClose" />
+                        <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content="(&#xE11B;) Custom Skills GCD" BorderBrush="{x:Null}" Click="ShowGcdInfo" FontSize="18" Margin="4,49,342,379" FontWeight="Bold">
+                            <Button.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">If you click it, you might learn something</TextBlock>
+                                    <TextBlock>
+                                      CLICK ME IF YOU'RE CONFUSED WHRDTRFHJNDFRTHN BDERTHNDRFH BNDRTFH DH DHF
+                                    </TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                                </StackPanel>
+                            </Button.ToolTip>
+                        </Button>
+                        <Button Style="{StaticResource MainButtonStyle}" Content="Close" Margin="451,424,10,10" FontWeight="Bold" Click="LaunchOptionsClose" />
                     </Grid>
                     <Grid x:Name="OptionsInfo" Visibility="Hidden">
-                        <Label FontFamily="Segoe UI Symbol" Content="&#xE11B; Global Cooldown Info" Margin="10,10,169,397" Foreground="White" FontSize="30"/>
+                        <Label FontFamily="Segoe UI Symbol" Content="&#xE11B; GCD / Recycle Info" Margin="10,10,169,397" Foreground="White" FontSize="30"/>
                         <Button BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe10a; " BorderBrush="{x:Null}" Click="CloseGcdInfo" FontSize="36" Margin="480,0,0,397"/>
-                        <TextBlock TextWrapping="Wrap" Foreground="White" FontFamily="Arial" FontWeight="Bold" Margin="10,64,10,10" FontSize="14">
-                            Skill ID
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="10,56,0,0">
+                            <StackPanel CanVerticallyScroll="True">
+                                <TextBlock TextWrapping="Wrap" Foreground="White" FontFamily="Arial" FontSize="13" Width="510">
+                            <Run Foreground="#FF4794FF" FontWeight="Bold" FontSize="16">Skill ID</Run>
                             <LineBreak/>
-                            The skill you are trying to reduce, if you use the skill ID 0 it will apply to all skills that are not in the list.
-                            <LineBreak/>
-                            <LineBreak/>
-                            Value
-                            <LineBreak/>
-                            This is a float value, if you want to reduce a skills GCD by 100ms you would use -0.1 or -0.100 as this will translate to (GCD - 100ms).
-                            If using static mode use a full integer such as 300 for 300ms.
+                            The skill you are trying to reduce.
+                                <LineBreak/>
+                                <Run Foreground="#FFFFEC32">Using Skill ID: 0 will apply it to all skills not in the list</Run>
                             <LineBreak/>
                             <LineBreak/>
-                            Mode
+                            <Run Foreground="#FF4794FF" FontWeight="Bold" FontSize="16">What is the difference between GCD and Recycle?</Run>
+                             <LineBreak/>
+                             <Run Foreground="#FFFFEC32" FontWeight="Bold">Recycle</Run>
+                              <LineBreak/>
+                               This is the skills cooldown, you can't truly remove the cooldown of a skill using this but if a skill does have a CD you can slightly reduce the time before you can use that skill again. Users with high ping can typically benefit from this but users with low ping won't notice any difference. The other purpose of this is to add a cooldown time to certain skills if you so choose.<LineBreak/>
+                               It's recommended to use -0.01 to -0.015 or to leave it at 0 if you don't really understand it.
+                                    <LineBreak/>
+                                    <LineBreak/>
+                              <Run Foreground="#FFFFEC32" FontWeight="Bold">GCD</Run><LineBreak/>
+                                Global Cool Down is a separate restriction placed after activating a skill putting a usage restriction on skills in that group. By reducing the GCD you are able to get skills to fire off slightly faster while reducing the time of that group. This again operates independently of the skills cooldown and depending on ping can have a noticeble difference between the skills cooldown.
+                             <LineBreak/>
                             <LineBreak/>
-                            Most people will use offset mode (0 by default) as it is more convenient, static is something that you will see in the datafile.bin so bin andy's will be familiar.
+                            <Run Foreground="#FF4794FF" FontWeight="Bold" FontSize="16">GCD / Recycle Mode(s)</Run>
+                            <LineBreak/>
+                            Modes on both GCD and Recycle behave the same way, by default each new entry uses mode 0.
+                            <LineBreak/>
+                            <Run Foreground="#FFFFEC32" FontWeight="Bold">Mode: 0</Run>
+                            <LineBreak/>
+                            Uses a float value that can dynamically increase or decrease based on float value
+                            <LineBreak/>
+                            <Run Foreground="#FFFFEC32" FontWeight="Bold" >Mode: 1</Run>
+                            <LineBreak/>
+                            Uses an integer value to statically set the value(s), please note the STATIC part. It means the value(s) being used will always be that value.
                             <LineBreak/>
                             <LineBreak/>
-                            0 (Offset mode): uses a float value to reduce ms off skill. If skill MS is 400ms and you use -0.1 that skill will now have 300ms.
+                            <Run Foreground="#FF4794FF" FontWeight="Bold" FontSize="16">GCD / Recycle Value(s)</Run>
+                            <LineBreak/>
+                            This value depends on which mode is being used. If you are using <Run Foreground="#FF8FBAF5" FontWeight="Bold">mode 0</Run> you will use a negative or positive float value.
+                             <LineBreak/>
+                             <LineBreak/>
+                            <Run Foreground="#FFFFEC32" FontWeight="Bold">Example: -0.1</Run>
+                            <LineBreak/>
+                             This will dynamically remove 100ms from the skill.
                             <LineBreak/>
                             <LineBreak/>
-                            1 (Static Mode): uses an integer value to set the ms of a skill. If a skill is 1000ms but you want it to be 500ms you would set 500 as the value.
+                            If the mode you are using is <Run Foreground="#FF8FBAF5" FontWeight="Bold" >mode 1</Run> you will use an integer to statically set the value.
+                            <LineBreak/>
+                                <Run Foreground="#FFFFEC32" FontWeight="Bold">Example: 400</Run>
+                            <LineBreak/>
+                             This will statically set the skill to 400ms
+                         
                             <LineBreak/>
                             <LineBreak/>
-                        </TextBlock>
-                        <TextBlock TextWrapping="Wrap" Foreground="#FFFFEC32" FontFamily="Arial" FontSize="16" Margin="10,377,0,10" FontWeight="Bold">You can delete rows by selecting and pressing the delete key on your keyboard, additionally you can insert new rows with F2 outside of double clicking. You can use P in-game (Character Menu) to reload the GCD values</TextBlock>
+                            <Run Foreground="#FF4794FF" FontWeight="Bold" FontSize="16">Auto Bias</Run>
+                             <LineBreak/>
+                                    Controls whether or not the skill(s) will undergo Auto-Bias Calculations<LineBreak/>
+                                    <Run Foreground="#FF8FBAF5" FontWeight="Bold">Using value 1 will disable auto-bias on skill(s)</Run>
+                             <LineBreak/>
+                            <LineBreak/>
+                             <Run Foreground="IndianRed" FontWeight="Bold" FontSize="16">Refreshing config in game</Run>
+                             <LineBreak/>
+                             You can reload the entire Multi-Tool config in-game with <Run FontWeight="Bold" Foreground="IndianRed">[ ALT + P ]</Run>
+                             <LineBreak/>
+                                </TextBlock>
+                                <TextBlock TextWrapping="Wrap" Foreground="#FFFFEC32" FontFamily="Arial" FontSize="16" FontWeight="Bold">You can delete rows by selecting and pressing the delete key on your keyboard, additionally you can insert new rows with F2 outside of double clicking.</TextBlock>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
                 </Grid>
             </Border>

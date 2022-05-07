@@ -110,7 +110,7 @@ namespace BnS_Multitool
                 client.Dispose();
             }
 
-            Dispatchers.labelContent(usersOnlineLbl, String.Format("Users Online: {0}", (usersOnline != 0) ? usersOnline.ToString() : "Error"));
+            Dispatchers.labelContent(usersOnlineLbl, String.Format("Users Online: {0}", (usersOnline != 0) ? usersOnline.ToString("N0") : "Error"));
         }
 
         private void monitorPing(object sender, DoWorkEventArgs e)
@@ -242,5 +242,7 @@ namespace BnS_Multitool
                 ChangeLog.AppendText(msg);
             }));
         }
+
+        private void PatreonClick(object sender, RoutedEventArgs e) => Process.Start(@"https://patreon.com/tonnilson");
     }
 }

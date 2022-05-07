@@ -25,7 +25,8 @@ namespace BnS_Multitool
                     NEW_GAME_OPTION = 0,
                     UPDATER_THREADS = 0,
                     MINIMZE_ACTION = 1,
-                    PATCH_412 = true,
+                    HK_Installed = false,
+                    PATCH_413 = true,
                     PING_CHECK = 1,
                     CLASS = new List<BNS_CLASS_STRUCT>
                     {
@@ -39,7 +40,7 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Summoner",
                                 EFFECTS = new string[] { "Mod_Remove_Summoner_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Summon_Animset_p.pak" }
+                                ANIMATIONS = new string[] { "Mod_Remove_Summoner_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -117,7 +118,7 @@ namespace BnS_Multitool
                 };
 
                 string _JSON = JsonConvert.SerializeObject(SYS, Formatting.Indented);
-                File.WriteAllText(CONFIG_FILE, _JSON);
+                Globals.WriteAllText(CONFIG_FILE, _JSON);
             }
             else
             {
@@ -127,12 +128,12 @@ namespace BnS_Multitool
                     SYS = JsonConvert.DeserializeObject<SYSConfig>(_JSON);
 
                     bool changesToConfig = false;
-                    //This whole section is for patching older clients, eventually will remove.
+
+                    //This whole section is for patching older clients, sections of code will eventually be removed.
                     if (SYS.CLASS == null)
                         SYS.CLASS = new List<BNS_CLASS_STRUCT>() { };
 
-                    //Hotfix
-                    if (!SYS.PATCH_412)
+                    if(!SYS.PATCH_413)
                     {
                         changesToConfig = true;
                         SYS.CLASS = new List<BNS_CLASS_STRUCT>
@@ -147,7 +148,7 @@ namespace BnS_Multitool
                             {
                                 CLASS = "Summoner",
                                 EFFECTS = new string[] { "Mod_Remove_Summoner_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Summon_Animset_p.pak" }
+                                ANIMATIONS = new string[] { "Mod_Remove_Summoner_Animset_p.pak" }
                             },
                             new BNS_CLASS_STRUCT()
                             {
@@ -223,15 +224,16 @@ namespace BnS_Multitool
                             }
                         };
                         Effects.ExtractPakFiles();
-                        SYS.PATCH_412 = true;
+                        SYS.PATCH_413 = true;
                     }
                     
                     if(changesToConfig)
                         Save();
 
-                } catch (Exception)
+                } catch (Exception ex)
                 {
-                    var dialog = new ErrorPrompt("There was an error reading the config file: settings.json\rIf error persists delete settings.json or check for syntax errors.");
+                    Logger.log.Error("SYSTEMCONFIG::PATCH\nType: {0}\n{1}", ex.GetType().Name, ex.ToString());
+                    var dialog = new ErrorPrompt("There was an error reading or patching settings.json, additional information in logs.\r\rTry deleting settings.json to remove error before starting again, if errors persist submit log.");
                     dialog.ShowDialog();
                     Environment.Exit(0);
                 }
@@ -243,9 +245,10 @@ namespace BnS_Multitool
             try
             {
                 string json = JsonConvert.SerializeObject(SYS, Formatting.Indented);
-                File.WriteAllText(CONFIG_FILE, json);
+                Globals.WriteAllText(CONFIG_FILE, json);
             } catch (Exception ex)
             {
+                Logger.log.Error("SYSTEMCONFIG::Save\nType: {0}\n{1}", ex.GetType().Name, ex.ToString());
                 var dialog = new ErrorPrompt(ex.Message);
                 dialog.ShowDialog();
             }
@@ -260,6 +263,7 @@ namespace BnS_Multitool
         {
             public string VERSION { get; set; }
             public string FINGERPRINT { get; set; }
+            public bool HK_Installed { get; set; }
             public int THEME { get; set; }
             public int ADDITIONAL_EFFECTS { get; set; }
             public int UPDATER_THREADS { get; set; }
@@ -268,7 +272,7 @@ namespace BnS_Multitool
             public int PING_CHECK { get; set; }
             public int DELTA_PATCHING { get; set; }
             public string BNS_DIR { get; set; }
-            public bool PATCH_412 { get; set; }
+            public bool PATCH_413 { get; set; }
             public List<BNS_CLASS_STRUCT> CLASS { get; set; }
         }
 

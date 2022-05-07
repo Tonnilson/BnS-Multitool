@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -9,26 +8,18 @@ namespace BnS_Multitool
 {
     class Globals
     {
+        public class Region_Info
+        {
+            public string Name;
+            public string LoginServer;
+            public string CDN;
+        }
+
         public static string localBnSVersion;
         public static string onlineBnSVersion;
         public static bool loginAvailable;
-        private static string loginServer;
-        private static string loginServerVar;
-        public static int MEGAAPI_TIMEOUT = 10000; //Centralized variable for MegaAPI Timeout
         public static string MAIN_SERVER_ADDR = @"http://multitool.tonic.pw/";
-
-        public class BnS_Servers
-        {
-            public string region { get; set; }
-            public List<BnS_Server_Details> info { get; set; }
-        }
-
-        public class BnS_Server_Details
-        {
-            public string loginServer { get; set; }
-            public string loginVar { get; set; }
-            public string CDN { get; set; }
-        }
+        public static Region_Info BnS_ServerInfo = new Region_Info();
 
         public enum BnS_Region
         {
@@ -60,39 +51,56 @@ namespace BnS_Multitool
             Directory.Delete(source, true);
         }
 
-        public static string CalculateMD5(string fileName)
-        {
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            {
-                using (var stream = File.OpenRead(fileName))
-                {
-                    var hash = md5.ComputeHash(stream);
-                    return BitConverter.ToString(hash).Replace("-", "").ToLowerInvariant();
-                }
-            }
-        }
-
         private static void refreshServerVar()
         {
             switch((BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION)
             {
                 case BnS_Region.KR:
-                    loginServer = "up4svr.ncupdate.com";
-                    loginServerVar = "BNS_LIVE";
+                    BnS_ServerInfo.LoginServer = "up4svr.ncupdate.com";
+                    BnS_ServerInfo.Name = "BNS_LIVE";
+                    BnS_ServerInfo.CDN = @"http://bnskor.ncupdate.com/BNS_LIVE/";
                     break;
                 case BnS_Region.TW:
-                    loginServer = "up4svr.plaync.com.tw";
-                    loginServerVar = "TWBNSUE4";
+                    BnS_ServerInfo.LoginServer = "up4svr.plaync.com.tw";
+                    BnS_ServerInfo.Name = "TWBNSUE4";
+                    BnS_ServerInfo.CDN = @"http://mmorepo.cdn.plaync.com.tw/TWBNSUE4/";
                     break;
                 case BnS_Region.TEST:
-                    loginServer = "up4svr.plaync.com";
-                    loginServerVar = "BNS_KOR_TEST";
+                    BnS_ServerInfo.LoginServer = "up4svr.plaync.com";
+                    BnS_ServerInfo.Name = "BNS_KOR_TEST";
+                    BnS_ServerInfo.CDN = @"http://bnskor.ncupdate.com/BNS_LIVE/";
                     break;
                 default:
-                    loginServer = "updater.nclauncher.ncsoft.com";
-                    loginServerVar = "BnS_UE4";
+                    BnS_ServerInfo.LoginServer = "updater.nclauncher.ncsoft.com";
+                    BnS_ServerInfo.Name = "BnS_UE4";
+                    BnS_ServerInfo.CDN = @"http://d37ob46rk09il3.cloudfront.net/BnS_UE4/";
                     break;
             }
+        }
+
+        // Potential solution to Accounts & settings.json being nulled out when system unexpectedly crashes or restarts
+        // Apparently all contents through System.IO.File.WriteAllText get flushed to the filesystem cache
+        // tl;dr the file is written over with 0x00 and then the bytes are replaced
+        // with the bytes from the filesystem cache but that cache is obviously lost on system restart / crash
+        public static void WriteAllText(string path, string contents)
+        {
+            // generate a temp filename
+            var tempPath = Path.Combine(Path.GetDirectoryName(path), Guid.NewGuid().ToString());
+            var backup = path + ".backup";
+
+            if (File.Exists(backup))
+                File.Delete(backup);
+
+            var data = Encoding.UTF8.GetBytes(contents);
+
+            using (var tempFile = File.Create(tempPath, 4096, FileOptions.WriteThrough))
+                tempFile.Write(data, 0, data.Length);
+
+            // We need to make sure the file exists otherwise it'll throw an error if we try to use File.Replace
+            if(File.Exists(path))
+                File.Replace(tempPath, path, backup);
+            else
+                File.Move(tempPath, path);
         }
 
         public static string onlineVersionNumber()
@@ -103,13 +111,13 @@ namespace BnS_Multitool
                 refreshServerVar();
                 MemoryStream ms = new MemoryStream();
                 BinaryWriter bw = new BinaryWriter(ms);
-                NetworkStream ns = new TcpClient(loginServer, 27500).GetStream();
+                NetworkStream ns = new TcpClient(BnS_ServerInfo.LoginServer, 27500).GetStream();
 
                 bw.Write((short)0);
                 bw.Write((short)6);
                 bw.Write((byte)10);
-                bw.Write((byte)loginServerVar.Length);
-                bw.Write(Encoding.ASCII.GetBytes(loginServerVar));
+                bw.Write((byte)BnS_ServerInfo.Name.Length);
+                bw.Write(Encoding.ASCII.GetBytes(BnS_ServerInfo.Name));
                 bw.BaseStream.Position = 0L;
                 bw.Write((short)ms.Length);
 
@@ -148,7 +156,8 @@ namespace BnS_Multitool
 
         public static void GameVersionCheck()
         {
-            IniHandler VersionInfo_BnS = new IniHandler(Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault());
+            refreshServerVar();
+            IniHandler VersionInfo_BnS = new IniHandler(Path.Combine(SystemConfig.SYS.BNS_DIR, string.Format("VersionInfo_{0}.ini", BnS_ServerInfo.Name)));
             localBnSVersion = VersionInfo_BnS.Read("VersionInfo", "GlobalVersion");
             onlineBnSVersion = onlineVersionNumber();
 
@@ -163,13 +172,13 @@ namespace BnS_Multitool
                 refreshServerVar();
                 MemoryStream ms = new MemoryStream();
                 BinaryWriter bw = new BinaryWriter(ms);
-                NetworkStream ns = new TcpClient(loginServer, 27500).GetStream();
+                NetworkStream ns = new TcpClient(BnS_ServerInfo.LoginServer, 27500).GetStream();
 
                 bw.Write((short)0);
                 bw.Write((short)4);
                 bw.Write((byte)10);
-                bw.Write((byte)loginServerVar.Length);
-                bw.Write(Encoding.ASCII.GetBytes(loginServerVar));
+                bw.Write((byte)BnS_ServerInfo.Name.Length);
+                bw.Write(Encoding.ASCII.GetBytes(BnS_ServerInfo.Name));
                 bw.BaseStream.Position = 0L;
                 bw.Write((short)ms.Length);
 

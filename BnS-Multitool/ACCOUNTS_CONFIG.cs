@@ -33,7 +33,7 @@ namespace BnS_Multitool
                 };
 
                 string _JSON = JsonConvert.SerializeObject(ACCOUNTS, Formatting.Indented);
-                File.WriteAllText(CONFIG_FILE, _JSON);
+                Globals.WriteAllText(CONFIG_FILE, _JSON);
             }
             else
             {
@@ -43,8 +43,9 @@ namespace BnS_Multitool
                     ACCOUNTS = JsonConvert.DeserializeObject<ACCOUNTS_CONFIG>(_JSON);
 
                     //appendChangesToConfig();
-                } catch (Exception)
+                } catch (Exception ex)
                 {
+                    Logger.log.Error("ACCOUNTS_CONFIG Parse Error\n{0}\n{1}", ex.Message, ex.StackTrace);
                     var dialog = new ErrorPrompt("There was an error reading the config file: accounts.json\rIf error persists delete accounts.json or check for syntax errors.");
                     dialog.ShowDialog();
                     Environment.Exit(0);
@@ -55,7 +56,7 @@ namespace BnS_Multitool
         public static void appendChangesToConfig()
         {
             string json = JsonConvert.SerializeObject(ACCOUNTS, Formatting.Indented);
-            File.WriteAllText(CONFIG_FILE, json);
+            Globals.WriteAllText(CONFIG_FILE, json);
         }
 
         public static bool DoesPropertyExist(dynamic settings, string name)

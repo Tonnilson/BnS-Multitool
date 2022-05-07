@@ -36,17 +36,17 @@
             </ListBox.ItemTemplate>
         </ListBox>
 
-        <Button Content="Apply" Margin="124,428,440,28" FontFamily="Arial Black" FontSize="16" Click="applyPatchesAndAddons">
+        <Button Style="{StaticResource MainButtonStyle}" Content="Apply" Margin="124,428,440,28" FontFamily="Arial Black" FontSize="16" Click="applyPatchesAndAddons">
 
         </Button>
-        <Button Content="Refresh" Margin="227,428,337,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click">
+        <Button Style="{StaticResource MainButtonStyle}" Content="Refresh" Margin="227,428,337,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click">
 
         </Button>
-        <Button Content="Manager" Margin="329,428,235,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click_1">
+        <Button Style="{StaticResource MainButtonStyle}" Content="Manager" Margin="329,428,235,28" FontFamily="Arial Black" FontSize="16" Click="Button_Click_1">
 
         </Button>
 
-        <Button x:Name="patches_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="HandleToggle" Margin="393,10,233,449">
+        <Button Style="{StaticResource MainButtonStyle}" x:Name="patches_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="HandleToggle" Margin="393,10,233,449">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -59,7 +59,7 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button x:Name="patches_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="357,10,269,449" Click="HandleToggle">
+        <Button Style="{StaticResource MainButtonStyle}" x:Name="patches_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="357,10,269,449" Click="HandleToggle">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
@@ -92,7 +92,7 @@
                 </TransformGroup>
             </Image.RenderTransform>
         </Image>
-        <Button x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="HandleToggle" Margin="44,10,582,449">
+        <Button Style="{StaticResource MainButtonStyle}" x:Name="addons_on_btn" FontFamily="Segoe UI Symbol" Content="&#xE10B;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="HandleToggle" Margin="44,10,582,449">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Check all</TextBlock>
@@ -105,7 +105,7 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="9,10,617,449" Click="HandleToggle">
+        <Button Style="{StaticResource MainButtonStyle}" x:Name="addons_off_btn" FontFamily="Segoe UI Symbol" Content="&#xE10A;" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="9,10,617,449" Click="HandleToggle">
             <Button.ToolTip>
                 <StackPanel>
                     <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Uncheck all</TextBlock>
@@ -118,6 +118,6 @@
                 </StackPanel>
             </Button.ToolTip>
         </Button>
-        <Button Content="Sync" Margin="432,428,132,28" FontFamily="Arial Black" FontSize="16" Click="OpenSyncPage"/>
+        <Button Style="{StaticResource MainButtonStyle}" Content="Sync" Margin="432,428,132,28" FontFamily="Arial Black" FontSize="16" Click="OpenSyncPage"/>
     </Grid>
 </Page>

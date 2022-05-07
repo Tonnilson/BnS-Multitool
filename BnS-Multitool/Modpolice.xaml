@@ -7,104 +7,71 @@
       xmlns:ToggleSwitch="clr-namespace:ToggleSwitch;assembly=ToggleSwitch" x:Class="BnS_Multitool.Modpolice"
       mc:Ignorable="d" 
       d:DesignHeight="490" d:DesignWidth="660"
-      Title="Modpolice" Loaded="Page_Loaded">
+      Title="Modpolice" Loaded="Page_Loaded"
+      DataContext="{Binding RelativeSource={RelativeSource Self}}"
+    >
 
     <Grid>
         <Grid x:Name="ProgressGrid" Visibility="Hidden">
             <StackPanel x:Name="ProgressPanel"/>
         </Grid>
-        <Grid x:Name="MainGrid">
-            <Label x:Name="pluginloaderLabel" Content="Current: Not Installed" Margin="348,82,47,380" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Button x:Name="installOnline" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="550,243,13,222" Content="Install Online" FontFamily="Arial" FontWeight="Bold" Click="installModPolice"/>
-            <Button x:Name="installLocal" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="550,311,13,154" Content="Install Local" FontFamily="Arial" FontWeight="Bold" Click="installModPolice"/>
-            <Label x:Name="bnspatchLabel" Content="Current: Not Installed" Margin="348,171,47,291" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Label x:Name="LessLoadingscreensLabel" Content="Less Loading Screens" Margin="10,10,377,440" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24" Background="{x:Null}" Visibility="Hidden"/>
-            <Button x:Name="lessloadingInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,86,367,379" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional" Visibility="Hidden"/>
-            <Button x:Name="del_lessloadingscreens" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="298,86,338,379" FontFamily="Segoe UI Symbol" Content="&#xe106;" FontWeight="Bold" Click="deletePlugin" Foreground="Red" Visibility="Hidden"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="10,35,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D"/>
-            <Label x:Name="lessloadingCurrentLbl" Content="Current: Not Installed" Margin="18,55,444,407" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" Visibility="Hidden"/>
-            <Label x:Name="lessloadingOnlineLbl" Content="Online: Fetching....." Margin="18,83,444,379" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" Visibility="Hidden"/>
-            <Label Content="FPS Booster" Margin="10,126,314,324" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24" Visibility="Hidden">
-                <Label.ToolTip>
-                    <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">FPS Booster</TextBlock>
-                        <TextBlock>
-                          Disables functions behind combat log, thus giving a performance boost.
-                            <LineBreak/>
-                            Alt + 1
-                            <LineBreak/>
-                            Turns off/on a lot of text parsing and display, somewhat similar to stripping local file but not quite the same gains.
-                            <LineBreak/>
-                            <LineBreak/>
-                            Alt + 3
-                            <LineBreak/>
-                            Turns off/on chatbox based notifications (Used XXX item, boss notifications, death log etc). 
-                            <LineBreak/>
-                            <LineBreak/>
-                            Alt + X
-                            <LineBreak/>
-                            An alternative to Ctrl + X but hides only select UI elements, this adds a significant boost in performance by removing a lot of the UI Elements off screen.
-                        </TextBlock>
-                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+        <Grid x:Name="MainGrid" Visibility="Hidden">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="openbin64" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="539,445,10,10" Content="Game Directory" FontFamily="Arial" FontWeight="Bold" Click="openBinLocation"/>
+            <Label HorizontalContentAlignment="Center" Background="#FF2D3F5D" Margin="10,10,350,448" Content="Available Plugins" FontFamily="Arial Black" FontSize="20" Foreground="White"/>
+            <ListView x:Name="AvailablePluginsView" Background="#FF1E2021"
+                      ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" Width="300"
+                      BorderBrush="{x:Null}" Margin="10,42,350,10"
+                      ItemsSource="{Binding PluginViewCollection}" SelectionChanged="PluginSelectionChanged"
+                      >
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="{x:Type ListViewItem}">
+                        <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                        <Setter Property="BorderBrush" Value="Transparent"/>
+                        <Style.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="BorderThickness" Value="0" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </ListView.ItemContainerStyle>
+                <ListView.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel VerticalAlignment="Top" Orientation="Vertical"/>
+                    </ItemsPanelTemplate>
+                </ListView.ItemsPanel>
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid>
+                            <StackPanel Orientation="Vertical" Width="290">
+                                <TextBlock VerticalAlignment="Center" Width="290" TextAlignment="Left" HorizontalAlignment="Center" Text="{Binding Title}" Foreground="{Binding FontColor}" FontSize="24" FontWeight="Bold" />
+                                <TextBlock Text="{Binding DateLocal}" Foreground="White" TextAlignment="left"/>
+                            </StackPanel>
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+            <Grid x:Name="PluginInfoGrid" Margin="330,10,10,50" Visibility="Hidden">
+                <Label Content="Plugin Info" Foreground="White" FontWeight="Bold" Margin="0,0,0,385" FontSize="24"/>
+                <Label Content="Description" Margin="0,50,0,346" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                <StackPanel Orientation="Vertical" Width="300" Margin="10,84,10,0">
+                    <TextBlock x:Name="PluginDescription" TextWrapping="WrapWithOverflow" Text="Test Description" Width="300" Foreground="White"/>
+                    <Label/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <Button Style="{StaticResource MainButtonStyle}" x:Name="InstallOrUpdate_BTN" Width="75" Height="25" Content="Install" FontWeight="Bold" Click="InstallOrUpdateClick"/>
+                        <Label Width="2.5"/>
+                        <Button Style="{StaticResource MainButtonStyle}" x:Name="Remove_BTN" Content="Remove" Width="75" FontWeight="Bold" Click="RemovePluginClick"/>
                     </StackPanel>
-                </Label.ToolTip>
-            </Label>
-            <Label HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Content="This is filler space for now&#xD;&#xA;lessloading screens and &#xD;&#xA;fpsbooster are dead" Foreground="White" FontWeight="Bold" FontSize="20" Margin="24,50,338,279"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="10,151,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D" Visibility="Hidden"/>
-            <Label x:Name="SimplemodeCurrentLbl" Content="Current: Not Installed" Margin="18,168,438,294" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" Visibility="Hidden"/>
-            <Label x:Name="SimplemodeOnlineLbl" Content="Online: Fetching....." Margin="18,199,438,263" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" Visibility="Hidden"/>
-            <Button x:Name="simplemodeInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,200,367,265" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional" Visibility="Hidden"/>
-            <Label Content="High Priority" Margin="10,214,314,236" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="10,239,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D"/>
-            <Label x:Name="HighpriorityCurrentLbl" Content="Current: Not Installed" Margin="18,256,438,206" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Label x:Name="HighpriorityOnlineLbl" Content="Online: Fetching....." Margin="18,287,438,175" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Button x:Name="HighpriorityInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,288,367,177" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional"/>
-            <ToggleSwitch:HorizontalToggleSwitch x:Name="HighpriorityToggle" Margin="230,257,366,208" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="64" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="togglePlugin" Unchecked="togglePlugin"/>
-            <Button x:Name="openbin64" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="111,433,438,22" Content="Game Directory" FontFamily="Arial" FontWeight="Bold" Click="openBinLocation"/>
-            <Label x:Name="LessLoadingscreensLabel_Copy" Content="Modpolice Core" Margin="409,10,44,440" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24" Background="{x:Null}"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="340,35,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <Label HorizontalAlignment="Center" x:Name="pluginloaderLabel_Copy" Content="Loader3" Margin="349,49,44,408" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="340,66,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <Label x:Name="pluginloaderOnlineLbl" Content="Online: Fetching...." Margin="348,108,47,354" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="340,126,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <Label HorizontalAlignment="Center" x:Name="pluginloaderLabel_Copy1" Content="BNSPatch" Margin="349,138,44,319" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="339,155,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <Label x:Name="bnspatchOnlineLbl" Content="Online: Fetching...." Margin="348,199,47,263" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="340,215,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <TextBlock TextWrapping="WrapWithOverflow" x:Name="textBlock" HorizontalAlignment="Left" Height="43" Margin="348,237,0,0" Text="Install online will download latest version from online and install." VerticalAlignment="Top" Width="191" Foreground="#FF68D349" FontWeight="Bold"/>
-            <TextBlock TextWrapping="WrapWithOverflow" x:Name="textBlock_Copy" HorizontalAlignment="Left" Height="43" Margin="349,303,0,0" Text="Install local will use zip files from modpolice folder and install." VerticalAlignment="Top" Width="197" Foreground="#FFE8DA54" FontWeight="Bold"/>
-            <StackPanel Orientation="Horizontal" Margin="337,11,316,0">
-                <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="#FF2D415D" Width="2" Margin="2,34,2,0"/>
-            </StackPanel>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="341,277,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="340,352,0,0" VerticalAlignment="Top" Width="310" Background="#FF2D3F5D"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="341,379,0,0" VerticalAlignment="Top" Width="312" Background="#FF2D3F5D"/>
-            <Label HorizontalAlignment="Center" x:Name="bnsnoggLabel" Content="BNSNoGG" Margin="351,363,44,94" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="18"/>
-            <TextBlock TextWrapping="WrapWithOverflow" x:Name="textBlock_Copy1" HorizontalAlignment="Left" Height="43" Margin="349,447,0,0" Text="Required only for TW to disable anti cheat" VerticalAlignment="Top" Width="197" Foreground="#FFD63636" FontWeight="Bold"/>
-            <Button x:Name="installOnline_Copy" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="550,451,13,14" Content="Install Online" FontFamily="Arial" FontWeight="Bold" Click="installBNSNOGG"/>
-            <Label x:Name="bnsnogglocalLabel" Content="Current: Not Installed" Margin="348,392,47,70" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Label x:Name="bnsnoggOnlineLabel" Content="Online: Fetching...." Margin="348,418,47,44" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Label Content="Cutscene Removal" Margin="10,318,314,132" Foreground="#FF4E86D4" FontFamily="Arial" FontWeight="Bold" FontSize="24">
-                <Label.ToolTip>
-                    <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Cutscene Removal</TextBlock>
-                        <TextBlock>
-                          Removes all cinematic cutscenes from the game, similiar to the mod but without stopping
-                            <LineBreak/>
-                            you in place allowing a smoother and dynamic way to get rid of scenes.
-                        </TextBlock>
-                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
-                    </StackPanel>
-                </Label.ToolTip>
-            </Label>
-            <Label x:Name="CutsceneremovalCurrentLbl" Content="Current: Not Installed" Margin="18,360,438,102" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Label x:Name="CutsceneremovalOnlineLbl" Content="Online: Fetching....." Margin="18,390,438,72" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
-            <Button x:Name="CutsceneremovalInstall" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="230,393,367,72" Content="Install" FontFamily="Arial" FontWeight="Bold" Click="installAdditional"/>
-            <ToggleSwitch:HorizontalToggleSwitch x:Name="CutsceneremovalToggle" Margin="230,361,366,104" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="64" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="togglePlugin" Unchecked="togglePlugin"/>
-            <Separator HorizontalAlignment="Left" Height="20" Margin="10,341,0,0" VerticalAlignment="Top" Width="329" Background="#FF2D3F5D"/>
-            <Button x:Name="del_fpsbooster" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="298,200,338,265" FontFamily="Segoe UI Symbol" Content="&#xE106;" FontWeight="Bold" Click="deletePlugin" Foreground="Red" Visibility="Hidden"/>
-            <Button x:Name="del_highpriority" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="298,288,338,177" FontFamily="Segoe UI Symbol" Content="&#xE106;" FontWeight="Bold" Click="deletePlugin" Foreground="Red"/>
-            <Button x:Name="del_cutsceneremoval" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="298,393,338,72" FontFamily="Segoe UI Symbol" Content="&#xE106;" FontWeight="Bold" Click="deletePlugin" Foreground="Red"/>
+                </StackPanel>
+            </Grid>
+        </Grid>
+        <Grid x:Name="HKUpdater" Visibility="Visible">
+            
         </Grid>
     </Grid>
 </Page>

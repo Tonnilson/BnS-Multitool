@@ -1,5 +1,4 @@
-﻿using CG.Web.MegaApiClient;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -12,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media.Animation;
+using static BnS_Multitool.Functions.FileExtraction;
 
 namespace BnS_Multitool
 {
@@ -954,109 +954,6 @@ namespace BnS_Multitool
             infoDat.Clear();
         }
 
-        //Holy fucking shit do I recycle code like crazy, maybe I should make this one main function accessed through various namespaces later on...
-        private ProgressControl _progressControl;
-        private static string plugins_x86 = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins");
-        private static string plugins_x64 = Path.Combine(SystemConfig.SYS.BNS_DIR, "bin64", "plugins");
-        private async void InstallSigbypasser(object sender, RoutedEventArgs e)
-        {
-            _progressControl = new ProgressControl();
-            ProgressGrid.Visibility = Visibility.Visible;
-            LocalDatGrid.Visibility = Visibility.Hidden;
-            ProgressPanel.Children.Add(_progressControl);
-
-            string pluginName = "SigBypasser";
-
-            try
-            {
-                if (!Directory.Exists("modpolice"))
-                    Directory.CreateDirectory("modpolice");
-
-                ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                var client = new MegaApiClient();
-                await client.LoginAnonymousAsync();
-
-                if (!Directory.Exists("modpolice"))
-                    Directory.CreateDirectory("modpolice");
-
-                ProgressControl.updateProgressLabel("Retrieving file list...");
-                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/6lUDWQRB#08LQQAjiqfgo7tGWGd2QEg"));
-
-                INode currentNode = null;
-                IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
-
-                //Find our latest nodes for download
-                INode loginhelper_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains(pluginName)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-
-                if (loginhelper_node == null)
-                {
-                    ProgressControl.errorSadPeepo(Visibility.Visible);
-                    ProgressControl.updateProgressLabel("Something went wrong getting the node");
-                    await Task.Delay(7000);
-                    return;
-                }
-
-                if (File.Exists(@"modpolice\" + loginhelper_node.Name))
-                    File.Delete(@"modpolice\" + loginhelper_node.Name);
-
-                currentNode = loginhelper_node;
-                await client.DownloadFileAsync(currentNode, @"modpolice\" + loginhelper_node.Name, progress);
-
-                ProgressControl.updateProgressLabel("Unzipping: " + loginhelper_node.Name);
-                await Task.Delay(750);
-                Modpolice.ExtractZipFileToDirectory(@".\modpolice\" + loginhelper_node.Name, @".\modpolice", true);
-
-                ProgressControl.updateProgressLabel("Installing " + pluginName + " x86");
-                await Task.Delay(750);
-
-                if (!Directory.Exists(plugins_x86))
-                    Directory.CreateDirectory(plugins_x86);
-
-                ProgressControl.updateProgressLabel("Installing " + pluginName + " x86");
-                if (File.Exists(Path.Combine(plugins_x86, pluginName + ".dll")))
-                    File.Delete(Path.Combine(plugins_x86, pluginName + ".dll"));
-
-                File.Move(@".\modpolice\bin\plugins\" + pluginName + ".dll", Path.Combine(plugins_x86, pluginName + ".dll"));
-
-                ProgressControl.updateProgressLabel("Installing " + pluginName + " x64");
-                await Task.Delay(750);
-
-                if (!Directory.Exists(plugins_x64))
-                    Directory.CreateDirectory(plugins_x64);
-
-                ProgressControl.updateProgressLabel("Installing " + pluginName + " x64");
-                if (File.Exists(Path.Combine(plugins_x64, pluginName + ".dll")))
-                    File.Delete(Path.Combine(plugins_x64, pluginName + ".dll"));
-
-                File.Move(@".\modpolice\bin64\plugins\" + pluginName + ".dll", Path.Combine(plugins_x64, pluginName + ".dll"));
-
-                ProgressControl.updateProgressLabel("All done, just tidying up.");
-                await client.LogoutAsync();
-            }
-            catch (Exception ex)
-            {
-                ProgressControl.errorSadPeepo(Visibility.Visible);
-                ProgressControl.updateProgressLabel(ex.Message);
-                await Task.Delay(7000);
-            }
-
-            ProgressGrid.Visibility = Visibility.Hidden;
-            LocalDatGrid.Visibility = Visibility.Visible;
-            ProgressPanel.Children.Clear();
-            _progressControl = null;
-
-            //Check if loginhelper is installed
-            sigbypasserInstalled = ((File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", "SigBypasser.dll"))) && (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", "SigBypasser.dll"))));
-            if (sigbypasserInstalled)
-                sigbypasserPlugin = new Modpolice.pluginFileInfo(Path.Combine(SystemConfig.SYS.BNS_DIR, "bin", "plugins", "SigBypasser.dll"));
-            else
-                sigbypasserPlugin = null;
-
-            Dispatchers.labelContent(sigbypasserLabel, String.Format("Installed: {0}", (sigbypasserPlugin != null) ? sigbypasserPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
-        }
-
-        private static Modpolice.pluginFileInfo sigbypasserPlugin;
-        private static bool sigbypasserInstalled;
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;

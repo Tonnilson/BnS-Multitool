@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using System.Xml.XPath;
+using static BnS_Multitool.Functions.Crypto;
 
 namespace BnS_Multitool
 {
@@ -113,9 +114,9 @@ namespace BnS_Multitool
             {
                 using (GZipWebClient client = new GZipWebClient())
                     return await client.DownloadStringTaskAsync(new Uri(WEB_ADDR));
-            } catch (WebException)
+            } catch (WebException ex)
             {
-                //Log later
+                Logger.log.Error("Sync::Fetch_XMLS::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 return "";
             }
         }
@@ -148,6 +149,7 @@ namespace BnS_Multitool
                 }
             } catch (WebException we)
             {
+                Logger.log.Error("Synce::PublishXMLRequest::{0}\n{1}", we.ToString(), we.StackTrace);
                 response = ((HttpWebResponse)we.Response).StatusDescription;
             }
 
@@ -180,13 +182,13 @@ namespace BnS_Multitool
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID)) return false;
                 if (!System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type))) return false;
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID && x.Hash == xml.Hash)) return false;
-                if (Globals.CalculateMD5(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
             } else if (SyncConfig.Synced != null && xml.Discord_id != this.Discord.id)
             {
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID)) return false;
                 if (!System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type))) return false;
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID && x.Hash == xml.Hash)) return false;
-                if (Globals.CalculateMD5(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
             } else if (this.Discord != null && xml.Discord_id == this.Discord.id)
             {
                 bool exists = System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)) ||
@@ -195,9 +197,9 @@ namespace BnS_Multitool
                 else
                 {
                     if (System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)))
-                        if (Globals.CalculateMD5(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                        if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)) != xml.Hash) return false;
                     if(System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)))
-                        if (Globals.CalculateMD5(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                        if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
                 }
             } else if (SyncConfig.Synced == null && this.Discord != null && xml.Discord_id != this.Discord.id) return false;
             return true;
@@ -219,7 +221,7 @@ namespace BnS_Multitool
                     response = await client.DownloadStringTaskAsync(WEB_ADDR);
             } catch (Exception ex)
             {
-                // error log later
+                Logger.log.Error("Sync::Fetch_XMLAsync::Type: {0}\n{1}{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
             }
             return response;
         }
@@ -290,6 +292,7 @@ namespace BnS_Multitool
                     response = Encoding.UTF8.GetString(await client.UploadFileTaskAsync(WEB_ADDR, "POST", this.File));
                 } catch (WebException we)
                 {
+                    Logger.log.Error("Sync::Upload::{0}\n{1}", we.ToString(), we.StackTrace);
                     response = ((HttpWebResponse)we.Response).StatusDescription;
                 }
             }

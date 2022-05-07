@@ -14,8 +14,8 @@
         <Label x:Name="OnlineGameLbl" Content="&#xe12b; Online" Margin="330,10,110,418" Foreground="White" FontFamily="Segoe UI Symbol" FontSize="36"/>
         <Label x:Name="LocalGameLbl" Content="&#xe105; Local" Margin="141,10,351,418" Foreground="White" FontFamily="Segoe UI Symbol" FontSize="36"/>
         <Label HorizontalContentAlignment="Center" x:Name="localVersionLabel" Content="164" Margin="173,53,351,399" Foreground="White" FontSize="20"/>
-        <Button x:Name="DownloadBtn" Content="Update" Margin="259,96,253,361" FontFamily="Arial Black" FontSize="18" Click="DownloadBtn_Click"/>
-        <RichTextBox FocusVisualStyle="{x:Null}" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Foreground="#FFC5C5C5" FontFamily="Arial" FontWeight="Bold" FontSize="14" x:Name="ErrorLog" Margin="10,144,10,134" Background="{x:Null}" BorderBrush="{x:Null}"/>
+        <Button Style="{StaticResource MainButtonStyle}" x:Name="DownloadBtn" Content="Update" Margin="259,96,253,361" FontFamily="Arial Black" FontSize="18" Click="DownloadBtn_Click"/>
+        <RichTextBox BorderThickness="0" FocusVisualStyle="{x:Null}" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Foreground="#FFC5C5C5" FontFamily="Arial" FontWeight="Bold" FontSize="14" x:Name="ErrorLog" Margin="10,144,10,134" Background="{x:Null}" BorderBrush="{x:Null}"/>
         <Grid x:Name="ProgressGrid" Margin="10,213,10,10" Visibility="Hidden">
             <Label Visibility="Hidden" x:Name="DltPLbl" Content="&#xe167; Delta" Foreground="#FF3F6AA6" FontFamily="Segoe UI Symbol" FontSize="24" Margin="10,164,416,52" Background="{x:Null}"/>
             <ProgressBar Style="{StaticResource ProgressBarStyle1}" x:Name="currentProgress" Margin="10,204,10,6"/>

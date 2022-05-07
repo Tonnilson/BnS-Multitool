@@ -4,15 +4,18 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:BnS_Multitool"
-        mc:Ignorable="d" Height="134" Width="496" Foreground="Black" Background="#FF161A1F" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        DataContext="{Binding RelativeSource={RelativeSource Self}}"
+        mc:Ignorable="d" Height="135" Width="500" Foreground="Black" Background="{x:Null}" AllowsTransparency="True" WindowStyle="None" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="88*"/>
-            <ColumnDefinition Width="15*"/>
-        </Grid.ColumnDefinitions>
-        <Image Visibility="Hidden" Source="Images/feelsworry.png" Margin="-4,0,294,0" x:Name="PromptIcon"/>
-        <Image Visibility="Hidden" Source="poggies.png" Margin="-4,0,294,0" x:Name="PromptIcon2"/>
-        <TextBlock x:Name="ErrorLabel" TextWrapping="WrapWithOverflow" Text="Error Message" Foreground="White" FontFamily="Arial" Margin="135,10,10,32" Grid.ColumnSpan="2" FontSize="14"/>
-        <Button Margin="237,107,104,4" Content="OK" Click="Button_Click"/>
+        <Border Background="#FF161A1F" BorderBrush="#FF161A1F" BorderThickness="1" CornerRadius="10" Margin="5,4,5,4">
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="5" ShadowDepth="1" Color="Black"/>
+            </Border.Effect>
+            <Grid>
+                <TextBlock x:Name="ErrorLabel" TextWrapping="WrapWithOverflow" Text="Error Message" Foreground="White" FontFamily="Arial" Margin="149,4,5,22" FontSize="14"/>
+                <Button Style="{StaticResource MainButtonStyle}" Margin="201,104,185,1" Content="OK" Click="Button_Click"/>
+            </Grid>
+        </Border>
+        <Image Source="{Binding StatusIcon}" Margin="-4,0,366,0" x:Name="PromptIcon"/>
     </Grid>
 </Window>

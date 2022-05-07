@@ -54,10 +54,6 @@
       <select-nodes query="./group[@name='particle']/option[contains(@name,'-particle-duration')]/@value">
         <set-value value="0.0001" />
       </select-nodes>
-      <!-- disable breast physics -->
-      <select-node query="./group[@name='uncategorized']/option[@name='no-use-breast-physics']/@value">
-        <set-value value="yes" />
-      </select-node>
       <!-- no retry cooldown in skill training room -->
       <select-node query="./group[@name='skill-training-room']/option[@name='retry-button-cool-time']/@value">
         <set-value value="0" />

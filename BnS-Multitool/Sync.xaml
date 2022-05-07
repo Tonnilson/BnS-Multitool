@@ -14,7 +14,7 @@
             <Label HorizontalContentAlignment="Right" x:Name="SyncPublish_CharacterLimit" Content="0/2000" Margin="344,25,240,441" Foreground="White"/>
             <Label Content="Description" Foreground="White" FontWeight="Bold" FontSize="20" Margin="10,10,323,430" />
             <TextBlock x:Name="FILE_NAME_LABEL" Foreground="#FF98FF83" FontWeight="Bold" Margin="10,413,240,49"/>
-            <RichTextBox VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="SyncPublish_Description" Margin="10,49,240,82" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="SyncPublish_Desc_Updated" PreviewKeyDown="SyncPublish_Desc_PreviewKeyDown">
+            <RichTextBox BorderThickness="0" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="SyncPublish_Description" Margin="10,49,240,82" Background="#FF1E2021" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Bold" FontSize="14" TextChanged="SyncPublish_Desc_Updated" PreviewKeyDown="SyncPublish_Desc_PreviewKeyDown">
                 <RichTextBox.Resources>
                     <Style TargetType="{x:Type Paragraph}">
                         <Setter Property="Margin" Value="0"/>
@@ -22,8 +22,8 @@
                 </RichTextBox.Resources>
             </RichTextBox>
             <Button Visibility="Hidden" x:Name="Submit" Content="Submit" Margin="123,456,436,10" FontWeight="Bold" Click="SyncPublish_ConfirmPublish" />
-            <Button Content="Close" Margin="10,456,549,10" FontWeight="Bold" Click="ClosePublishWindow" />
-            <Button Visibility="Hidden" x:Name="Browse_XML" Content="Browse" Margin="229,456,330,10" FontWeight="Bold" Click="Browse_XML_File" />
+            <Button Style="{StaticResource MainButtonStyle}" Content="Close" Margin="10,456,549,10" FontWeight="Bold" Click="ClosePublishWindow" />
+            <Button Style="{StaticResource MainButtonStyle}" Visibility="Hidden" x:Name="Browse_XML" Content="Browse" Margin="229,456,330,10" FontWeight="Bold" Click="Browse_XML_File" />
             <ComboBox x:Name="categoryBox" Margin="442,81,16,389">
                 <ComboBoxItem>Other</ComboBoxItem>
                 <ComboBoxItem>Blademaster</ComboBoxItem>
@@ -44,12 +44,12 @@
             <Label Content="Category" Foreground="White" FontWeight="Bold" FontSize="16" Margin="442,49,64,409"/>
             <Label Content="Title" Foreground="White" FontWeight="Bold" FontSize="16" Margin="442,106,64,352"/>
             <TextBox MaxLength="45" VerticalContentAlignment="Center" x:Name="SyncPublish_TitleBox" Margin="442,138,16,332" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold"/>
-            <Button x:Name="SyncPublish_EditSubmit" Content="Publish" FontWeight="Bold" Margin="454,163,117,305" Click="SyncPublish_ConfirmPublish"/>
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="SyncPublish_EditSubmit" Content="Publish" FontWeight="Bold" Margin="454,163,117,305" Click="SyncPublish_ConfirmPublish"/>
             <Grid x:Name="StatusGrid" Margin="395,354,0,0" Visibility="Hidden">
                 <Image Source="poggies.png" Margin="-17,50,167,0"/>
                 <TextBlock x:Name="StatusText" Text="Sample Text" TextWrapping="WrapWithOverflow" Foreground="White" FontWeight="Bold" FontSize="16" Margin="103,74,0,0"/>
             </Grid>
-            <Button x:Name="SyncPublish_UploadBrowse" Content="Browse" FontWeight="Bold" Margin="550,163,26,305" RenderTransformOrigin="1.072,0.568" Click="Browse_XML_File"/>
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="SyncPublish_UploadBrowse" Content="Browse" FontWeight="Bold" Margin="550,163,26,305" RenderTransformOrigin="1.072,0.568" Click="Browse_XML_File"/>
         </Grid>
         <Grid x:Name="SyncView" Visibility="Hidden">
             <ListView x:Name="AvailablexmlsView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0,0,235,10" Background="#FF181A1B" BorderBrush="{x:Null}"
@@ -131,8 +131,8 @@
             <Label HorizontalContentAlignment="Center" Content="Out of Sync" Foreground="Red" FontWeight="Bold" FontSize="16" Margin="442,341,16,117"/>
             <Label HorizontalContentAlignment="Center" Content="Synced" Foreground="Green" FontWeight="Bold" FontSize="16" Margin="442,373,16,85"/>
             <Separator Margin="457,266,31,212"/>
-            <Button x:Name="ViewSyncPublishBtn" Visibility="Hidden" Content="Publish" Margin="474,448,48,10" Click="ShowPublishWindow" FontWeight="Bold"/>
-            <Button  Visibility="Visible" Content="&#xE1DF; Update" Margin="474,411,48,47" Click="SyncGetUpdates" FontWeight="Bold" FontFamily="Segoe UI Symbol"/>
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="ViewSyncPublishBtn" Visibility="Hidden" Content="Publish" Margin="474,448,48,10" Click="ShowPublishWindow" FontWeight="Bold"/>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="&#xE1DF; Update" Margin="474,411,48,47" Click="SyncGetUpdates" FontWeight="Bold" FontFamily="Segoe UI Symbol"/>
 
             <Grid x:Name="XML_DESCRIPTION_GRID" Visibility="Hidden">
                 <Grid Background="#7F000000"/>
@@ -142,7 +142,7 @@
                         <Label x:Name="INFO_USER" Foreground="White" FontWeight="Bold" Margin="10,32,343,251"/>
                         <Label HorizontalContentAlignment="Right" x:Name="INFO_DOWNLOADS" Foreground="White" FontWeight="Bold" Margin="374,32,10,251" Content="Downloads: 7,1561"/>
                         <Separator Margin="6,51,7,251" Background="#FF464242" />
-                        <RichTextBox IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="INFO_DESCRIPTION" Margin="10,68,10,10" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Normal" FontSize="14">
+                        <RichTextBox BorderThickness="0" IsReadOnly="True" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" x:Name="INFO_DESCRIPTION" Margin="10,68,10,10" Background="{x:Null}" BorderBrush="{x:Null}" Foreground="White" FontFamily="Arial" FontWeight="Normal" FontSize="14">
                             <RichTextBox.Resources>
                                 <Style TargetType="{x:Type Paragraph}">
                                     <Setter Property="Margin" Value="0"/>
@@ -159,9 +159,9 @@
         <Grid x:Name="SyncAuth" Visibility="Hidden">
             <Label HorizontalContentAlignment="Center" Content="Authorization Token" Foreground="White" FontWeight="Bold" FontSize="20" Margin="0,105,0,350"/>
             <PasswordBox HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="AuthTokenBox" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="163,145,153,316" FontSize="16"/>
-            <Button Content="Skip" Margin="163,179,400,280" FontWeight="Bold" Click="SkipAuthorization"/>
-            <Button Content="Get Token" Margin="410,179,153,280" FontWeight="Bold" Click="GetAuthToken"/>
-            <Button Content="Authorize" Margin="265,179,255,280" FontWeight="Bold" Click="UseAuthorizationToken"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="Skip" Margin="163,179,400,280" FontWeight="Bold" Click="SkipAuthorization"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="Get Token" Margin="410,179,153,280" FontWeight="Bold" Click="GetAuthToken"/>
+            <Button Style="{StaticResource MainButtonStyle}" Content="Authorize" Margin="265,179,255,280" FontWeight="Bold" Click="UseAuthorizationToken"/>
             <TextBlock TextAlignment="Center" TextWrapping="WrapWithOverflow" Foreground="White" FontWeight="Bold" Margin="163,215,153,105">
                 Discord is used as the authorization, I only collect and save your username, avatar and unique id. None of your personal information is
                 accessed or saved.

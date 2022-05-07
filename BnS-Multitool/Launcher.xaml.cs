@@ -9,7 +9,6 @@ using System.Threading;
 using System.IO;
 using System.ComponentModel;
 using System.Windows.Media.Animation;
-using CG.Web.MegaApiClient;
 using System.Windows.Threading;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
@@ -17,6 +16,9 @@ using System.Xml.XPath;
 using System.Management;
 using System.Collections.ObjectModel;
 using BnS_Multitool.Extensions;
+using static BnS_Multitool.Functions.FileExtraction;
+using static BnS_Multitool.Functions.Crypto;
+using OtpNet;
 
 namespace BnS_Multitool
 {
@@ -35,11 +37,12 @@ namespace BnS_Multitool
         private static string plugins_path = Path.Combine(bin_path, "plugins");
         public bool loginHelper_installed = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
         private static string pluginPath = Path.Combine("BNSR", "Binaries", "Win64", "plugins");
-        private bool modpolice_installed = false;
+        private bool loader3_installed = false;
+        private bool bnsnogg_installed = false;
         private ProgressControl _progressControl;
         private static BackgroundWorker monitorProcesses = new BackgroundWorker();
         private static DispatcherTimer memoryTimer = new DispatcherTimer();
-        private static Modpolice.pluginFileInfo loginhelperPlugin;
+        private static bool ignoreRestOfSession = false;
 
         public ObservableCollection<SESSION_LIST> ActiveClientList { get; set; }
 
@@ -49,6 +52,9 @@ namespace BnS_Multitool
             public float skillvalue { get; set; }
             public int mode { get; set; }
             public string description { get; set; }
+            public float recycleTime { get; set; }
+            public int recycleMode { get; set; }
+            public int ignoreAutoBias { get; set; }
         }
 
         private List<SkillData> LoadSkillDataCollection()
@@ -63,7 +69,10 @@ namespace BnS_Multitool
                     skillID = int.Parse(node.Attribute("id").Value),
                     skillvalue = float.Parse(node.Attribute("value").Value),
                     mode = int.Parse(node.Attribute("mode").Value),
-                    description = (node.Attribute("description") == null) ? "" : node.Attribute("description").Value
+                    description = (node.Attribute("description") == null) ? "" : node.Attribute("description").Value,
+                    recycleTime = float.Parse((node.Attribute("recycleTime") == null) ? "-0.015" : node.Attribute("recycleTime").Value),
+                    recycleMode = int.Parse((node.Attribute("recycleMode") == null) ? "0" : node.Attribute("recycleMode").Value),
+                    ignoreAutoBias = int.Parse((node.Attribute("ignoreAutoBias") == null) ? "0" : node.Attribute("ignoreAutoBias").Value)
                 });
 
             return skillData;
@@ -125,11 +134,13 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
+                Logger.log.Error("Launcher::Initialize::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 var dialog = new ErrorPrompt("Something went wrong, accounts.json is probably corrupted. Check for syntax errors in accounts.json or delete entirely.\r\rAddition information: \r" + ex.Message);
                 dialog.ShowDialog();
                 Environment.Exit(0);
             }
 
+            SetupQoLSettings:
             try
             {
                 if (MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='useMarketplace']").Attribute("enable").Value == "1")
@@ -157,8 +168,28 @@ namespace BnS_Multitool
                     MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
                 }
 
+                if(MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='useWindowClipboard']") == null)
+                {
+                    var options = MainWindow.qol_xml.Descendants("options").Last();
+                    options.Add(new XElement("option", new XAttribute("name", "useWindowClipboard"), new XAttribute("enable", "0")));
+                    MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+                }
+
+                if (MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='useWindowClipboard']").Attribute("enable").Value == "1")
+                    useWindowClipboard.IsChecked = true;
+                
                 if (MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='useDebug']").Attribute("enable").Value == "1")
                     useDebug.IsChecked = true;
+
+                if (MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("TurnOffOnDeath") == null)
+                {
+                    var nodes = MainWindow.qol_xml.XPathSelectElement("/config/options/option[@name='AutoCombat']");
+                    nodes.Add(new XAttribute("TurnOffOnDeath", "0"));
+                    MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+                }
+
+                if (MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("TurnOffOnDeath").Value == "1")
+                    autoCombatTurnOffOndeath.IsChecked = true;
 
                 if (MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='useNoWallRunStamina']") == null)
                 {
@@ -173,13 +204,32 @@ namespace BnS_Multitool
                 if (MainWindow.qol_xml.XPathSelectElement("config/gcd").Attribute("enable").Value == "1")
                     enableGCD.IsChecked = true;
 
+                if (MainWindow.qol_xml.XPathSelectElement("config/gcd").Attribute("ignorePing") == null)
+                {
+                    var nodes = MainWindow.qol_xml.XPathSelectElement("config/gcd");
+                    nodes.Add(new XAttribute("ignorePing", "0"));
+                    MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+                }
+                
+                ignorePing.SelectedIndex = int.Parse(MainWindow.qol_xml.XPathSelectElement("config/gcd").Attribute("ignorePing").Value);
+
                 SkillDataGrid.ItemsSource = LoadSkillDataCollection();
                 autoCombatRange.Text = MainWindow.qol_xml.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("range").Value;
 
             }
             catch (Exception ex)
             {
-                new ErrorPrompt(string.Format("Something went wrong with setting QoL toggles\r\rAdditional Information: \r{0}", ex.Message)).ShowDialog();
+                Logger.log.Error("Launcher::Initialize::QoL::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
+                if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
+                    File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+
+                using (StreamWriter output = File.CreateText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml")))
+                    output.Write(Properties.Resources.multitool_qol);
+
+                Logger.log.Info("Loading multitool_qol.xml from Documents\\BnS");
+                MainWindow.qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+                new ErrorPrompt(string.Format("Could not parse multitool_qol.xml, it has been reset. If continue getting this report it.")).ShowDialog();
+                goto SetupQoLSettings;
             }
         }
 
@@ -204,7 +254,7 @@ namespace BnS_Multitool
                 }
                 catch (Exception ex)
                 {
-                    Debug.WriteLine(ex.Message);
+                    Logger.log.Error("Launcher::MonitorActiveProcesses::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 }
             }
 
@@ -216,15 +266,6 @@ namespace BnS_Multitool
         {
             try
             {
-                //Check if loginhelper is installed
-                loginHelper_installed = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
-                modpolice_installed = File.Exists(Path.Combine(bin_path, "winmm.dll")) && File.Exists(Path.Combine(plugins_path, "bnspatch.dll"));
-
-                if (loginHelper_installed)
-                    del_loginhelper.Visibility = Visibility.Visible;
-                else
-                    del_loginhelper.Visibility = Visibility.Hidden;
-
                 Task.Run(new Action(() =>
                 {
                     if (ACCOUNT_CONFIG.ACCOUNTS.REGION < 2 || (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.KR)
@@ -233,7 +274,6 @@ namespace BnS_Multitool
                         Globals.isLoginAvailable();
                         Application.Current.Dispatcher.Invoke((Action)delegate
                         {
-                            Debug.WriteLine("{0}", Globals.onlineBnSVersion);
                             if (Globals.localBnSVersion != Globals.onlineBnSVersion || !Globals.loginAvailable)
                             {
                                 var dialog = new ErrorPrompt(String.Format("{0}\n{1}", (!Globals.loginAvailable) ? "The server is currently undergoing maintenance." : "", (Globals.localBnSVersion != Globals.onlineBnSVersion) ? "A game update is available" : ""));
@@ -245,12 +285,14 @@ namespace BnS_Multitool
                     }
                 }));
 
-                await Task.Run(async () => await CheckOnlineVersion());
-            } catch (Exception)
-            { }
+                await CheckOnlineVersion();
+            } catch (Exception ex)
+            {
+                Logger.log.Error("Launcher::Page_Loaded::Type: {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
+            }
         }
 
-        private void saveAccount(object sender, RoutedEventArgs e)
+        private void SaveAccount(object sender, RoutedEventArgs e)
         {
             if (BNS_USERNAME_BOX.Text == "")
             {
@@ -333,55 +375,62 @@ namespace BnS_Multitool
                 Process proc = new Process();
                 proc.StartInfo.FileName = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "BNSR.exe");
 
-                //Arugments passed to BNSR.exe
+                // Arugments passed to BNSR.exe
                 if (REGION_BOX.SelectedIndex >= 2)
                 {
-                    //Other Regions (TW / KR)
+                    // Other Regions (TW / KR)
                     proc.StartInfo.Arguments = string.Format(@"/sesskey /LaunchByLauncher /Loginmode -FIXPROGRAMID -unattended {0} {1} {2}",
                       ((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMING " : "", ((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORES " : "", cmdParams.Text);
                 }
                 else
                 {
-                    //NA & EU Region
+                    // NA & EU Region
                     proc.StartInfo.Arguments = string.Format(@"/sesskey /LaunchByLauncher /Loginmode -FIXPROGRAMID -lang:{0} -region:{1} -unattended {2} {3} {4}",
                         languageFromSelection(), REGION_BOX.SelectedIndex, ((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMING " : "", ((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORES " : "", cmdParams.Text);
                 }
 
-                //We need to truncate the password down to 16 characters as NCSoft password limit is technically 16 and trims off everything after 16, only know of it being a problem in NA/EU not sure about TW
+                // We need to truncate the password down to 16 characters as NCSoft password limit is technically 16 and trims off everything after 16, only know of it being a problem in NA/EU not sure about TW
                 string pw = (Globals.BnS_Region)REGION_BOX.SelectedIndex != Globals.BnS_Region.TW ? ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD.Truncate(16) : ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD;
 
-                //Setup environment variables for loginhelper
-                proc.StartInfo.UseShellExecute = false; //Required for setting environment variables to processes
+                // Setup environment variables for loginhelper
+                proc.StartInfo.UseShellExecute = false; // Required for setting environment variables to processes
                 proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_USERNAME", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].EMAIL);
                 proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_PASSWORD", pw);
-                proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE);
+
+                // Check if the pincode is numeric, if it's not all numeric values then it's possibly the OTP secret key
+                // This was suggested / provided by dbnryanc92 on Github for TW specifically but I have adjusted it for all regions.
+                if (int.TryParse(ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE, out _))
+                    proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE);
+                else if (!ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE.IsNullOrEmpty())
+                {
+                    Totp totp = new Totp(Base32Encoding.ToBytes(ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE));
+                    string otp = totp.ComputeTotp();
+                    proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", otp);
+                }
+
                 proc.StartInfo.RedirectStandardOutput = true;
 
                 if (MainWindow.qol_xml.XPathSelectElements("config/options/option[@enable='1']").Count() > 0 || MainWindow.qol_xml.XPathSelectElement("config/gcd").Attribute("enable").Value == "1")
-                    await QOL_PLUGIN_CHECK(); //Check version on launch
+                    await QOL_PLUGIN_CHECK(); // Check version on launch
 
-                if (REGION_BOX.SelectedIndex >= 2)
-                    if (!File.Exists(Path.Combine(plugins_path, "bnsnogg.dll")))
-                        throw new Exception("Your region has an anti-cheat and requires bnsnogg.dll, install it before launching");
-
-                //All checks out, start process
+                // All checks out, start process
                 proc.Start();
                 if (ActiveClient == null)
                 {
                     ActiveClientList.Add(new SESSION_LIST() { EMAIL = EMAIL, REGION = REGION_BOX.SelectedIndex, PROCESS = proc, DisplayName = string.Format("{0} - {1}", EMAIL, getSelectedRegion(REGION_BOX.SelectedIndex)) });
 
                     if (ActiveClientList.Count == 1 && !monitorProcesses.IsBusy)
-                        monitorProcesses.RunWorkerAsync(); //Start our worker thread.
+                        monitorProcesses.RunWorkerAsync(); // Start our worker thread.
                 }
                 else
                     ActiveClient.PROCESS = proc;
 
-                //Wait for the client to be loaded and responding before minimizing to avoid confusion on long launch time.
+                // Wait for the client to be loaded and responding before minimizing to avoid confusion on long launch time.
                 Task<bool> clientisLoaded = Task.Run(proc.WaitForInputIdle);
                 await clientisLoaded;
                 if (proc.HasExited) goto EndFunction;
 
-                //New code for settings option.
+                // New code for settings option.
                 switch (SystemConfig.SYS.NEW_GAME_OPTION)
                 {
                     case 1:
@@ -398,6 +447,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
+                Logger.log.Error("Launcher::LaunchNewGameClient::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 var dialog = new ErrorPrompt(ex.Message);
                 dialog.ShowDialog();
             }
@@ -429,12 +479,9 @@ namespace BnS_Multitool
         {
             try
             {
-                //Some error checking for retards
-                bool loginhelperBit = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
-                bool bnspatchBit = File.Exists(Path.Combine(plugins_path, "bnspatch.dll"));
-                bool pluginloaderBit = File.Exists(Path.Combine(bin_path, "winmm.dll"));
-
-                if (MainPage.onlineJson.ANTI_CHEAT_ENABLED == 1 && (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION != Globals.BnS_Region.TW)
+                var processCount = Process.GetProcessesByName("BNSR").Count();
+                // Some error checking for mentally challenged people that are in so much of a hurry they can't read
+                if(MainPage.onlineJson.ANTI_CHEAT_ENABLED == 1 && (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION != Globals.BnS_Region.TW)
                 {
                     var dialog = new ErrorPrompt("The Anti-cheat has been enabled, launching the game will be not possible right now. Remove loader3 before launching the game and keep an eye out on the discord for more information.", false, true);
                     dialog.ShowDialog();
@@ -447,20 +494,155 @@ namespace BnS_Multitool
                     ((Storyboard)FindResource("animate")).Begin(ErrorPromptGrid);
                     return;
                 }
-                else if (!loginhelperBit)
+                else if (!loginHelper_installed && processCount == 0)
                 {
                     var dialog = new ErrorPrompt("Loginhelper is missing, install loginhelper before continuing", false, true);
                     dialog.ShowDialog();
                     return;
                 }
-                else if (!pluginloaderBit)
+                else if (!loader3_installed && processCount == 0)
                 {
-                    var dialog = new ErrorPrompt("Loader3 is missing, You can install loader3 under Modpolice->Modpolicec Core", false, true);
+                    var dialog = new ErrorPrompt("Loader3 is missing, You can click the install button below to get the required plugins", false, true);
                     dialog.ShowDialog();
                     return;
                 }
+                else if (!bnsnogg_installed && processCount == 0)
+                {
+                    var dialog = new ErrorPrompt("BNSNoGG is missing, You can click the install button below to get the required plugins", false, true);
+                    dialog.ShowDialog();
+                    return;
+                }
+                #region hellokittywarnings
+                if ((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION != Globals.BnS_Region.TW)
+                {
+                    var result = await Modpolice.HKCheck();
+                    if (result == Modpolice.HK_State.Error && SystemConfig.SYS.HK_Installed)
+                    {
+                        new ErrorPrompt("There was an error getting your local client version, try doing a file check on the game.").ShowDialog();
+                        return;
+                    }
+                    if (result == Modpolice.HK_State.Not_Installed) goto ContinueLaunching;
+                    if (result == Modpolice.HK_State.Installed) goto ContinueLaunching;
+
+                    // Check if datafile is missing but binloader is present
+                    if (result == Modpolice.HK_State.Missing_datafile && SystemConfig.SYS.HK_Installed)
+                    {
+                        var drresult = WPFCustomMessageBox.CustomMessageBox.ShowYesNoCancel("You have binloader installed but are missing datafile64.bin, did you rename it? If you did then you know what you're doing and you can click Ignore.", "Binloader Error", "Install HK", "Remove Binloader", "Ignore Warning");
+                        if (drresult == MessageBoxResult.No)
+                        {
+                            if (File.Exists(Path.Combine(plugins_path, "binloader.dll")))
+                                File.Delete(Path.Combine(plugins_path, "binloader.dll"));
+                            goto ContinueLaunching;
+                        }
+                        else if (drresult == MessageBoxResult.Cancel)
+                        {
+                            ignoreRestOfSession = true;
+                            goto ContinueLaunching;
+                        }
+                        else if (drresult == MessageBoxResult.Yes)
+                            goto InstallHKFromLauncher;
+                        else
+                            return;
+                    }
+
+                    // Alert that an update for HK is available
+                    if (result == Modpolice.HK_State.Update_Available)
+                    {
+                        if (ignoreRestOfSession) goto ContinueLaunching;
+                        var drresult = WPFCustomMessageBox.CustomMessageBox.ShowOKCancel("An update for Hello Kitty is available\nIgnore will get rid of this message until you restart multi-tool", "HK Update", "Update", "Ignore Message");
+                        if (drresult == MessageBoxResult.OK) goto InstallHKFromLauncher;
+                        else
+                        {
+                            ignoreRestOfSession = true;
+                            goto ContinueLaunching;
+                        }
+                    }
+
+                    if (result == Modpolice.HK_State.Outdated)
+                    {
+                        if (ignoreRestOfSession) goto ContinueLaunching;
+                        var dresult = WPFCustomMessageBox.CustomMessageBox.ShowYesNoCancel("It appears that your version of Hello Kitty does not match server, what would you like to do?\n\nNote that ignoring can cause your game to not function properly or at all if it's not compatible!\n\nIgnore will get rid of this message until you restart multi-tool",
+                            "HK Warning", "Update", "Turn Off HK", "Ignore Warning");
+                        if (dresult == MessageBoxResult.Cancel)
+                        {
+                            ignoreRestOfSession = true;
+                            goto ContinueLaunching;
+                        }
+                        if (dresult == MessageBoxResult.No)
+                        {
+                            if (File.Exists(Path.Combine(plugins_path, "binloader.dll")))
+                                File.Delete(Path.Combine(plugins_path, "binloader.dll"));
+                            goto ContinueLaunching;
+                        }
+
+                        if (dresult == MessageBoxResult.Yes) goto InstallHKFromLauncher;
+                    }
+
+                    if(result == Modpolice.HK_State.Installed_ButBuildMismatch)
+                    {
+                        if(ignoreRestOfSession) goto ContinueLaunching;
+                        var dresult = WPFCustomMessageBox.CustomMessageBox.ShowOKCancel(
+                            "No Hello Kitty update for this version of the game\nIt is recommended to turn HK off until a new version is released, ignoring can cause the game to not work at all or have broken functionality.\n\nIgnore will get rid of this message until you restart multi-tool",
+                            "Build Mismatch",
+                            "Ignore Warning",
+                            "Turn Off HK"
+                            );
+
+                        if(dresult == MessageBoxResult.No)
+                        {
+                            ignoreRestOfSession = true;
+                            goto ContinueLaunching;
+                        }
+
+                        if (dresult == MessageBoxResult.Cancel)
+                        {
+                            if (File.Exists(Path.Combine(plugins_path, "binloader.dll")))
+                                File.Delete(Path.Combine(plugins_path, "binloader.dll"));
+                            goto ContinueLaunching;
+                        }
+
+                        if(dresult == MessageBoxResult.OK) goto ContinueLaunching;
+                    }
+                    return; // The results we were looking for were not set.
+
+                InstallHKFromLauncher:
+                    _progressControl = new ProgressControl();
+                    ProgressGrid.Visibility = Visibility.Visible;
+                    MainGrid.Visibility = Visibility.Collapsed;
+                    ProgressPanel.Children.Add(_progressControl);
+
+                    bool install_result = false;
+                    try
+                    {
+                        ProgressControl.updateProgressLabel("Updating Hello Kitty");
+                        await Task.Delay(TimeSpan.FromSeconds(1.5));
+                        install_result = await Modpolice.InstallPlugin(Modpolice.Plugins.PluginInfo.FirstOrDefault(x => x.Name == "binloader"));
+                        if (!install_result)
+                            throw new Exception("Failed to install binloader, cancelling rest of installation");
 
 
+                        install_result = await Modpolice.InstallHelloKitty();
+                        if (!install_result)
+                            throw new Exception("Failed to install binloader, cancelling rest of installation");
+
+                    }
+                    catch (Exception ex)
+                    {
+                        ProgressControl.updateProgressLabel(ex.Message);
+                        await Task.Delay(TimeSpan.FromSeconds(2.5));
+                    }
+
+                    ProgressGrid.Visibility = Visibility.Hidden;
+                    MainGrid.Visibility = Visibility.Visible;
+                    ProgressPanel.Children.Clear();
+                    _progressControl = null;
+
+                    if (install_result) goto ContinueLaunching;
+                    return;
+                }
+            #endregion
+
+            ContinueLaunching:
                 string EMAIL = ACCOUNT_LIST_BOX.Text;
                 var ActiveClient = ActiveClientList.Where(x => x.EMAIL == EMAIL && x.REGION == REGION_BOX.SelectedIndex).FirstOrDefault();
 
@@ -518,6 +700,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
+                Logger.log.Error("Launcher::KillGameProcess::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 var dialog = new ErrorPrompt(ex.Message);
                 dialog.ShowDialog();
             }
@@ -576,12 +759,21 @@ namespace BnS_Multitool
                 gcd_node.Attribute("enable").Value = currentState.ToString();
                 MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
             }
+            else if (currentCheckBox.Name == "ignorePing")
+            {
+                var gcd_node = MainWindow.qol_xml.XPathSelectElement("/config/gcd");
+                gcd_node.Attribute("ignorePing").Value = (sender as ComboBox).SelectedIndex.ToString();
+                MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
+            }
             else
             {
                 string optionName = currentCheckBox.Name;
                 if (currentCheckBox.Name == "autocombatrangeTOS")
                     optionName = "AutoCombat";
+                else if (currentCheckBox.Name == "autoCombatTurnOffOndeath")
+                    optionName = "AutoCombat";
 
+                // Make sure it's not null
                 if (MainWindow.qol_xml.XPathSelectElement("/config/options/option[@name='" + optionName + "']") == null)
                 {
                     var elements = MainWindow.qol_xml.Descendants("options").Last();
@@ -591,6 +783,8 @@ namespace BnS_Multitool
                 var option_node = MainWindow.qol_xml.XPathSelectElement("/config/options/option[@name='" + optionName + "']");
                 if (currentCheckBox.Name == "autocombatrangeTOS")
                     option_node.Attribute("useRange").Value = currentState.ToString();
+                else if (currentCheckBox.Name == "autoCombatTurnOffOndeath")
+                    option_node.Attribute("TurnOffOnDeath").Value = currentState.ToString();
                 else
                     option_node.Attribute("enable").Value = currentState.ToString();
 
@@ -601,30 +795,79 @@ namespace BnS_Multitool
         TaskCompletionSource<bool> downloadComplete = new TaskCompletionSource<bool>();
 
         #region pluginstuff
+
+        class requiredList
+        {
+            public string Name { get; set; }
+            public string Path { get; set; }
+            public string Hash { get; set; }
+        }
         private async Task CheckOnlineVersion()
         {
-            loginhelperPlugin = null;
-            if (loginHelper_installed)
-                loginhelperPlugin = new Modpolice.pluginFileInfo(Path.Combine(plugins_path, "loginhelper.dll"));
-
-            Dispatchers.labelContent(loginhelperLocalLbl, string.Format("Current: {0}", (loginhelperPlugin != null) ? loginhelperPlugin.modificationTime.ToString("MM-dd-yy") : "Not Installed"));
-
-            try
+            var plugins = await Modpolice.RetrieveOnlinePlugins();
+            if (plugins == null)
             {
-                MegaApiClient client = new MegaApiClient(new WebClient(Globals.MEGAAPI_TIMEOUT));
-                await client.LoginAnonymousAsync();
-
-                IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
-                await client.LogoutAsync();
-                INode loginhelper_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains("loginhelper")).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-
-                if (loginhelper_node != null)
-                    Dispatchers.labelContent(loginhelperOnlineLbl, string.Format("Online: {0}", loginhelper_node.ModificationDate.Value.ToString("MM-dd-yy")));
+                new ErrorPrompt("Failed to retrieve pluginList from server", false, true);
+                return;
             }
-            catch (Exception ex)
+
+            Modpolice.Plugins = plugins;
+
+            var loader3 = plugins.PluginInfo.FirstOrDefault(x => x.Name.Equals("loader3"));
+            var bnsnogg = plugins.PluginInfo.FirstOrDefault(x => x.Name.Equals("bnsnogg"));
+            var loginhelper = plugins.PluginInfo.FirstOrDefault(x => x.Name.Equals("loginhelper"));
+
+            if(loader3 == null || bnsnogg == null || loginhelper == null)
             {
-                
-                Dispatchers.labelContent(loginhelperOnlineLbl, ex.Message == "Timed out" ? "Online: " + ex.Message : "Online: Error!");
+                new ErrorPrompt("Null references to pluginInfo", false, true);
+                return;
+            }
+
+            // Do not check if BnS is detected as running.
+            if (ActiveClientList.Count > 0 || Process.GetProcessesByName("BNSR").Count() > 0) 
+            {
+                if (PluginInfoText.Text.IsNullOrEmpty())
+                    PluginInfoText.Text = "Game is running, can't check plugins";
+
+                return; 
+            }
+
+            loader3_installed = File.Exists(Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, loader3.FilePath)));
+            bnsnogg_installed = File.Exists(Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, bnsnogg.FilePath)));
+            loginHelper_installed = File.Exists(Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, loginhelper.FilePath)));
+            var requiredList = new List<requiredList>
+            {
+                new requiredList { Name = "Loader3", Path = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, loader3.FilePath)), Hash = loader3.Hash.ToLower()},
+                new requiredList { Name = "GameGuard Bypass", Path = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, bnsnogg.FilePath)), Hash = bnsnogg.Hash.ToLower()},
+                new requiredList { Name = "LoginHelper", Path = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, loginhelper.FilePath)), Hash = loginhelper.Hash.ToLower()}
+            };
+
+            PluginInfoText.Text = "";
+
+            foreach(var item in requiredList)
+            {
+                if(File.Exists(item.Path))
+                {
+                    if(SHA1_File(item.Path) == item.Hash)
+                    {
+                        System.Windows.Documents.Run text = new System.Windows.Documents.Run("\uE10B");
+                        text.Foreground = System.Windows.Media.Brushes.Green;
+                        PluginInfoText.Inlines.Add(text);
+                    } else
+                    {
+                        System.Windows.Documents.Run text = new System.Windows.Documents.Run("\uE118");
+                        text.Foreground = System.Windows.Media.Brushes.Yellow;
+                        PluginInfoText.Inlines.Add(text);
+                    }
+                } else
+                {
+                    System.Windows.Documents.Run text = new System.Windows.Documents.Run("\uE10A");
+                    text.Foreground = System.Windows.Media.Brushes.Red;
+                    PluginInfoText.Inlines.Add(text);
+                }
+
+                System.Windows.Documents.Run name = new System.Windows.Documents.Run(" " + item.Name + "\r\n");
+                PluginInfoText.Inlines.Add(name);
             }
         }
 
@@ -635,97 +878,49 @@ namespace BnS_Multitool
             MainGrid.Visibility = Visibility.Collapsed;
             ProgressPanel.Children.Add(_progressControl);
 
-            string pluginName = "loginhelper";
-            if (((Button)sender).Name.Contains("CHARSELECT"))
-                pluginName = "charselect";
-
-            await Task.Run(async () =>
+            try
             {
-                try
+                PluginInfoText.Text = "";
+                // Loop through all plugins and install the 3 required plugins to launch the game if they need to be installed
+                var required = new List<string> { "loader3", "bnsnogg", "loginhelper" };
+                foreach (var plugin in Modpolice.Plugins.PluginInfo)
                 {
-                    if (!Directory.Exists("modpolice"))
-                        Directory.CreateDirectory("modpolice");
-
-                    ProgressControl.updateProgressLabel("Logging into Mega anonymously...");
-                    MegaApiClient client = new MegaApiClient();
-                    await client.LoginAnonymousAsync();
-
-                    if (!Directory.Exists("modpolice"))
-                        Directory.CreateDirectory("modpolice");
-
-                    ProgressControl.updateProgressLabel("Retrieving file list...");
-                    IEnumerable<INode> nodes = await client.GetNodesFromLinkAsync(new Uri("https://mega.nz/folder/4EUF2IhL#Ci1Y-sbbyw7nwwMGvHV2_w"));
-
-                    INode currentNode = null;
-                    IProgress<double> progress = new Progress<double>(x => ProgressControl.updateProgressLabel(String.Format("Downloading: {0} ({1}%)", currentNode.Name, Math.Round(x))));
-
-                    //Find our latest nodes for download
-                    INode loginhelper_node = nodes.Where(x => x.Type == NodeType.File && x.Name.Contains(pluginName)).OrderByDescending(t => t.ModificationDate).FirstOrDefault();
-
-                    if (loginhelper_node == null)
+                    bool inList = required.Any(x => x.ToLower() == plugin.Name.ToLower());
+                    if (inList)
                     {
-                        ProgressControl.errorSadPeepo(Visibility.Visible);
-                        ProgressControl.updateProgressLabel("Something went wrong getting the node");
-                        await Task.Delay(7000);
-                        return;
-                    }
+                        ProgressControl.updateProgressLabel(string.Format("Validating {0}", plugin.Title));
 
-                    if (File.Exists(@"modpolice\" + loginhelper_node.Name))
-                        File.Delete(@"modpolice\" + loginhelper_node.Name);
+                        // Check that it doesn't need to be updated first
+                        var pluginPath = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, plugin.FilePath));
+                        if (File.Exists(pluginPath) && SHA1_File(pluginPath) == plugin.Hash.ToLower()) continue;
 
-                    currentNode = loginhelper_node;
-                    await client.DownloadFileAsync(currentNode, @"modpolice\" + loginhelper_node.Name, progress);
+                        ProgressControl.updateProgressLabel(string.Format("Installing {0}", plugin.Title));
+                        await Task.Delay(150);
 
-                    ProgressControl.updateProgressLabel("Unzipping: " + loginhelper_node.Name);
-                    await Task.Delay(750);
-                    Modpolice.ExtractZipFileToDirectory(@".\modpolice\" + loginhelper_node.Name, @".\modpolice", true);
+                        // Download and install plugin, returns true if successful
+                        bool result = await Modpolice.InstallPlugin(plugin);
+                        ProgressControl.updateProgressLabel(string.Format("{0} {1}", plugin.Title, result ? "successfully installed" : "Failed to install"));
+                        await Task.Delay(TimeSpan.FromSeconds(1.5));
 
-                    ProgressControl.updateProgressLabel(string.Format("Installing: {0}", pluginName));
-                    await Task.Delay(750);
+                        if (plugin.Name == "loader3")
+                            loader3_installed = result;
 
-                    if (!Directory.Exists(plugins_path))
-                        Directory.CreateDirectory(plugins_path);
+                        if(plugin.Name == "bnsnogg")
+                            bnsnogg_installed = result;
 
-                    if (!Directory.Exists(plugins_path))
-                        Directory.CreateDirectory(plugins_path);
+                        if(plugin.Name == "loginhelper")
+                            loginHelper_installed = result;
 
-                    ProgressControl.updateProgressLabel("Installing " + pluginName + " x64");
-                    if (File.Exists(Path.Combine(plugins_path, pluginName + ".dll")))
-                        File.Delete(Path.Combine(plugins_path, pluginName + ".dll"));
-
-                    File.Move(@".\modpolice\BNSR\Binaries\Win64\plugins\" + pluginName + ".dll", Path.Combine(plugins_path, pluginName + ".dll"));
-
-                    ProgressControl.updateProgressLabel("All done, just tidying up.");
-                    await client.LogoutAsync();
+                    } else
+                        continue;
                 }
-                catch (Exception ex)
-                {
-                    ProgressControl.errorSadPeepo(Visibility.Visible);
-                    ProgressControl.updateProgressLabel(ex.Message);
-                    await Task.Delay(7000);
-                }
-            });
+            } catch { }
 
+            await CheckOnlineVersion();
             ProgressGrid.Visibility = Visibility.Hidden;
             MainGrid.Visibility = Visibility.Visible;
             ProgressPanel.Children.Clear();
             _progressControl = null;
-
-            //Check if loginhelper is installed
-            loginHelper_installed = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
-
-            if (loginHelper_installed)
-                del_loginhelper.Visibility = Visibility.Visible;
-            else
-                del_loginhelper.Visibility = Visibility.Hidden;
-
-            await Task.Run(async () => await CheckOnlineVersion());
-        }
-
-        private void DownloadCompleted(object sender, AsyncCompletedEventArgs e)
-        {
-            ProgressControl.updateProgressLabel("Download Completed...");
-            downloadComplete.SetResult(true);
         }
         #endregion
 
@@ -744,7 +939,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Logger.log.Error("Launcher::ActiveProcessesDblClick::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
             }
         }
 
@@ -754,7 +949,7 @@ namespace BnS_Multitool
             {
                 ((ComboBox)sender).Focus();
             }
-            catch (Exception) { }
+            catch { }
         }
 
         private int timerFromSelection()
@@ -834,7 +1029,6 @@ namespace BnS_Multitool
         private void dispatchTimer_tick(object sender, EventArgs e)
         {
             DispatcherTimer timer = (DispatcherTimer)sender;
-            Debug.WriteLine("Cleaning Memory...");
             Process[] allProcesses = Process.GetProcessesByName("BNSR");
             if (allProcesses.Count() >= 0)
             {
@@ -844,7 +1038,7 @@ namespace BnS_Multitool
                     {
                         PoormanCleaner.EmptyWorkingSet(process.Handle);
                     }
-                    catch (Exception) { }
+                    catch { }
                 }
             }
         }
@@ -883,7 +1077,7 @@ namespace BnS_Multitool
                     {
                         PoormanCleaner.EmptyWorkingSet(process.Handle);
                     }
-                    catch (Exception) { }
+                    catch { }
                 }
             }
         }
@@ -945,7 +1139,7 @@ namespace BnS_Multitool
 
         private void OpenOptionsMenu(object sender, RoutedEventArgs e) => ((Storyboard)FindResource("FadeIn")).Begin(LaunchOptions);
 
-        //This is so bad on so many levels but i don't care, it works as is. Maybe one day i'll use a viewmodel which is the proper way to handle this.
+        // This is so bad on so many levels but i don't care, it works as is. Maybe one day i'll use a viewmodel which is the proper way to handle this.
         private void LaunchOptionsClose(object sender, RoutedEventArgs e)
         {
             ((Storyboard)FindResource("FadeOut")).Begin(LaunchOptions);
@@ -963,7 +1157,15 @@ namespace BnS_Multitool
                 var elements = tempdoc.Descendants("gcd").Last();
 
                 foreach (SkillData skill in dataList)
-                    elements.Add(new XElement("skill", new XAttribute("id", skill.skillID.ToString()), new XAttribute("value", skill.skillvalue), new XAttribute("mode", skill.mode.ToString()), new XAttribute("description", (skill.description == null) ? "" : skill.description)));
+                    elements.Add(
+                        new XElement("skill", new XAttribute("id", skill.skillID.ToString()),
+                        new XAttribute("value", skill.skillvalue),
+                        new XAttribute("mode", skill.mode.ToString()),
+                        new XAttribute("description", (skill.description == null) ? "" : skill.description),
+                        new XAttribute("recycleTime", skill.recycleTime),
+                        new XAttribute("recycleMode", skill.recycleMode.ToString()),
+                        new XAttribute("ignoreAutoBias", skill.ignoreAutoBias.ToString())
+                    ));
 
                 //tempdoc.XPathSelectElement("config/gcd").Attribute("enable").Value = ((bool)enableGCD.IsChecked) ? "1" : "0";
                 MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
@@ -971,6 +1173,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
+                Logger.log.Error("Launcher::LaunchOptionsClose::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                 var dialog = new ErrorPrompt(String.Format("Error saving to multitool_qol.xml, make sure everything is filled out correctly in the skill section and the file exists in documents.\r\rAddition Info:\n{0}", ex.Message));
                 dialog.ShowDialog();
             }
@@ -993,8 +1196,9 @@ namespace BnS_Multitool
                 Process proc = Process.GetProcessById(pid);
                 if (!proc.HasExited) proc.Kill();
             }
-            catch (ArgumentException)
+            catch (Exception ex)
             {
+                Logger.log.Error("Launcher::KillProcessAndChildrens::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
             }
         }
 
@@ -1014,7 +1218,7 @@ namespace BnS_Multitool
                 if (MainPage.onlineJson.QOL_HASH == null)
                     throw new Exception("QOL Hash was null");
 
-                if (File.Exists(_pluginPath) && Globals.CalculateMD5(_pluginPath) == MainPage.onlineJson.QOL_HASH.ToLower())
+                if (File.Exists(_pluginPath) && MD5_File(_pluginPath) == MainPage.onlineJson.QOL_HASH.ToLower())
                     return;
                 else
                 {
@@ -1043,7 +1247,7 @@ namespace BnS_Multitool
                         client.DownloadFile(String.Format("{1}/plugin/{0}", MainPage.onlineJson.QOL_ARCHIVE, Globals.MAIN_SERVER_ADDR), @".\modpolice\" + MainPage.onlineJson.QOL_ARCHIVE);
 
                         ProgressControl.updateProgressLabel("Decompressing");
-                        Modpolice.ExtractZipFileToDirectory(@".\modpolice\" + MainPage.onlineJson.QOL_ARCHIVE, @".\modpolice", true);
+                        ExtractZipFileToDirectory(@".\modpolice\" + MainPage.onlineJson.QOL_ARCHIVE, @".\modpolice", true);
                         await Task.Delay(500);
 
                         ProgressControl.updateProgressLabel("Installing");
@@ -1063,7 +1267,7 @@ namespace BnS_Multitool
                     }
                     catch (Exception ex)
                     {
-                        Debug.WriteLine("{0}", ex.Message);
+                        Logger.log.Error("Launcher::QOL_PLUGIN_CHECK::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
                         ProgressControl.updateProgressLabel(ex.Message);
                         await Task.Delay(5000);
                     }
@@ -1080,7 +1284,7 @@ namespace BnS_Multitool
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.Message);
+                Logger.log.Error("{0}\n{1}", ex.Message, ex.StackTrace);
             }
         }
 
@@ -1102,44 +1306,13 @@ namespace BnS_Multitool
             MainOptions.Visibility = Visibility.Hidden;
         }
 
-        private async void deletePlugin(object sender, RoutedEventArgs e)
+        private void PingReductionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _progressControl = new ProgressControl();
-            ProgressGrid.Visibility = Visibility.Visible;
-            MainGrid.Visibility = Visibility.Collapsed;
-            ProgressPanel.Children.Add(_progressControl);
-
-            string senderName = ((Button)sender).Name.Split('_')[1];
-            ProgressControl.updateProgressLabel(String.Format("Removing plugin: {0}", senderName));
-            await Task.Delay(500);
-
-            string x86_path = Path.Combine(plugins_path, senderName + ".dll");
-
-            try
-            {
-                if (File.Exists(x86_path))
-                    File.Delete(x86_path);
-            }
-            catch (Exception)
-            { }
-
-            ProgressControl.updateProgressLabel(String.Format("{0} removed", senderName));
-
-            loginHelper_installed = File.Exists(Path.Combine(plugins_path, "loginhelper.dll"));
-
-            if (loginHelper_installed)
-                del_loginhelper.Visibility = Visibility.Visible;
-            else
-                del_loginhelper.Visibility = Visibility.Hidden;
-
-            await Task.Delay(500);
-
-            await Task.Run(async () => await CheckOnlineVersion());
-
-            ProgressGrid.Visibility = Visibility.Hidden;
-            MainGrid.Visibility = Visibility.Visible;
-            ProgressPanel.Children.Clear();
-            _progressControl = null;
+            if (sender == null) return;
+            var item = (sender as ComboBox);
+            var gcd_node = MainWindow.qol_xml.XPathSelectElement("/config/gcd");
+            gcd_node.Attribute("ignorePing").Value = item.SelectedIndex.ToString();
+            MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
         }
     }
 }
