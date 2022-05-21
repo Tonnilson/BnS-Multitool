@@ -73,8 +73,8 @@ namespace BnS_Multitool
             {
 
             }
-
-                userMods = new List<MODS_CLASS>();
+            
+            userMods = new List<MODS_CLASS>();
 
             foreach (string DIRECTORY in MOD_DIRECTORIES)
             {
@@ -956,21 +956,27 @@ namespace BnS_Multitool
 
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
-            LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
+            try
+            {
+                LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
 
-            string region = regionFromSelection();
-            modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Mods");
-            modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Mods");
+                string region = regionFromSelection();
+                modPath = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Mods");
+                modDestination = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Content", "Paks", "Mods");
 
-            //These are custom so we need to check if they exist, if not create them for the language.
-            if (!Directory.Exists(modPath))
-                Directory.CreateDirectory(modPath);
+                //These are custom so we need to check if they exist, if not create them for the language.
+                if (!Directory.Exists(modPath))
+                    Directory.CreateDirectory(modPath);
 
-            if (!Directory.Exists(modDestination))
-                Directory.CreateDirectory(modDestination);
+                if (!Directory.Exists(modDestination))
+                    Directory.CreateDirectory(modDestination);
 
-            await ShowModList();
-            LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
+                await ShowModList();
+                LANGUAGE_BOX.SelectedIndex = ACCOUNT_CONFIG.ACCOUNTS.LANGUAGE;
+            } catch (Exception ex)
+            {
+                Logger.log.Error("{0}\n{1}", ex.Message, ex.StackTrace);
+            }
         }
 
         private void PatchBit(object sender, RoutedEventArgs e)

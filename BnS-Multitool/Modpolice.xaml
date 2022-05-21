@@ -15,7 +15,7 @@
         <Grid x:Name="ProgressGrid" Visibility="Hidden">
             <StackPanel x:Name="ProgressPanel"/>
         </Grid>
-        <Grid x:Name="MainGrid" Visibility="Hidden">
+        <Grid x:Name="MainGrid" Visibility="Visible">
             <Button Style="{StaticResource MainButtonStyle}" x:Name="openbin64" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="539,445,10,10" Content="Game Directory" FontFamily="Arial" FontWeight="Bold" Click="openBinLocation"/>
             <Label HorizontalContentAlignment="Center" Background="#FF2D3F5D" Margin="10,10,350,448" Content="Available Plugins" FontFamily="Arial Black" FontSize="20" Foreground="White"/>
             <ListView x:Name="AvailablePluginsView" Background="#FF1E2021"
@@ -57,8 +57,9 @@
                 </ListView.ItemTemplate>
             </ListView>
             <Grid x:Name="PluginInfoGrid" Margin="330,10,10,50" Visibility="Hidden">
-                <Label Content="Plugin Info" Foreground="White" FontWeight="Bold" Margin="0,0,0,385" FontSize="24"/>
+                <Label Content="Plugin Info" Foreground="CornflowerBlue" FontWeight="Bold" Margin="0,0,0,385" FontSize="24"/>
                 <Label Content="Description" Margin="0,50,0,346" Foreground="White" FontWeight="Bold" FontSize="16"/>
+                <Label x:Name="AuthorLabel" Content="Author: " Margin="0,33,0,369" Foreground="Wheat" FontWeight="Bold" FontSize="16"/>
                 <StackPanel Orientation="Vertical" Width="300" Margin="10,84,10,0">
                     <TextBlock x:Name="PluginDescription" TextWrapping="WrapWithOverflow" Text="Test Description" Width="300" Foreground="White"/>
                     <Label/>

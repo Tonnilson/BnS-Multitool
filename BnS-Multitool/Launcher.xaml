@@ -120,13 +120,14 @@
             <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Center" Height="175" VerticalAlignment="Top" Width="310" Margin="10,10,340,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
 
-                    <TextBox x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="212" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                    <PasswordBox x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,73,0,0" VerticalAlignment="Top" Width="212" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                    <TextBox x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="116" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <TextBox x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="231" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <PasswordBox x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,73,0,0" VerticalAlignment="Top" Width="231" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <TextBox x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="123" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
                     <Label Content="Email" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
                     <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
                     <Label Content="Pin Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,97,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
-                    <Button Style="{StaticResource MainButtonStyle}" x:Name="MultiTool_UPDATE" Margin="145,121,77,10" Width="76" Content="Save" Click="SaveAccount"/>
+                    <Button Style="{StaticResource MainButtonStyle}" Margin="152,121,123,10" Content="&#xE11B;" Click="OpenPincodeInfo" FontFamily="Segoe UI Symbol"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="MultiTool_UPDATE" Margin="186,121,43,10" Content="Save" Click="SaveAccount"/>
                 </Grid>
             </GroupBox>
         </Grid>
@@ -490,6 +491,28 @@
                     </Grid>
                 </Grid>
             </Border>
+        </Grid>
+        <Grid x:Name="PinCodeInfoGrid" Visibility="Hidden">
+            <Grid Background="Black" Opacity="0.85"/>
+            <TextBlock Foreground="White" Margin="10,10,10,10" TextWrapping="WrapWithOverflow">
+                <Run Foreground="Wheat" FontSize="18" FontWeight="Bold">Pincode / TOTP</Run><LineBreak/>
+                If you would like loginhelper to automatically log you in using either a pincode or OTP Authenticator you can save either the 6-digit pin code or the Authenticator Secret key / code in the pincode box. If you do not want automatic pin submission you can leave the field blank.
+                <LineBreak/><LineBreak/>
+                <Run Foreground="CornflowerBlue" FontSize="16" FontWeight="Bold">TOTP / Authenticator Setup:</Run><LineBreak/>
+                You will need the Authenticator Secret key also referred to as "Code" when setting up 2FA. Please note you should NEVER share this key with anyone, it defeats the entire purpose of using 2FA, this is just for YOUR convience. If you currently have 2FA enabled and you did not write the code down you will have to remove 2FA and reset it up.
+                <LineBreak/>
+                <LineBreak/>
+                <Run Foreground="Wheat" FontWeight="Bold">Step 1:</Run><LineBreak/>
+                Setup 2FA from the respective site Example for NA/EU: https://account.ncsoft.com/<LineBreak/><LineBreak/>
+                <Run Foreground="Wheat" FontWeight="Bold">Step 2:</Run><LineBreak/>
+                Write the code down next to the QR image, it looks something like this: <Run FontWeight="Bold" FontSize="14" TextDecorations="Underline">JBSWY3DPEHPK3PXP</Run><LineBreak/><LineBreak/>
+                <Run Foreground="Wheat" FontWeight="Bold">Step 3:</Run><LineBreak/>
+                Continue 2FA setup as you normally would like scanning the QR code and setting it up with Authy/Google<LineBreak/><LineBreak/>
+                <Run Foreground="Wheat" FontWeight="Bold">Step 4:</Run><LineBreak/>
+                Take the code you wrote down / copied and save it in the pincode box.<LineBreak/>
+                And that's it, loginhelper will try to generate a TOTP pin-code when logging in and submit that, it may fail but most cases it works.
+            </TextBlock>
+            <Button Style="{StaticResource MainButtonStyle}" Content="OK GOT IT! GET ME OUT!" Margin="203,441,204,21" Click="ClosePincodeInfo" FontWeight="Bold" />
         </Grid>
         <Border x:Name="ErrorPromptGrid" Visibility="Hidden" BorderThickness="1" BorderBrush="Black" Background="#E5000000" CornerRadius="75" Margin="99,127,35,178" Grid.ColumnSpan="2">
             <Grid>

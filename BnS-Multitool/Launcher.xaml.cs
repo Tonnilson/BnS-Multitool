@@ -18,7 +18,6 @@ using System.Collections.ObjectModel;
 using BnS_Multitool.Extensions;
 using static BnS_Multitool.Functions.FileExtraction;
 using static BnS_Multitool.Functions.Crypto;
-using OtpNet;
 
 namespace BnS_Multitool
 {
@@ -365,6 +364,9 @@ namespace BnS_Multitool
             return lang;
         }
 
+        // Test Callback for when a message is received when using stderr/stdout redirect & received event
+        void Pipe_DataReceived(object sender, DataReceivedEventArgs e) => Debug.WriteLine("Pipe Data: {0}", e.Data);
+
         private async Task LaunchNewGameClient()
         {
             try
@@ -389,26 +391,23 @@ namespace BnS_Multitool
                         languageFromSelection(), REGION_BOX.SelectedIndex, ((bool)NOTEXTURE_STREAMING.IsChecked) ? "-NOTEXTURESTREAMING " : "", ((bool)USE_ALL_CORES.IsChecked) ? "-USEALLAVAILABLECORES " : "", cmdParams.Text);
                 }
 
-                // We need to truncate the password down to 16 characters as NCSoft password limit is technically 16 and trims off everything after 16, only know of it being a problem in NA/EU not sure about TW
+                // We need to truncate the password down to 16 characters as NCWest password limit is technically 16 and trims off everything after 16, only know of it being a problem in NA/EU not sure about TW/JP
                 string pw = (Globals.BnS_Region)REGION_BOX.SelectedIndex != Globals.BnS_Region.TW ? ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD.Truncate(16) : ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PASSWORD;
 
                 // Setup environment variables for loginhelper
+                // Originally I was adding, this way should correct any errors if they were previously set on the process/system or multi-tool as environment variables from multi-tool are inherited to this
                 proc.StartInfo.UseShellExecute = false; // Required for setting environment variables to processes
-                proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_USERNAME", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].EMAIL);
-                proc.StartInfo.EnvironmentVariables.Add("BNS_PROFILE_PASSWORD", pw);
+                proc.StartInfo.EnvironmentVariables["BNS_PROFILE_USERNAME"] = ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].EMAIL;
+                proc.StartInfo.EnvironmentVariables["BNS_PROFILE_PASSWORD"] = pw;
 
                 // Check if the pincode is numeric, if it's not all numeric values then it's possibly the OTP secret key
-                // This was suggested / provided by dbnryanc92 on Github for TW specifically but I have adjusted it for all regions.
+                // This was suggested / provided by dbnryanc92 on Github for TW specifically, it has since been adjusted for login-helper native support
                 if (int.TryParse(ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE, out _))
-                    proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE);
+                    proc.StartInfo.EnvironmentVariables["BNS_PROFILE_PIN"] = ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE;
                 else if (!ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE.IsNullOrEmpty())
-                {
-                    Totp totp = new Totp(Base32Encoding.ToBytes(ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE));
-                    string otp = totp.ComputeTotp();
-                    proc.StartInfo.EnvironmentVariables.Add("BNS_PINCODE", otp);
-                }
+                    proc.StartInfo.EnvironmentVariables["BNS_PROFILE_OTP_SECRET"] = ACCOUNT_CONFIG.ACCOUNTS.Saved[ACCOUNT_SELECTED_INDEX].PINCODE;
 
-                proc.StartInfo.RedirectStandardOutput = true;
+                proc.StartInfo.RedirectStandardOutput = false; // If I ever implement debug log into MT its self this needs to be true
 
                 if (MainWindow.qol_xml.XPathSelectElements("config/options/option[@enable='1']").Count() > 0 || MainWindow.qol_xml.XPathSelectElement("config/gcd").Attribute("enable").Value == "1")
                     await QOL_PLUGIN_CHECK(); // Check version on launch
@@ -417,7 +416,12 @@ namespace BnS_Multitool
                 proc.Start();
                 if (ActiveClient == null)
                 {
-                    ActiveClientList.Add(new SESSION_LIST() { EMAIL = EMAIL, REGION = REGION_BOX.SelectedIndex, PROCESS = proc, DisplayName = string.Format("{0} - {1}", EMAIL, getSelectedRegion(REGION_BOX.SelectedIndex)) });
+                    ActiveClientList.Add(new SESSION_LIST() { 
+                        EMAIL = EMAIL,
+                        REGION = REGION_BOX.SelectedIndex,
+                        PROCESS = proc, 
+                        DisplayName = string.Format("{0} - {1}", EMAIL, ((Globals.BnS_Region)REGION_BOX.SelectedIndex).GetDescription()) 
+                    });
 
                     if (ActiveClientList.Count == 1 && !monitorProcesses.IsBusy)
                         monitorProcesses.RunWorkerAsync(); // Start our worker thread.
@@ -454,25 +458,6 @@ namespace BnS_Multitool
 
         EndFunction:
             GC.Collect();
-        }
-
-        private static string getSelectedRegion(int id)
-        {
-            string region;
-            switch (id)
-            {
-                case 1:
-                    region = "EU";
-                    break;
-                case 2:
-                    region = "TW";
-                    break;
-                default:
-                    region = "NA";
-                    break;
-            }
-
-            return region;
         }
 
         private async void LaunchGameClientClick(object sender, RoutedEventArgs e)
@@ -1314,5 +1299,8 @@ namespace BnS_Multitool
             gcd_node.Attribute("ignorePing").Value = item.SelectedIndex.ToString();
             MainWindow.qol_xml.Save(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
         }
+
+        private void OpenPincodeInfo(object sender, RoutedEventArgs e) => PinCodeInfoGrid.Visibility = Visibility.Visible;
+        private void ClosePincodeInfo(object sender, RoutedEventArgs e) => PinCodeInfoGrid.Visibility = Visibility.Collapsed;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
@@ -23,11 +24,17 @@ namespace BnS_Multitool
 
         public enum BnS_Region
         {
+            [Description("NA")]
             NA,
+            [Description("EU")]
             EU,
+            [Description("TW")]
             TW,
+            [Description("KR")]
             KR,
+            [Description("KR Test")]
             TEST,
+            [Description("NA/EU")] // Why?
             NAEU
         }
 

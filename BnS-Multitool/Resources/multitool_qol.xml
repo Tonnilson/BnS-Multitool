@@ -4,9 +4,10 @@
         <option name="useAutoBait" enable="0" />
         <option name="useItemCap" enable="0" />
         <option name="useMarketplace" enable="0" />
-        <option name="AutoCombat" enable="0" useRange="0" range="30"/>
+        <option name="AutoCombat" enable="0" useRange="0" range="30" TurnOffOnDeath="0" />
         <option name="useNoCameraLock" enable="0" />
         <option name="useNoWallRunStamina" enable="0" />
+		<option name="useWindowClipboard" enable="0" />
         <option name="useDebug" enable="0" />
     </options>
     <gcd enable="0">
