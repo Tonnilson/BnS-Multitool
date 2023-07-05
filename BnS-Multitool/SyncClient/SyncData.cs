@@ -69,7 +69,22 @@ namespace BnS_Multitool
             [Description("Astromancer")]
             AST = 13,
             [Description("Dualblade")]
-            DB = 14
+            DB = 14,
+            [Description("Bard")]
+            BRD = 15
+        }
+
+        public class Discord_Refresh
+        {
+            public string access_token { get; set; }
+            public string token_type { get; set; }
+            public string refresh_token { get; set; }
+        }
+        public class SocketReceivedData
+        {
+            public string type { get; set; }
+            public string access_token { get; set; }
+            public string refresh_token { get; set; }
         }
 
         public class XML_VIEW_RESPONSE
@@ -98,6 +113,12 @@ namespace BnS_Multitool
             public string Type { get; set; }
             public string FileName { get; set; }
             public int xml_id { get; set; }
+        }
+
+        public class REMOVE_XML_POST
+        {
+            public string Auth_Code { get; set; }
+            public int XML_ID { get; set; }
         }
 
         public class XMLS_RESPONSE

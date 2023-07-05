@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<patches>
+  <!-- 修復 TW版hellokitty 無法進入冰庫懸浮/無法接任問題 -->
+  <patch file="questdata.*.xml">
+    <select-node query="//table/quest/acquisition/@preceding-quest-check">
+      <remove />
+    </select-node>
+  </patch>
+</patches>

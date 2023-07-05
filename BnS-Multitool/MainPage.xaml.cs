@@ -80,8 +80,10 @@ namespace BnS_Multitool
             } catch (WebException ex)
             {
                 onlineJson = new MainWindow.ONLINE_VERSION_STRUCT();
-                onlineJson.CHANGELOG = new List<MainWindow.CHANGELOG_STRUCT>();
-                onlineJson.CHANGELOG.Add(new MainWindow.CHANGELOG_STRUCT() { VERSION = "ERROR", NOTES =  ex.Message});
+                onlineJson.CHANGELOG = new List<MainWindow.CHANGELOG_STRUCT>
+                {
+                    new MainWindow.CHANGELOG_STRUCT() { VERSION = "ERROR", NOTES = ex.Message }
+                };
             }
             finally
             {
@@ -119,7 +121,8 @@ namespace BnS_Multitool
             switch((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION)
             {
                 case Globals.BnS_Region.EU:
-                    regionIP = "18.194.180.254";
+                    //regionIP = "18.194.180.254";
+                    regionIP = "3.75.38.202";
                     break;
                 case Globals.BnS_Region.TW:
                     regionIP = "210.242.83.163";
@@ -128,7 +131,8 @@ namespace BnS_Multitool
                     regionIP = "222.122.231.3";
                     break;
                 default:
-                    regionIP = "184.73.104.101";
+                    //regionIP = "184.73.104.101";
+                    regionIP = "18.235.123.165";
                     break;
             }
 
@@ -163,7 +167,6 @@ namespace BnS_Multitool
                 pingWorker.ReportProgress(0);
                 Thread.Sleep(1000);
             }
-            Debug.WriteLine("Stopping worker");
         }
 
         private void pingProgress(object sender, ProgressChangedEventArgs e)

@@ -14,7 +14,9 @@ using System.Security.Principal;
 using System.Xml.Linq;
 using System.Globalization;
 using System.Runtime.InteropServices;
+using System.Xml.XPath;
 using BnS_Multitool.Functions;
+using System.Text.RegularExpressions;
 
 namespace BnS_Multitool
 {
@@ -56,6 +58,7 @@ namespace BnS_Multitool
         }
 
         public static XDocument qol_xml;
+        public static XDocument extended_xml;
         private void RestartAsAdmin()
         {
             var processInfo = new ProcessStartInfo(Assembly.GetExecutingAssembly().CodeBase)
@@ -82,8 +85,8 @@ namespace BnS_Multitool
         public MainWindow()
         {
             // Check if application is running as administrator, if not restart it as admin.
-            if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
-                RestartAsAdmin();
+            //if (!new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator))
+              //  RestartAsAdmin();
 
             // Check if Segoe MDL2 Assets or Segoe UI is installed, if not install and restart the application. I have no idea if this actually works lmao
             /*
@@ -117,6 +120,9 @@ namespace BnS_Multitool
             Logger.log.Info("Initialized Logger");
 
             InitializeComponent();
+
+            if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS")))
+                Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS"));
 
             CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name);
             if (ci.NumberFormat.NumberDecimalSeparator != ".")
@@ -171,6 +177,19 @@ namespace BnS_Multitool
                 // Load XML contents into memory
                 qol_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "multitool_qol.xml"));
 
+                Logger.log.Info("Loading extended_options.xml from Documents\\BnS");
+
+                // Check if extended_options.xml exists in Documents\BnS if not create it and write our default-template
+                if (!File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "extended_options.xml")))
+                {
+                    Logger.log.Info("extended_options.xml does not exist, writing file");
+                    using (StreamWriter output = File.CreateText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "extended_options.xml")))
+                        output.Write(Properties.Resources.extended_options);
+                }
+
+                // Load XML contents into memory
+                extended_xml = XDocument.Load(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "extended_options.xml"));
+
                 Logger.log.Info("Adjusting Tool-tip Service");
                 // Make the tooltip stay on screen till hover is over.
                 ToolTipService.ShowDurationProperty.OverrideMetadata(
@@ -181,9 +200,22 @@ namespace BnS_Multitool
                 if (string.IsNullOrEmpty(SyncConfig.AUTH_KEY))
                     SyncConfig.AUTH_KEY = "";
 
-                // Code that needs to be removed after next patch, meant to move directories for testers
-                if (Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync")))
-                    Globals.MoveDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "sync"), Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync"));
+                // Applying a needed fix for older patches.xml, eventually there will be multiple children with the same name so we need to change select-node to select-nodes
+                if (File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "patches.xml")))
+                {
+                    XDocument patches = XDocument.Load(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "patches.xml"));
+                    var child = patches.XPathSelectElement("//select-node[contains(@query, 'self-restraint-gauge-time')]");
+                    if (child != null)
+                    {
+                        child.Name = "select-nodes";
+
+                        child = patches.XPathSelectElement("//select-node[contains(@query, 'rapid-decompose-duration')]");
+                        if (child != null)
+                            child.Name = "select-nodes";
+
+                        patches.Save(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "patches.xml"));
+                    }
+                }
             }
             catch (Exception ex)
             {
@@ -244,6 +276,7 @@ namespace BnS_Multitool
             lstBoxNewGame.SelectedIndex = SystemConfig.SYS.NEW_GAME_OPTION;
             lstBoxLauncherX.SelectedIndex = SystemConfig.SYS.MINIMZE_ACTION;
             DeltaPatching_Checkbox.IsChecked = SystemConfig.SYS.DELTA_PATCHING == 1;
+            BuildRelay_Checkbox.IsChecked = SystemConfig.SYS.BUILD_RELAY;
             PingCheckTick.IsChecked = SystemConfig.SYS.PING_CHECK == 1;
             BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
 
@@ -336,7 +369,6 @@ namespace BnS_Multitool
         }
 
         private void CloseMenuItem_Click(object sender, RoutedEventArgs e) => this.Close();
-
         public static string FileVersion() =>
              FileVersionInfo.GetVersionInfo(Assembly.GetExecutingAssembly().Location).FileVersion;
 
@@ -427,6 +459,7 @@ namespace BnS_Multitool
             SystemConfig.SYS.NEW_GAME_OPTION = lstBoxNewGame.SelectedIndex;
             SystemConfig.SYS.MINIMZE_ACTION = lstBoxLauncherX.SelectedIndex;
             SystemConfig.SYS.DELTA_PATCHING = ((bool)DeltaPatching_Checkbox.IsChecked) ? 1 : 0;
+            SystemConfig.SYS.BUILD_RELAY = (bool)BuildRelay_Checkbox.IsChecked;
             SystemConfig.SYS.PING_CHECK = ((bool)PingCheckTick.IsChecked) ? 1 : 0;
             SystemConfig.SYS.BNS_DIR = BNS_LOCATION_BOX.Text;
 
@@ -440,6 +473,7 @@ namespace BnS_Multitool
             lstBoxNewGame.SelectedIndex = SystemConfig.SYS.NEW_GAME_OPTION;
             lstBoxLauncherX.SelectedIndex = SystemConfig.SYS.MINIMZE_ACTION;
             DeltaPatching_Checkbox.IsChecked = (SystemConfig.SYS.DELTA_PATCHING == 1) ? true : false;
+            BuildRelay_Checkbox.IsChecked = SystemConfig.SYS.BUILD_RELAY;
             PingCheckTick.IsChecked = (SystemConfig.SYS.PING_CHECK == 1) ? true : false;
             BNS_LOCATION_BOX.Text = SystemConfig.SYS.BNS_DIR;
 

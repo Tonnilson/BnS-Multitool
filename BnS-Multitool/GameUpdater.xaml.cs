@@ -32,6 +32,8 @@ namespace BnS_Multitool
         private List<BnSFileInfo> BnSInfoMap;
         private List<MultipartArchives> BnSMultiParts;
         private static List<string> errorLog;
+        System.Windows.Threading.DispatcherTimer dlTimer = new System.Windows.Threading.DispatcherTimer();
+        ProcessMonitoring.NetworkPerformanceReporter Network = null;
 
         public class BnSFileInfo
         {
@@ -66,7 +68,13 @@ namespace BnS_Multitool
             patchWorker.DoWork += new DoWorkEventHandler(PatchGameWorker);
             patchWorker.RunWorkerCompleted += new RunWorkerCompletedEventHandler(PatchGameFinished);
             ServicePointManager.DefaultConnectionLimit = 50; //Raise the concurrent connection limit for WebClient
+
+            dlTimer.Tick += new EventHandler(DownloadSpeed_Tick);
+            dlTimer.Interval = TimeSpan.FromSeconds(1);
         }
+
+        private void DownloadSpeed_Tick(object sender, EventArgs e) =>
+            Dispatchers.textBlock(ProgressBlock, string.Format("Download Speed: {0}/s ", SizeSuffix(Network.GetNetworkPerformanceData().BytesReceived, 2)));
 
         private void WriteError(string msg) => this.ErrorLog.Dispatcher.BeginInvoke(new Action(() => { ErrorLog.AppendText(msg + "\r"); ErrorLog.ScrollToEnd(); }));
 
@@ -141,8 +149,8 @@ namespace BnS_Multitool
                 else
                     targetVersion = onlineVersion;
 
-                string FileInfoURL = String.Format(@"{0}{1}/Patch/{2}_{1}.dat.zip", BASE_URL, targetVersion, Path.GetFileNameWithoutExtension(FileInfoName));
-                string PatchInfoURL = String.Format(@"{0}{1}/Patch/{2}_{1}.dat.zip", BASE_URL, targetVersion, Path.GetFileNameWithoutExtension(PatchInfoName));
+                string FileInfoURL = string.Format(@"{0}{1}/Patch/{2}_{1}.dat.zip", BASE_URL, targetVersion, Path.GetFileNameWithoutExtension(FileInfoName));
+                string PatchInfoURL = string.Format(@"{0}{1}/Patch/{2}_{1}.dat.zip", BASE_URL, targetVersion, Path.GetFileNameWithoutExtension(PatchInfoName));
 
                 totalBytes = 0L;
                 currentBytes = 0L;
@@ -158,11 +166,13 @@ namespace BnS_Multitool
                 DltPLbl.Dispatcher.BeginInvoke(new Action(() => { DltPLbl.Visibility = (deltaPatch) ? Visibility.Visible : Visibility.Hidden; }));
 
                 if (!RemoteFileExists(PatchInfoURL))
-                    throw new Exception(String.Format("PatchFileInfo for build #{0} could not be reached", onlineVersion));
+                    throw new Exception(string.Format("PatchFileInfo for build #{0} could not be reached", onlineVersion));
 
                 if (!Directory.Exists(PatchDirectory))
                     Directory.CreateDirectory(PatchDirectory);
 
+                Logger.log.Info("PatchInfoUrl: {0}", PatchInfoURL);
+                Logger.log.Info("Path: {0}", Path.Combine(PatchDirectory, PatchInfoName + ".zip"));
                 Dispatchers.textBlock(ProgressBlock, "Retrieving " + PatchInfoName);
                 if (!DownloadContents(PatchInfoURL, Path.Combine(PatchDirectory, PatchInfoName + ".zip"), false))
                     throw new Exception("Failed to download " + PatchInfoName);
@@ -264,6 +274,10 @@ namespace BnS_Multitool
                 Dispatchers.labelContent(PatchingLabel, "Downloading...");
                 Thread.Sleep(2000); //Create slack for progress bar to reset
 
+                // Create and start download speed label tick
+                Network = ProcessMonitoring.NetworkPerformanceReporter.Create();
+                dlTimer.IsEnabled = true;
+                dlTimer.Start();
                 // Adding an extra thread on download just cause the download server limits speeds on each file so we'll get more bang for our buck by increasing download tasks
                 Parallel.ForEach<BnSFileInfo>(BnSInfoMap, new ParallelOptions { MaxDegreeOfParallelism = threadCount + 1 }, delegate (BnSFileInfo file)
                 {
@@ -302,7 +316,7 @@ namespace BnS_Multitool
                         if (!file.path.EndsWith("zip"))
                         {
                             string FileName = Path.GetFileNameWithoutExtension(file.path);
-                            int curIndex = partArchives.FindIndex(x => x.File == FileName);
+                            int curIndex = partArchives.FindIndex(x => x.File == FileName && x.Directory == Path.GetDirectoryName(file.path));
                             try
                             {
                                 if (curIndex == -1)
@@ -328,6 +342,9 @@ namespace BnS_Multitool
                     FilesProcessed((int)((double)processedFiles / totalFiles * 100));
                 });
 
+                dlTimer.Stop();
+                Network.Dispose();
+                Dispatchers.textBlock(ProgressBlock, "Download Complete");
                 Thread.Sleep(2000);
                 if (partArchives.Count <= 0) goto PatchNormalFiles;
 
@@ -493,6 +510,7 @@ namespace BnS_Multitool
             catch (Exception ex)
             {
                 errorLog.Add(ex.Message);
+                Logger.log.Error("{0}\n{1}", ex.Message, ex.StackTrace);
             }
 
             errorLog.ForEach(er => WriteError(er));
@@ -524,8 +542,12 @@ namespace BnS_Multitool
             if (!Directory.Exists(Path.GetDirectoryName(path)))
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
 
+            Logger.log.Info("url: {0}", url);
+            Logger.log.Info("path: {0}", path);
+
             long contentLength = 0L;
             int retries = 0;
+            if (retry) retries = 5;
         DownloadStart:
             if (retries >= 6) goto FailedCount;
             retries++;
@@ -596,7 +618,7 @@ namespace BnS_Multitool
             // Uncomment this if forcing a specific patch, note that patches not <> than 2 will force delta so turn off delta patching if downgrading a patch
             //onlineVersion = "9";
 
-            localVersionLabel.Content = localVersion.ToString();
+            localVersionLabel.Content = localVersion;
             currentVersionLabel.Content = string.Format("{0}", (onlineVersion == "") ? "Error" : onlineVersion);
 
             //Redundant..? Doing it cause fuck it.

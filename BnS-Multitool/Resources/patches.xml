@@ -34,13 +34,13 @@
       </select-node>
       <select-node query="./group[@name='inventory']">
         <!-- instantly open chests -->
-        <select-node query="./option[@name='self-restraint-gauge-time']/@value">
+        <select-nodes query="./option[@name='self-restraint-gauge-time']/@value">
           <set-value value="0" />
-        </select-node>
+        </select-nodes>
         <!-- instant salvaging -->
-        <select-node query="./option[@name='rapid-decompose-duration']/@value">
+        <select-nodes query="./option[@name='rapid-decompose-duration']/@value">
           <set-value value="0" />
-        </select-node>
+        </select-nodes>
       </select-node>
       <!-- pvp: show names of silver and bronze players -->
       <select-node query="./group[@name='duel']/option[@name='hidden-pc-name-rating']/@value">

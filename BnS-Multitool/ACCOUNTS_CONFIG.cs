@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
 using System.Dynamic;
@@ -27,7 +24,6 @@ namespace BnS_Multitool
                     SELECT_LAST_CHAR = 0,
                     AUTPATCH_QOL = 0,
                     MEMORY_CLEANER = 0,
-                    ADDITIONAL_PARAMS = "",
                     LAST_USED_ACCOUNT = -1,
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
                 };
@@ -53,7 +49,7 @@ namespace BnS_Multitool
             }
         }
 
-        public static void appendChangesToConfig()
+        public static void Save()
         {
             string json = JsonConvert.SerializeObject(ACCOUNTS, Formatting.Indented);
             Globals.WriteAllText(CONFIG_FILE, json);
@@ -77,7 +73,6 @@ namespace BnS_Multitool
             public int SELECT_LAST_CHAR { get; set; }
             public int MEMORY_CLEANER { get; set; }
             public int AUTPATCH_QOL { get; set; }
-            public string ADDITIONAL_PARAMS { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
             public int LAST_USED_ACCOUNT { get; set; }
         }
@@ -87,6 +82,8 @@ namespace BnS_Multitool
             public string EMAIL { get; set; }
             public string PASSWORD { get; set; }
             public string PINCODE { get; set; }
+            public string PARAMS { get; set; }
+            public string ENVARS { get; set; }
         }
     }
 }

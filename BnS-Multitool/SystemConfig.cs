@@ -18,15 +18,18 @@ namespace BnS_Multitool
                 {
                     VERSION = MainWindow.FileVersion(),
                     FINGERPRINT = null,
+                    BNSPATCH_DIRECTORY = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS"),
                     ADDITIONAL_EFFECTS = 0,
+                    AUTO_UPDATE_PLUGINS = false,
                     BNS_DIR = "",
                     DELTA_PATCHING = 1,
+                    BUILD_RELAY = false,
                     THEME = 0,
                     NEW_GAME_OPTION = 0,
-                    UPDATER_THREADS = 0,
+                    UPDATER_THREADS = 1,
                     MINIMZE_ACTION = 1,
                     HK_Installed = false,
-                    PATCH_413 = true,
+                    PATCH_424 = false,
                     PING_CHECK = 1,
                     CLASS = new List<BNS_CLASS_STRUCT>
                     {
@@ -133,99 +136,8 @@ namespace BnS_Multitool
                     if (SYS.CLASS == null)
                         SYS.CLASS = new List<BNS_CLASS_STRUCT>() { };
 
-                    if(!SYS.PATCH_413)
-                    {
-                        changesToConfig = true;
-                        SYS.CLASS = new List<BNS_CLASS_STRUCT>
-                        {
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Assassin",
-                                EFFECTS = new string[] { "Mod_Remove_Assassin_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Assassin_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Summoner",
-                                EFFECTS = new string[] { "Mod_Remove_Summoner_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Summoner_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "KungFuMaster",
-                                EFFECTS = new string[] { "Mod_Remove_KungfuFighter_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_KungfuFighter_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Gunslinger",
-                                EFFECTS = new string[] { "Mod_Remove_Shooter_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Shooter_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Destroyer",
-                                EFFECTS = new string[] { "Mod_Remove_Destroyer_05_SF_p.pak"},
-                                ANIMATIONS = new string[] { "Mod_Remove_Destroyer_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Forcemaster",
-                                EFFECTS = new string[] { "Mod_Remove_ForceMaster_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_ForceMaster_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Soulfighter",
-                                EFFECTS = new string[] { "Mod_Remove_SoulFighter_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_SoulFighter_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Archer",
-                                EFFECTS = new string[] { "Mod_Remove_Archer_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Archer_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Blademaster",
-                                EFFECTS = new string[] { "Mod_Remove_Fencer_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Fencer_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Bladedancer",
-                                EFFECTS = new string[] { "Mod_Remove_SwordMaster_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_SwordMaster_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Warlock",
-                                EFFECTS = new string[] { "Mod_Remove_Warlock_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Warlock_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Warden",
-                                EFFECTS = new string[] { "Mod_Remove_Warrior_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Warrior_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Astromancer",
-                                EFFECTS = new string[] { "Mod_Remove_Thunderder_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_Thunderer_Animset_p.pak" }
-                            },
-                            new BNS_CLASS_STRUCT()
-                            {
-                                CLASS = "Dualblade",
-                                EFFECTS = new string[] { "Mod_Remove_Dualblade_05_SF_p.pak" },
-                                ANIMATIONS = new string[] { "Mod_Remove_DualBlade_Animset_p.pak", "Mod_Remove_DualBlader_Animset_p.pak" }
-                            }
-                        };
-                        Effects.ExtractPakFiles();
-                        SYS.PATCH_413 = true;
-                    }
+                    if(SYS.BNSPATCH_DIRECTORY == null)
+                        SYS.BNSPATCH_DIRECTORY = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS");
                     
                     if(changesToConfig)
                         Save();
@@ -262,17 +174,20 @@ namespace BnS_Multitool
         public struct SYSConfig
         {
             public string VERSION { get; set; }
+            public string BNSPATCH_DIRECTORY { get; set; }
             public string FINGERPRINT { get; set; }
             public bool HK_Installed { get; set; }
             public int THEME { get; set; }
             public int ADDITIONAL_EFFECTS { get; set; }
+            public bool AUTO_UPDATE_PLUGINS { get; set; }
             public int UPDATER_THREADS { get; set; }
             public int NEW_GAME_OPTION { get; set; }
             public int MINIMZE_ACTION { get; set; }
             public int PING_CHECK { get; set; }
             public int DELTA_PATCHING { get; set; }
+            public bool BUILD_RELAY { get; set; }
             public string BNS_DIR { get; set; }
-            public bool PATCH_413 { get; set; }
+            public bool PATCH_424 { get; set; }
             public List<BNS_CLASS_STRUCT> CLASS { get; set; }
         }
 

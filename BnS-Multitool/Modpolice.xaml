@@ -17,6 +17,17 @@
         </Grid>
         <Grid x:Name="MainGrid" Visibility="Visible">
             <Button Style="{StaticResource MainButtonStyle}" x:Name="openbin64" HorizontalContentAlignment="Left" VerticalContentAlignment="Center"  Margin="539,445,10,10" Content="Game Directory" FontFamily="Arial" FontWeight="Bold" Click="openBinLocation"/>
+            <CheckBox x:Name="AutoPluginUpdates" Content="Auto Update Plugins" Background="White" Foreground="White" Click="AutoPluginClicked" FontFamily="Arial" FontWeight="Bold" Margin="357,452,146,16">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Auto Plugin Updates</TextBlock>
+                        <TextBlock>
+                                       Will automatically check and download all installed plugins when launching a game for the first time.
+                        </TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
             <Label HorizontalContentAlignment="Center" Background="#FF2D3F5D" Margin="10,10,350,448" Content="Available Plugins" FontFamily="Arial Black" FontSize="20" Foreground="White"/>
             <ListView x:Name="AvailablePluginsView" Background="#FF1E2021"
                       ScrollViewer.VerticalScrollBarVisibility="Auto" 
@@ -70,9 +81,6 @@
                     </StackPanel>
                 </StackPanel>
             </Grid>
-        </Grid>
-        <Grid x:Name="HKUpdater" Visibility="Visible">
-            
         </Grid>
     </Grid>
 </Page>

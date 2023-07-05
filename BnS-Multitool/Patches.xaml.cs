@@ -19,7 +19,7 @@ namespace BnS_Multitool
     public partial class Patches : Page
     {
         public static BackgroundWorker bgWorker = new BackgroundWorker();
-        public static string BNS_DIR = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),"BnS");
+        public static string BNS_DIR = SystemConfig.SYS.BNSPATCH_DIRECTORY;
         public static string MANAGER_DIR = Path.Combine(BNS_DIR, "manager");
         public static string ADDON_DIR = Path.Combine(BNS_DIR, "addons");
         public static string PATCHES_DIR = Path.Combine(BNS_DIR, "patches");
@@ -57,6 +57,8 @@ namespace BnS_Multitool
 
             if (!Directory.Exists(Path.Combine(MANAGER_DIR, "sync")))
                 Directory.CreateDirectory(Path.Combine(MANAGER_DIR, "sync"));
+
+            BNSPATCH_PATH.Text = SystemConfig.SYS.BNSPATCH_DIRECTORY;
         }
 
         private async void Page_Loaded(object sender, RoutedEventArgs e) =>
@@ -285,5 +287,42 @@ namespace BnS_Multitool
 
         private void OpenSyncPage(object sender, RoutedEventArgs e) =>
             MainWindow.mainWindow.SetCurrentPage("Sync");
+
+        private void BNSPatch_Browse(object sender, RoutedEventArgs e)
+        {
+            using (var FOLDER = new System.Windows.Forms.FolderBrowserDialog())
+            {
+                System.Windows.Forms.DialogResult RESULT = FOLDER.ShowDialog();
+
+                if (RESULT == System.Windows.Forms.DialogResult.OK && !string.IsNullOrWhiteSpace(FOLDER.SelectedPath))
+                    BNSPATCH_PATH.Text = FOLDER.SelectedPath + ((FOLDER.SelectedPath.Last() != '\\') ? "\\" : "");
+            }
+        }
+
+        private async void SaveSettings(object sender, RoutedEventArgs e)
+        {
+            SystemConfig.SYS.BNSPATCH_DIRECTORY = BNSPATCH_PATH.Text;
+            SystemConfig.Save();
+            BNSPatch_Settings.Visibility = Visibility.Collapsed;
+            BNS_DIR = BNSPATCH_PATH.Text;
+            MANAGER_DIR = Path.Combine(BNS_DIR, "manager");
+            ADDON_DIR = Path.Combine(BNS_DIR, "addons");
+            PATCHES_DIR = Path.Combine(BNS_DIR, "patches");
+
+            if(!File.Exists(Path.Combine(BNS_DIR, "patches.xml")))
+                File.WriteAllText(Path.Combine(BNS_DIR, "patches.xml"), Properties.Resources.patches);
+
+            if(!Directory.Exists(MANAGER_DIR))
+                Directory.CreateDirectory(MANAGER_DIR);
+            if (!File.Exists(PATCHES_DIR))
+                Directory.CreateDirectory(PATCHES_DIR);
+            if (!File.Exists(ADDON_DIR))
+                Directory.CreateDirectory(ADDON_DIR);
+
+            await UpdateListing();
+        }
+
+        private void SettingsCancel(object sender, RoutedEventArgs e) => BNSPatch_Settings.Visibility = Visibility.Collapsed;
+        private void Open_BNSPatchSettings(object sender, RoutedEventArgs e) => BNSPatch_Settings.Visibility = Visibility.Visible;
     }
 }

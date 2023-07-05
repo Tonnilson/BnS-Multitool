@@ -110,6 +110,59 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to 901679848022474752.
+        /// </summary>
+        internal static string discord_clientId {
+            get {
+                return ResourceManager.GetString("discord_clientId", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Gq4mVqoDBrWN7oKV0jLzqtOMzsj65Bwk.
+        /// </summary>
+        internal static string discord_secret {
+            get {
+                return ResourceManager.GetString("discord_secret", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;config&gt;
+        ///    &lt;options&gt;
+        ///        &lt;!-- Reload Config Keybind [CTRL + ALT + 9]--&gt;
+        ///        &lt;option name=&quot;reloadKey&quot; keyCode=&quot;39&quot; bCtrl=&quot;1&quot; bShift=&quot;0&quot; bAlt=&quot;1&quot; /&gt;
+        ///        &lt;!-- Profile 1 Keybind [CTRL + ALT + 1]--&gt;
+        ///        &lt;option name=&quot;profile_1&quot; keyCode=&quot;31&quot; bCtrl=&quot;1&quot; bShift=&quot;0&quot; bAlt=&quot;1&quot; /&gt;
+        ///        &lt;!-- Profile 2 Keybind [CTRL + ALT + 2]--&gt;
+        ///        &lt;option name=&quot;profile_2&quot; keyCode=&quot;32&quot; bCtrl=&quot;1&quot; bShift=&quot;0&quot; bAlt=&quot;1&quot; /&gt;
+        ///        &lt;!-- Profile 3 Keybind [CTRL + ALT + 3] [rest of string was truncated]&quot;;.
+        /// </summary>
+        internal static string extended_options {
+            get {
+                return ResourceManager.GetString("extended_options", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+        ///&lt;patches&gt;
+        ///  &lt;!-- 修復 TW版hellokitty 無法進入冰庫懸浮/無法接任問題 --&gt;
+        ///  &lt;patch file=&quot;questdata.*.xml&quot;&gt;
+        ///    &lt;select-node query=&quot;//table/quest/acquisition/@preceding-quest-check&quot;&gt;
+        ///      &lt;remove /&gt;
+        ///    &lt;/select-node&gt;
+        ///  &lt;/patch&gt;
+        ///&lt;/patches&gt;.
+        /// </summary>
+        internal static string hellokitty_tw_FixQuest {
+            get {
+                return ResourceManager.GetString("hellokitty_tw_FixQuest", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to # target hp
         ///UI.Gauge.CurMax
         ///
@@ -154,14 +207,11 @@ namespace BnS_Multitool.Properties {
         ///        &lt;option name=&quot;useAutoBait&quot; enable=&quot;0&quot; /&gt;
         ///        &lt;option name=&quot;useItemCap&quot; enable=&quot;0&quot; /&gt;
         ///        &lt;option name=&quot;useMarketplace&quot; enable=&quot;0&quot; /&gt;
-        ///        &lt;option name=&quot;AutoCombat&quot; enable=&quot;0&quot; useRange=&quot;0&quot; range=&quot;30&quot;/&gt;
+        ///        &lt;option name=&quot;AutoCombat&quot; enable=&quot;0&quot; useRange=&quot;0&quot; range=&quot;30&quot; TurnOffOnDeath=&quot;0&quot; /&gt;
         ///        &lt;option name=&quot;useNoCameraLock&quot; enable=&quot;0&quot; /&gt;
         ///        &lt;option name=&quot;useNoWallRunStamina&quot; enable=&quot;0&quot; /&gt;
-        ///        &lt;option name=&quot;useDebug&quot; enable=&quot;0&quot; /&gt;
-        ///    &lt;/options&gt;
-        ///    &lt;gcd enable=&quot;0&quot;&gt;
-        ///    &lt;/gcd&gt;
-        ///&lt;/config&gt;.
+        ///		&lt;option name=&quot;useWindowClipboard&quot; enable=&quot;0&quot; /&gt;
+        ///        &lt;option name=&quot;useDebug&quot; enable=&quot; [rest of string was truncated]&quot;;.
         /// </summary>
         internal static string multitool_qol {
             get {

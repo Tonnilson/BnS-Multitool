@@ -17,6 +17,8 @@ namespace BnS_Multitool
 {
     public class SyncClient
     {
+        public string PublishXML_URL { get { return "http://sync.bns.tools/publish/?action=publish"; } }
+        public string RemoveXML_URL { get { return "http://sync.bns.tools/removeXML"; } }
         public string Auth_Token { get; set; }
         private bool authorized { get; set; }
 
@@ -156,6 +158,35 @@ namespace BnS_Multitool
             return response;
         }
 
+        public async Task<string> PostDataToServer(string url, string postData)
+        {
+            HttpWebRequest client = (HttpWebRequest)WebRequest.Create(url);
+            client.Method = "POST";
+            client.ContentType = "application/json";
+            client.Accept = client.ContentType;
+            string response = "";
+
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(client.GetRequestStream()))
+                {
+                    await sw.WriteLineAsync(postData);
+                    sw.Close();
+
+                    var httpResponse = (HttpWebResponse)client.GetResponse();
+                    using (StreamReader sr = new StreamReader(httpResponse.GetResponseStream()))
+                        response = await sr.ReadToEndAsync();
+                }
+            }
+            catch (WebException we)
+            {
+                Logger.log.Error("Synce::PublishXMLRequest::{0}\n{1}", we.ToString(), we.StackTrace);
+                response = ((HttpWebResponse)we.Response).StatusDescription;
+            }
+
+            return response;
+        }
+
         /*
         ⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⣀⠠⠒⠄⣰⣾⣿⣿⣿⠉⠐⠠⠤⢄⠄⠄⠄⠄⠄⠄
         ⠄⠄⠄⠄⠄⠄⣠⠔⠊⡽⠄⠄⠄⠄⢸⣿⣿⣿⣿⠃⠄⠄⠄⠄⣷⣦⡄⠄⠄⠄
@@ -180,26 +211,26 @@ namespace BnS_Multitool
             if(this.Discord == null && SyncConfig.Synced != null)
             {
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID)) return false;
-                if (!System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type))) return false;
+                if (!System.IO.File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type))) return false;
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID && x.Hash == xml.Hash)) return false;
-                if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                if (MD5_File(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
             } else if (SyncConfig.Synced != null && xml.Discord_id != this.Discord.id)
             {
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID)) return false;
-                if (!System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type))) return false;
+                if (!System.IO.File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type))) return false;
                 if (!SyncConfig.Synced.Any(x => x.ID == xml.ID && x.Hash == xml.Hash)) return false;
-                if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                if (MD5_File(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync",xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
             } else if (this.Discord != null && xml.Discord_id == this.Discord.id)
             {
-                bool exists = System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)) ||
-                    System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type));
+                bool exists = System.IO.File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", xml.Name + "." + xml.Type)) ||
+                    System.IO.File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type));
                 if (!exists) return false;
                 else
                 {
-                    if (System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)))
-                        if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", xml.Name + "." + xml.Type)) != xml.Hash) return false;
-                    if(System.IO.File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)))
-                        if (MD5_File(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                    if (System.IO.File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", xml.Name + "." + xml.Type)))
+                        if (MD5_File(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", xml.Name + "." + xml.Type)) != xml.Hash) return false;
+                    if(System.IO.File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)))
+                        if (MD5_File(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)) != xml.Hash) return false;
                 }
             } else if (SyncConfig.Synced == null && this.Discord != null && xml.Discord_id != this.Discord.id) return false;
             return true;
@@ -320,6 +351,58 @@ namespace BnS_Multitool
             this.Discord = JsonConvert.DeserializeObject<DISCORD_JSON_RESPONSE>(responseString);
             this.authorized = !this.Discord.username.IsNullOrEmpty();
             return Task.CompletedTask;
+        }
+
+        public async Task<SyncData.Discord_Refresh> DiscordRefreshToken()
+        {
+            if (SyncConfig.AUTH_REFRESH == null)
+                return null;
+
+            NameValueCollection nvc = new NameValueCollection();
+            nvc.Add("client_id", Properties.Resources.discord_clientId);
+            nvc.Add("client_secret", Properties.Resources.discord_secret);
+            nvc.Add("refresh_token", SyncConfig.AUTH_REFRESH);
+            nvc.Add("grant_type", "refresh_token");
+
+            string postData = http_build_query(nvc);
+
+            HttpWebRequest req = (HttpWebRequest)WebRequest.Create("https://discord.com/api/oauth2/token");
+            req.Method = "POST";
+            req.ContentType = "application/x-www-form-urlencoded";
+            req.Accept = "application/json";
+            req.Headers.Add("authorization", "Bearer ");
+            string responseMessage = "";
+
+            try
+            {
+                using (StreamWriter sw = new StreamWriter(req.GetRequestStream()))
+                {
+                    await sw.WriteAsync(postData);
+                    sw.Close();
+                    var httpResponse = (HttpWebResponse)req.GetResponse();
+                    using (StreamReader sr = new StreamReader(httpResponse.GetResponseStream()))
+                        responseMessage = await sr.ReadToEndAsync();
+                }
+
+                return JsonConvert.DeserializeObject<SyncData.Discord_Refresh>(responseMessage);
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public string http_build_query(NameValueCollection nvc)
+        {
+            string postData = "";
+            foreach (string key in nvc)
+            {
+                if (postData == string.Empty)
+                    postData += string.Format("{0}={1}", key, nvc.Get(key));
+                else
+                    postData += string.Format("&{0}={1}", key, nvc.Get(key));
+            }
+            return postData;
         }
     }
 }

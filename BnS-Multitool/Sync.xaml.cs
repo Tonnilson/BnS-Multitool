@@ -18,7 +18,9 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Windows.Documents;
 using System.Windows.Input;
+using WatsonWebsocket;
 using static BnS_Multitool.Functions.Crypto;
+using System.Text;
 
 namespace BnS_Multitool
 {
@@ -40,6 +42,7 @@ namespace BnS_Multitool
         private string Editing_FileExt = "";
         private static List<SyncData.XML_VIEW_RESPONSE> DOWNLOADED_XMLS = new List<SyncData.XML_VIEW_RESPONSE>();
         private TaskCompletionSource<bool> AuthorizationCompleted = new TaskCompletionSource<bool>();
+        private WatsonWsServer WS_Server = new WatsonWsServer("localhost", 42069, false);
 
         private ObservableCollection<XML_View_List> _XmlViewCollection = new ObservableCollection<XML_View_List>();
         public ObservableCollection<XML_View_List> Sync_Available_XMLS { get { return _XmlViewCollection; } }
@@ -60,11 +63,33 @@ namespace BnS_Multitool
             public string Description { get; set; }
             public string SyncButton { get; set; }
             public string FileName { get; set; }
+            public Visibility CanRemove { get; set; }
         }
 
         public Sync()
         {
             InitializeComponent();
+            WS_Server.MessageReceived += WS_Server_MessageReceived;
+        }
+
+        private void WS_Server_MessageReceived(object sender, MessageReceivedEventArgs e)
+        {
+            try
+            {
+                var packet = JsonConvert.DeserializeObject<SyncData.SocketReceivedData>(Encoding.UTF8.GetString(e.Data));
+                if (packet == null) throw new Exception();
+                SyncConfig.AUTH_REFRESH = packet.refresh_token;
+                SyncConfig.AUTH_KEY = packet.access_token;
+                AuthorizationCompleted.SetResult(true);
+                MainWindow.mainWindow.Activate();
+
+            } catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+            } finally
+            {
+                WS_Server.Stop();
+            }
         }
 
         private async Task SetupAuthKey()
@@ -73,7 +98,14 @@ namespace BnS_Multitool
             await AuthorizationCompleted.Task;
             if (!SkipAuth)
             {
-                SyncConfig.AUTH_KEY = AuthTokenBox.Password;
+                if (!AuthTokenBox.Password.IsNullOrEmpty())
+                {
+                    SyncConfig.AUTH_REFRESH = AuthTokenBox.Password.Split(';')[1];
+                    SyncConfig.AUTH_KEY = AuthTokenBox.Password.Split(';')[0];
+                    if(WS_Server.IsListening)
+                        WS_Server.Stop(); // We need to stop this
+                }
+
                 _sync.Auth_Token = SyncConfig.AUTH_KEY;
                 await AuthorizeDiscord();
             }
@@ -95,7 +127,26 @@ namespace BnS_Multitool
 
                 if (!SyncConfig.AUTH_KEY.IsNullOrEmpty())
                 {
-                    await _sync.AuthDiscordAsync();
+                    try
+                    {
+                        await _sync.AuthDiscordAsync();
+                    } catch
+                    {
+                        if(SyncConfig.AUTH_REFRESH.IsNullOrEmpty())
+                            throw new Exception("Failed to authorize with token, generate a new one.");
+
+                        var refresh = await _sync.DiscordRefreshToken();
+                        if(refresh == null)
+                            throw new Exception("Failed to authorize with token, generate a new one.");
+
+                        if(refresh.access_token.IsNullOrEmpty())
+                            throw new Exception("Failed to authorize with token, generate a new one.");
+
+                        SyncConfig.AUTH_REFRESH = refresh.refresh_token;
+                        SyncConfig.AUTH_KEY = refresh.access_token;
+                        _sync.Auth_Token = refresh.access_token;
+                        await _sync.AuthDiscordAsync();
+                    }
                     // User's discord identity was authorized, change display elements.
                     if (_sync.Authorized)
                     {
@@ -113,7 +164,7 @@ namespace BnS_Multitool
             catch (Exception ex)
             {
                 _splash.ProgressText = ex.Message;
-                await Task.Delay(5000);
+                await Task.Delay(3000);
             }
             ProgressPanel.Children.Clear();
             ((Storyboard)FindResource("FadeOut")).Begin(ProgressGrid);
@@ -233,7 +284,7 @@ namespace BnS_Multitool
                 });
 
                 // Submit a request for a security token to upload, Tokens last only 10 minutes
-                responseData = await _sync.PublishXMLRequest(postData);
+                responseData = await _sync.PostDataToServer(_sync.PublishXML_URL, postData);
                 var response = JObject.Parse(responseData);
                 //Debug.WriteLine(responseData);
 
@@ -279,7 +330,7 @@ namespace BnS_Multitool
                 Filter = Editing_FileExt.IsNullOrEmpty() ? "XML Files (*.xml)|*.xml|Patch Files (*.patch)|*.patch" : string.Format("Patch Files(.*)|{0}.{1}",Editing_FileName, Editing_FileExt),
                 DefaultExt = Editing_FileExt.IsNullOrEmpty() ? ".xml" : "." + Editing_FileExt,
                 FileName = Editing_FileName.IsNullOrEmpty() ? string.Empty : string.Format("{0}.{1}",Editing_FileName, Editing_FileExt),
-                InitialDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager"),
+                InitialDirectory = Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager"),
                 AddExtension = true
             };
             bool? result = dialog.ShowDialog();
@@ -298,7 +349,12 @@ namespace BnS_Multitool
         }
 
         private void UseAuthorizationToken(object sender, RoutedEventArgs e) => AuthorizationCompleted.SetResult(true);
-        private void GetAuthToken(object sender, RoutedEventArgs e) => Process.Start("http://sync.bns.tools/discord/?login");
+        private void GetAuthToken(object sender, RoutedEventArgs e)
+        {
+            Process.Start("http://sync.bns.tools/discord_auth/?login");
+            //Process.Start("http://multitool.tonic.pw/discord/authorize.php?login"); // This is a test version for the websocket
+            WS_Server.Start();
+        }
 
         private async void RestartSync(object sender, RoutedEventArgs e)
         {
@@ -347,12 +403,13 @@ namespace BnS_Multitool
                     Brush color;
                     string syncButtonText = '\uE1DF'.ToString();
                     bool isSynced = SyncConfig.Synced != null && _sync.IsSynced(xml);
-
+                    Visibility owner = Visibility.Hidden;
                     if (_sync.Discord != null && xml.Discord_id == _sync.Discord.id)
                     {
                         isSynced = false;
                         syncButtonText = '\uE104'.ToString(); // Pencil Icon Segoe UI Symbol
                         color = Brushes.Orange;
+                        owner = Visibility.Visible;
                     }
                     else if (isSynced && SyncConfig.Synced != null)
                         color = Brushes.Green;
@@ -375,7 +432,8 @@ namespace BnS_Multitool
                         Downloads = xml.Downloads,
                         Description = xml.Description,
                         SyncButton = syncButtonText,
-                        FileName = xml.Name
+                        FileName = xml.Name,
+                        CanRemove = owner
                     });
                 }
 
@@ -497,13 +555,13 @@ namespace BnS_Multitool
 
                 SyncConfig.Save();
 
-                if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString())))
-                    Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString()));
+                if (!Directory.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString())))
+                    Directory.CreateDirectory(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString()));
 
                 using (GZipWebClient client = new GZipWebClient())
                     await client.DownloadFileTaskAsync(
                         string.Format("http://sync.bns.tools/xml_data/{0}/{1}.{2}", xml.Discord_id, xml.Name, xml.Type),
-                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)
+                        Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type)
                         );
 
                 if (_sync.Discord == null)
@@ -601,12 +659,12 @@ namespace BnS_Multitool
                     if (!_sync.IsSynced(xml_data))
                     {
                         _splash.ProgressText = string.Format("Updating {0}", xml.Name);
-                        if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString())))
-                            Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString()));
+                        if (!Directory.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString())))
+                            Directory.CreateDirectory(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString()));
 
                         var dataResult = await client.GetAsync(string.Format("http://sync.bns.tools/xml_data/{0}/{1}.{2}", xml.Discord_id, xml.Name, xml.Type));
                         using (var stream = await dataResult.Content.ReadAsStreamAsync())
-                        using (var filestream = new FileStream(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type), FileMode.Create))
+                        using (var filestream = new FileStream(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), xml.Name + "." + xml.Type), FileMode.Create))
                             await stream.CopyToAsync(filestream);
 
                         // Update synced entry with data from server
@@ -736,12 +794,14 @@ namespace BnS_Multitool
                 Brush color;
                 bool isSynced = SyncConfig.Synced != null && _sync.IsSynced(xml);
                 string syncButtonText = '\uE1DF'.ToString();
+                Visibility owner = Visibility.Hidden;
 
                 if (_sync.Discord != null && xml.Discord_id == _sync.Discord.id)
                 {
                     isSynced = false;
                     syncButtonText = '\uE104'.ToString(); //Pencil Icon Segoe UI Symbol
                     color = Brushes.Orange;
+                    owner = Visibility.Visible;
                 }
                 else if (isSynced && SyncConfig.Synced != null)
                     color = Brushes.Green;
@@ -764,7 +824,8 @@ namespace BnS_Multitool
                     Downloads = xml.Downloads,
                     Description = xml.Description,
                     FileName = xml.Name,
-                    SyncButton = syncButtonText
+                    SyncButton = syncButtonText,
+                    CanRemove = owner
                 });
             }
         }
@@ -777,13 +838,67 @@ namespace BnS_Multitool
             if(xml == null) return;
             SyncConfig.Synced.Remove(xml);
 
-            if (File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), string.Format("{0}.{1}", xml.Name, xml.Type))))
-                File.Delete(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS", "manager", "sync", xml.Discord_id.ToString(), string.Format("{0}.{1}", xml.Name, xml.Type)));
+            if (File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), string.Format("{0}.{1}", xml.Name, xml.Type))))
+                File.Delete(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "manager", "sync", xml.Discord_id.ToString(), string.Format("{0}.{1}", xml.Name, xml.Type)));
 
             SyncConfig.Save();
 
             ((Storyboard)FindResource("FadeOut")).Begin(XML_DESCRIPTION_GRID);
             await RefreshAllXmls();
+        }
+
+        private async void RemoveXMLCommand(object sender, RoutedEventArgs e)
+        {
+            if (ActionInProgress) return;
+            ActionInProgress = true;
+
+            var result = WPFCustomMessageBox.CustomMessageBox.ShowOKCancel("Are you sure you want to remove this from Sync? This will only remove it from the listing.", "Remove from Sync", "Remove", "Cancel");
+            if (result == MessageBoxResult.OK)
+            {
+                // Continue
+                XML_View_List entry = ((ListViewItem)AvailablexmlsView.ContainerFromElement((Button)sender)).Content as XML_View_List;
+                if (_sync.Discord != null && entry.DiscordID == _sync.Discord.id)
+                {
+                    var _splash = new ProgressSplash();
+                    ProgressPanel.Children.Add(_splash);
+                    _splash.ProgressText = "Sending request...";
+                    ((Storyboard)FindResource("FadeIn")).Begin(ProgressGrid);
+
+                    string responseData = "";
+                    try
+                    {
+                        // POST data that we need to send, serialize it as json-format.
+                        var postData = JsonConvert.SerializeObject(new SyncData.REMOVE_XML_POST
+                        {
+                            Auth_Code = SyncConfig.AUTH_KEY,
+                            XML_ID = entry.ID
+                        });
+
+                        // Submit a request for a security token to upload, Tokens last only 10 minutes
+                        responseData = await _sync.PostDataToServer(_sync.RemoveXML_URL, postData);
+                        var response = JObject.Parse(responseData);
+                        //Debug.WriteLine(responseData);
+
+                        if ((HttpStatusCode)(int)response["response"] != HttpStatusCode.OK)
+                            throw new WebException((string)response["response_msg"]);
+
+                        _splash.ProgressText = string.Format("Removed {0} from Sync", entry.Title);
+                        await Task.Delay(1000);
+                        await RefreshAllXmls();
+
+                    } catch (Exception ex)
+                    {
+                        _splash.ProgressText = ex.GetType() == typeof(JsonReaderException) ? responseData : ex.Message;
+                        await Task.Delay(5000);
+                    } finally
+                    {
+                        //await RefreshAllXmls();
+                        ((Storyboard)FindResource("FadeOut")).Begin(ProgressGrid);
+                        ProgressPanel.Children.Clear();
+                    }
+                }
+            }
+            ActionInProgress = false;
         }
     }
 }

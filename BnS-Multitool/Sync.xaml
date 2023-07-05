@@ -40,6 +40,7 @@
                 <ComboBoxItem>Archer</ComboBoxItem>
                 <ComboBoxItem>Astromancer</ComboBoxItem>
                 <ComboBoxItem>Dualblade</ComboBoxItem>
+                <ComboBoxItem>Bard</ComboBoxItem>
             </ComboBox>
             <Label Content="Category" Foreground="White" FontWeight="Bold" FontSize="16" Margin="442,49,64,409"/>
             <Label Content="Title" Foreground="White" FontWeight="Bold" FontSize="16" Margin="442,106,64,352"/>
@@ -52,7 +53,7 @@
             <Button Style="{StaticResource MainButtonStyle}" x:Name="SyncPublish_UploadBrowse" Content="Browse" FontWeight="Bold" Margin="550,163,26,305" RenderTransformOrigin="1.072,0.568" Click="Browse_XML_File"/>
         </Grid>
         <Grid x:Name="SyncView" Visibility="Hidden">
-            <ListView x:Name="AvailablexmlsView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0,0,235,10" Background="#FF181A1B" BorderBrush="{x:Null}"
+            <ListView x:Name="AvailablexmlsView" ScrollViewer.HorizontalScrollBarVisibility="Disabled" Margin="0,0,208,10" Background="#FF181A1B" BorderBrush="{x:Null}"
                       ItemsSource="{Binding Sync_Available_XMLS}"
                       VerticalContentAlignment="Top"  
                       ScrollViewer.VerticalScrollBarVisibility="Visible"
@@ -79,7 +80,7 @@
                     <DataTemplate>
                         <Grid>
                             <StackPanel Orientation="Horizontal" Height="50">
-                                <StackPanel Orientation="Vertical" Width="365">
+                                <StackPanel Orientation="Vertical" Width="360">
                                     <TextBlock Text="{Binding Title}" Foreground="#FF6495FF" TextWrapping="NoWrap" FontFamily="Arial" FontWeight="Bold" FontSize="14"/>
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Padding="5" Text="{Binding User}" FontSize="12" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
@@ -91,13 +92,18 @@
                                         <TextBlock Padding="3" Text="{Binding CategoryText}" Foreground="Wheat" FontWeight="Bold"/>
                                     </StackPanel>
                                 </StackPanel>
+                                <Button VerticalAlignment="Top" Visibility="{Binding CanRemove}" Foreground="Red" Content="&#xe106;" Style="{StaticResource SyncButtons}" FontFamily="Segoe UI Symbol" Height="28" Width="35" FontWeight="Bold" FontSize="20" Click="RemoveXMLCommand">
+                                    <Button.ToolTip>
+                                        <TextBlock>Remove From Sync</TextBlock>
+                                    </Button.ToolTip>
+                                </Button>
                                 <Button VerticalAlignment="Top" IsEnabled="{Binding Synced}" Foreground="{Binding SyncColor}" Content="{Binding SyncButton}" Style="{StaticResource SyncButtons}" FontFamily="Segoe UI Symbol" Height="28" Width="40" FontWeight="Bold" FontSize="20" Click="SyncXMLBtn"/>
                             </StackPanel>
                         </Grid>
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
-            <Button Content="&#xE149;" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" FontWeight="Bold" Margin="425,0,208,468" Click="SyncView_SyncRefresh"/>
+            <Button Content="&#xE149;" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" FontWeight="Bold" Margin="451,0,182,468" Click="SyncView_SyncRefresh"/>
             <Label HorizontalContentAlignment="Center" Content="Category Filter" Foreground="White" FontWeight="Bold" FontSize="16" Margin="442,49,16,409"/>
             <Label HorizontalContentAlignment="Center" Content="Sort By" Foreground="White" FontWeight="Bold" FontSize="16" Margin="442,106,16,352"/>
             <ComboBox VerticalContentAlignment="Center" VerticalAlignment="Center" HorizontalContentAlignment="Center" x:Name="categoryFilter" Margin="474,81,31,389" SelectionChanged="CategorySelectionChanged">
@@ -117,6 +123,7 @@
                 <ComboBoxItem>Archer</ComboBoxItem>
                 <ComboBoxItem>Astromancer</ComboBoxItem>
                 <ComboBoxItem>Dualblade</ComboBoxItem>
+                <ComboBoxItem>Bard</ComboBoxItem>
             </ComboBox>
 
             <ComboBox VerticalContentAlignment="Center" VerticalAlignment="Top" HorizontalContentAlignment="Center" x:Name="SyncView_SortBy" Margin="474,138,31,0" SelectionChanged="SyncView_SortBy_SelectionChanged" SelectedIndex="0">

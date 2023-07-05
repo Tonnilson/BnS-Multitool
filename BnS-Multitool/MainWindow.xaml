@@ -8,7 +8,7 @@
         Title="BnS-Multi-Tool" Height="508" Width="863" ResizeMode="CanMinimize" WindowStyle="None" AllowsTransparency="False" Background="#FF151617" Loaded="Window_Loaded" WindowStartupLocation="CenterScreen">
     <Grid>
         <Grid.Effect>
-        <DropShadowEffect BlurRadius="10" Direction="-90"
+            <DropShadowEffect BlurRadius="10" Direction="-90"
                               RenderingBias="Quality" ShadowDepth="1"/>
         </Grid.Effect>
         <DockPanel LastChildFill="False" Opacity="0.95">
@@ -39,25 +39,25 @@
                                 <Button Click="MAIN_CLICK">
                                     <Button.Style>
                                         <Style TargetType="{x:Type Button}">
-                                        <Setter Property="Background" Value="#161a1f"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="{x:Type Button}">
-                                                    <Border Background="{TemplateBinding Background}">
-                                                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                                    </Border>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                        <Style.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter Property="Background" Value="#FF242E3C"/>
-                                            </Trigger>
-                                            <Trigger Property="IsEnabled" Value="False">
-                                                <Setter Property="Foreground" Value="Gray"/>
-                                                <Setter Property="Background" Value="#FF111417"/>
-                                            </Trigger>
-                                        </Style.Triggers>
+                                            <Setter Property="Background" Value="#161a1f"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="{x:Type Button}">
+                                                        <Border Background="{TemplateBinding Background}">
+                                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                        </Border>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Background" Value="#FF242E3C"/>
+                                                </Trigger>
+                                                <Trigger Property="IsEnabled" Value="False">
+                                                    <Setter Property="Foreground" Value="Gray"/>
+                                                    <Setter Property="Background" Value="#FF111417"/>
+                                                </Trigger>
+                                            </Style.Triggers>
                                         </Style>
                                     </Button.Style>
                                     <StackPanel Orientation="Horizontal" Width="190">
@@ -409,6 +409,20 @@
                         <ComboBoxItem>Worry and Pepe</ComboBoxItem>
                         <ComboBoxItem>Agon</ComboBoxItem>
                     </ComboBox>
+                    <Label Content="Build # Relay" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="302,154,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold">
+                        <Label.ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">NAEU Build Relay</TextBlock>
+                                <TextBlock>
+                                       This is for users who are having an issue establishing a connection with NCWest's main server
+                                    <LineBreak/>
+                                    This mirrors the current build as told by NCWest on my server for game updates
+                                </TextBlock>
+                                <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                            </StackPanel>
+                        </Label.ToolTip>
+                    </Label>
+                    <CheckBox x:Name="BuildRelay_Checkbox" Content="" Margin="440,160,54,304" Foreground="White" />
                 </Grid>
             </Border>
         </Grid>

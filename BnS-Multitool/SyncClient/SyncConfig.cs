@@ -15,6 +15,12 @@ namespace BnS_Multitool
             set { Settings.AUTH_KEY = value; Save(); }
         }
 
+        public static string AUTH_REFRESH
+        {
+            get { return Settings.AUTH_REFRESH; }
+            set => Settings.AUTH_REFRESH = value;
+        }
+
         public static List<Synced_Xmls> Synced
         {
             get { return Settings.Synced; }
@@ -29,6 +35,7 @@ namespace BnS_Multitool
                 Settings = new Sync_Config
                 {
                     AUTH_KEY = null,
+                    AUTH_REFRESH = null,
                     Synced = new List<Synced_Xmls>()
                 };
 
@@ -49,7 +56,7 @@ namespace BnS_Multitool
         {
             try
             {
-                File.WriteAllText(_configFile, JsonConvert.SerializeObject(Settings, Formatting.Indented));
+                Globals.WriteAllText(_configFile, JsonConvert.SerializeObject(Settings, Formatting.Indented));
             } catch (IOException ex)
             {
                 new ErrorPrompt(ex.Message).ShowDialog();
@@ -59,6 +66,7 @@ namespace BnS_Multitool
         private struct Sync_Config
         {
             public string AUTH_KEY { get; set; }
+            public string AUTH_REFRESH { get; set; }
             public List<Synced_Xmls> Synced { get; set; }
         }
 

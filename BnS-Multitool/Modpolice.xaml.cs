@@ -21,10 +21,11 @@ namespace BnS_Multitool
     /// </summary>
     public partial class Modpolice : Page
     {
-        private static string patches_xml = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments) + @"\BnS\patches.xml";
+        private static string patches_xml = Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "patches.xml");
         private static string plugin_path = Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins");
         public static string datafile64_sha1 = string.Empty;
         public static string localfile64_sha1 = string.Empty;
+        private bool init = false;
         public static DateTime RefreshTime { get; set; } = DateTime.Now;
 
         public static AvailablePlugins Plugins = null;
@@ -60,6 +61,7 @@ namespace BnS_Multitool
         {
             public List<PluginInfo> PluginInfo { get; set; }
             public Hello_Kitty HK { get; set; }
+            public Hello_Kitty HK_TW { get; set; }
         }
         
         public Modpolice()
@@ -88,7 +90,7 @@ namespace BnS_Multitool
                 RefreshTime = DateTime.Now.AddMinutes(1);
                 using (GZipWebClient client = new GZipWebClient())
                 {
-                    string response = await client.DownloadStringTaskAsync(string.Format("{0}plugins/plugins.json", Globals.MAIN_SERVER_ADDR));
+                    string response = await client.DownloadStringTaskAsync(string.Format("{0}plugins/plugins_v2.json", Globals.MAIN_SERVER_ADDR));
                     if (string.IsNullOrEmpty(response)) return null;
                     return JsonConvert.DeserializeObject<AvailablePlugins>(response);
                 }
@@ -101,8 +103,13 @@ namespace BnS_Multitool
         private async void Page_Loaded(object sender, RoutedEventArgs e)
         {
             MainGrid.Visibility = Visibility.Visible;
-            HKUpdater.Visibility = Visibility.Hidden;
             PluginInfoGrid.Visibility = Visibility.Hidden;
+
+            if(!init)
+            {
+                AutoPluginUpdates.IsChecked = SystemConfig.SYS.AUTO_UPDATE_PLUGINS;
+                init = true;
+            }
 
             // Only show HK Updater button for NA / EU
             //HKUpdaterBtn.Visibility = (Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION != Globals.BnS_Region.TW ? Visibility.Visible : Visibility.Hidden;
@@ -121,7 +128,7 @@ namespace BnS_Multitool
                 // Check if our region is not allowed to see this
                 if (plugin.Regions != null && plugin.Regions.Count() > 0 && plugin.Regions.Contains(ACCOUNT_CONFIG.ACCOUNTS.REGION.ToString())) continue;
                 // Skip over if plugin entry is binloader and region is set to TW
-                if (plugin.Name == "binloader" && ((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.TW)) continue;
+                
 
                 // Do not display plugins with an invalid filename, this is for when I add new plugins.
                 if (plugin.FullName.IsNullOrEmpty()) continue;
@@ -134,20 +141,21 @@ namespace BnS_Multitool
 
                     if (File.Exists(datafile) && File.Exists(localfile) && File.Exists(Path.Combine(plugin_path, "binloader.dll")))
                     {
-                        if (Process.GetProcessesByName("BNSR").Count() == 0)
-                        {
-                            if (datafile64_sha1.IsNullOrEmpty())
-                                datafile64_sha1 = SHA1_File(datafile);
-                            if (localfile64_sha1.IsNullOrEmpty())
-                                localfile64_sha1 = SHA1_File(localfile);
+                        if (datafile64_sha1.IsNullOrEmpty())
+                            datafile64_sha1 = CRC32_File(datafile);
+                        if (localfile64_sha1.IsNullOrEmpty())
+                            localfile64_sha1 = CRC32_File(localfile);
 
-                            if (datafile64_sha1 == Plugins.HK.DataFile_Hash.ToLower() && localfile64_sha1 == Plugins.HK.LocalFile_Hash.ToLower())
-                                plugin.FontColor = Brushes.CornflowerBlue;
-                            else
-                                plugin.FontColor = Brushes.Yellow;
-                        }
+                        Hello_Kitty HK_Info = null;
+                        if (((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.TW))
+                            HK_Info = Plugins.HK_TW;
                         else
+                            HK_Info = Plugins.HK;
+
+                        if (datafile64_sha1 == HK_Info.DataFile_Hash && localfile64_sha1 == HK_Info.LocalFile_Hash)
                             plugin.FontColor = Brushes.CornflowerBlue;
+                        else
+                            plugin.FontColor = Brushes.Yellow;
                     }
                     else if (File.Exists(Path.Combine(plugin_path, "binloader.dll")))
                         plugin.FontColor = Brushes.OrangeRed;
@@ -159,15 +167,10 @@ namespace BnS_Multitool
                     var pluginP = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, plugin.FilePath));
                     if (File.Exists(pluginP))
                     {
-                        if (Process.GetProcessesByName("BNSR").Count() == 0)
-                        {
-                            if (SHA1_File(pluginP) == plugin.Hash.ToLower())
-                                plugin.FontColor = Brushes.CornflowerBlue;
-                            else
-                                plugin.FontColor = Brushes.Yellow;
-                        }
-                        else
+                        if (CRC32_File(pluginP) == plugin.Hash)
                             plugin.FontColor = Brushes.CornflowerBlue;
+                        else
+                            plugin.FontColor = Brushes.Yellow;
                     }
                     else
                         plugin.FontColor = Brushes.White;
@@ -249,61 +252,6 @@ namespace BnS_Multitool
             AvailablePluginsView.Items.Refresh();
         }
 
-        public static async Task<HK_State> HKCheck()
-        {
-            string binloader = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "binloader.dll"));
-            string datafile = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "datafile64.bin"));
-            string localfile = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "localfile64.bin"));
-
-            if (DateTime.Now >= RefreshTime)
-            {
-                datafile64_sha1 = SHA1_File(datafile);
-                localfile64_sha1 = SHA1_File(localfile);
-                Plugins = await RetrieveOnlinePlugins();
-            }
-            // Additional Check
-            if (datafile64_sha1.IsNullOrEmpty())
-                datafile64_sha1 = SHA1_File(datafile);
-            if (localfile64_sha1.IsNullOrEmpty())
-                localfile64_sha1 = SHA1_File(localfile);
-
-            // Check if datafile64.bin is missing but binloader is present
-            if (File.Exists(binloader) && !File.Exists(datafile))
-                return HK_State.Missing_datafile;
-
-            // Check if there is an update available based off datafile
-            if (SystemConfig.SYS.HK_Installed && !datafile64_sha1.IsNullOrEmpty() && datafile64_sha1 != Plugins.HK.DataFile_Hash.ToLower())
-                return HK_State.Update_Available;
-
-            // Check if there is an update available based off localfile
-            if (SystemConfig.SYS.HK_Installed && !localfile64_sha1.IsNullOrEmpty() && localfile64_sha1 != Plugins.HK.LocalFile_Hash.ToLower())
-                return HK_State.Update_Available;
-
-            if (!File.Exists(binloader)) return HK_State.Not_Installed; // Binloader is not present so no need to check the rest
-
-            var iniFile = Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault();
-            string localVersion = string.Empty;
-            if (!iniFile.IsNullOrEmpty())
-            {
-                IniHandler VersionInfo_BnS = new IniHandler(iniFile);
-                localVersion = VersionInfo_BnS.Read("VersionInfo", "GlobalVersion");
-            }
-            if (localVersion.IsNullOrEmpty()) return HK_State.Error; // Someones game is fucked if this file can't be found and loaded
-            if (!File.Exists(datafile) || !File.Exists(localfile)) return HK_State.Outdated;
-
-            if (localVersion == Plugins.HK.BuildNumber)
-            {
-                if (datafile64_sha1 == Plugins.HK.DataFile_Hash.ToLower() && localfile64_sha1 == Plugins.HK.LocalFile_Hash.ToLower()) return HK_State.Installed;
-                if (datafile64_sha1 == Plugins.HK.DataFile_Hash.ToLower() && localfile64_sha1 != Plugins.HK.LocalFile_Hash.ToLower()) return HK_State.Installed;
-            } else
-            {
-                if (datafile64_sha1 == Plugins.HK.DataFile_Hash.ToLower() && localfile64_sha1 == Plugins.HK.LocalFile_Hash.ToLower()) return HK_State.Installed_ButBuildMismatch;
-                if (datafile64_sha1 == Plugins.HK.DataFile_Hash.ToLower() && localfile64_sha1 != Plugins.HK.LocalFile_Hash.ToLower()) return HK_State.Installed_ButBuildMismatch;
-            }
-
-            return HK_State.Outdated;
-        }
-
         private ProgressControl _progressControl;
 
         private async void InstallOrUpdateClick(object sender, RoutedEventArgs e)
@@ -333,19 +281,12 @@ namespace BnS_Multitool
 
                         if (!File.Exists(patches_xml))
                         {
+                            SystemConfig.SYS.PATCH_424 = true;
+                            SystemConfig.Save();
                             File.WriteAllText(patches_xml, Properties.Resources.patches);
                             ProgressControl.updateProgressLabel("Installed patches.xml");
                             await Task.Delay(100);
                         }
-                    }
-
-                    if (pluginInfo.Name == "binloader")
-                    {
-                        ProgressControl.updateProgressLabel("Installing Hello Kitty");
-                        if (!await InstallHelloKitty())
-                            throw new Exception("Failed to download and install bins");
-                        ProgressControl.updateProgressLabel("Hello kitty bins downloaded");
-                        await Task.Delay(300);
                     }
 
                     ProgressControl.updateProgressLabel("Validating installation");
@@ -353,7 +294,7 @@ namespace BnS_Multitool
                     var pluginPath = Path.GetFullPath(Path.Combine(SystemConfig.SYS.BNS_DIR, pluginInfo.FilePath));
                     if (File.Exists(pluginPath))
                     {
-                        if (SHA1_File(pluginPath) == pluginInfo.Hash.ToLower())
+                        if (CRC32_File(pluginPath) == pluginInfo.Hash)
                         {
                             pluginInfo.FontColor = Brushes.CornflowerBlue;
                             InstallOrUpdate_BTN.Content = "Update";
@@ -454,84 +395,6 @@ namespace BnS_Multitool
             return true;
         }
 
-        public static async Task<bool> InstallHelloKitty()
-        {
-            var datafile = Path.GetFullPath(Path.Combine(plugin_path, "datafile64.bin"));
-            var localfile = Path.GetFullPath(Path.Combine(plugin_path, "localfile64.bin"));
-            string webUrl;
-            long contentLength = 0L;
-            bool downloadResult = false;
-            try
-            {
-                //IniHandler hIni = new IniHandler(Directory.GetFiles(SystemConfig.SYS.BNS_DIR, "VersionInfo_*.ini").FirstOrDefault());
-                // Update datafile if it needs it.
-                if (File.Exists(datafile))
-                {
-                    datafile64_sha1 = SHA1_File(datafile);
-                    if (datafile64_sha1 == Plugins.HK.DataFile_Hash.ToLower()) goto CheckLocalFile;
-                }
-
-                var fInfo = new FileInfo(Path.GetFullPath(Path.Combine("modpolice", Plugins.HK.FileNames.First(x => x.Contains("datafile")))));
-                webUrl = string.Format("{0}plugins/{1}", Globals.MAIN_SERVER_ADDR, Plugins.HK.FileNames.First(x => x.Contains("datafile")));
-                contentLength = await RemoteFileSize(webUrl);
-                if (!fInfo.Exists || (contentLength > 0 && fInfo.Length != contentLength))
-                {
-                    downloadResult = await DownloadRemoteFile(webUrl, Path.GetFullPath(Path.Combine("modpolice", Plugins.HK.FileNames.First(x => x.Contains("datafile")))));
-                    if (!downloadResult)
-                        throw new Exception("Failed to download HK because of file download error");
-                }
-
-                // Create some slack if the file is locked or something...
-                if (IsFileLocked(Path.GetFullPath(Path.Combine("modpolice", Plugins.HK.FileNames.First(x => x.Contains("datafile"))))))
-                    await Task.Delay(200);
-
-                if(ExtractArchiveLZMA(Path.GetFullPath(Path.Combine("modpolice", Plugins.HK.FileNames.First(x => x.Contains("datafile")))), plugin_path))
-                    datafile64_sha1 = SHA1_File(datafile);
-                else throw new Exception("Failed to extract");
-
-                // Update localfile if it needs it
-                CheckLocalFile:
-                if (File.Exists(localfile))
-                {
-                    localfile64_sha1 = SHA1_File(localfile);
-                    if (localfile64_sha1 == Plugins.HK.LocalFile_Hash.ToLower()) goto Finished;
-                }
-
-                var localFileName = Plugins.HK.FileNames.First(x => x.Contains("localfile"));
-                webUrl = string.Format("{0}plugins/{1}", Globals.MAIN_SERVER_ADDR, localFileName);
-                fInfo = new FileInfo(Path.Combine("modpolice", localFileName));
-                contentLength = await RemoteFileSize(webUrl);
-                if (!fInfo.Exists || (contentLength > 0 && fInfo.Length != contentLength))
-                {
-                    downloadResult = await DownloadRemoteFile(webUrl, Path.Combine("modpolice", localFileName));
-                    if (!downloadResult)
-                        throw new Exception("Failed to download HK because of file download error");
-                }
-
-                // Create some slack if the file is locked or something...
-                if (IsFileLocked(Path.GetFullPath(Path.Combine("modpolice", Plugins.HK.FileNames.First(x => x.Contains("localfile"))))))
-                    await Task.Delay(200);
-
-                if (ExtractArchiveLZMA(Path.GetFullPath(Path.Combine("modpolice", Plugins.HK.FileNames.First(x => x.Contains("localfile")))), plugin_path))
-                    localfile64_sha1 = SHA1_File(localfile);
-
-                else throw new Exception("Failed to extract");
-
-            Finished:
-                if(!SystemConfig.SYS.HK_Installed)
-                {
-                    SystemConfig.SYS.HK_Installed = true;
-                    SystemConfig.Save();
-                }
-                return true;
-
-            } catch (Exception ex)
-            {
-                Logger.log.Error("Plugins::InstallHelloKitty\nType: {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
-                return false;
-            }
-        }
-
         private static string downloadFile = "";
         private static void Client_DownloadProgressChanged(object sender, System.Net.DownloadProgressChangedEventArgs e)
         {
@@ -545,8 +408,33 @@ namespace BnS_Multitool
             // Check if the plugin currently exists
             if(File.Exists(pluginPath))
             {
-                if (SHA1_File(pluginPath) == plugin.Hash) return true; // Plugin exists and matches online version
+                if (CRC32_File(pluginPath) == plugin.Hash) return true; // Plugin exists and matches online version
                 File.Delete(pluginPath); // Delete the plugin in preperation for new installation
+            }
+
+            // This should be remove a few months after update push and SYS.HK_Installed should be phased out entirely.
+            if(plugin.Name == "hellokitty" && SystemConfig.SYS.HK_Installed)
+            {
+                if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "binloader.dll")))
+                    File.Delete(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "binloader.dll"));
+
+                if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "binloader.ini")))
+                    File.Delete(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "binloader.ini"));
+
+                if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "localfile64.bin")))
+                    File.Delete(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "localfile64.bin"));
+
+                if (File.Exists(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "datafile64.bin")))
+                    File.Delete(Path.Combine(SystemConfig.SYS.BNS_DIR, "BNSR", "Binaries", "Win64", "plugins", "datafile64.bin"));
+
+                if ((Globals.BnS_Region)ACCOUNT_CONFIG.ACCOUNTS.REGION == Globals.BnS_Region.TW)
+                {
+                    if (File.Exists(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "patches", "hellokitty_tw-FixQuest.xml")))
+                        File.Delete(Path.Combine(SystemConfig.SYS.BNSPATCH_DIRECTORY, "patches", "hellokitty_tw-FixQuest.xml"));
+                }
+
+                SystemConfig.SYS.HK_Installed = false;
+                SystemConfig.Save();
             }
             try
             {
@@ -563,6 +451,14 @@ namespace BnS_Multitool
             }
 
             return true;
+        }
+
+        private void AutoPluginClicked(object sender, RoutedEventArgs e)
+        {
+            if (!init) return;
+            var option = (sender as CheckBox);
+            SystemConfig.SYS.AUTO_UPDATE_PLUGINS = (bool)option.IsChecked;
+            SystemConfig.Save();
         }
     }
 }

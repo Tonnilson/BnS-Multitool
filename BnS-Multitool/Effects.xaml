@@ -4,18 +4,463 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
       xmlns:toggle="clr-namespace:ToggleSwitch;assembly=ToggleSwitch"
+      xmlns:core="clr-namespace:System;assembly=mscorlib"
       xmlns:local="clr-namespace:BnS_Multitool"
       mc:Ignorable="d" 
       d:DesignHeight="490" d:DesignWidth="660"
-      Title="Effects" Loaded="Page_Loaded" KeepAlive="True">
+      Title="Effects" Loaded="Page_Loaded" KeepAlive="True" 
+      DataContext="{Binding RelativeSource={RelativeSource Self}}"
+      >
+    <Page.Resources>
+        <ObjectDataProvider x:Key="e_ui_slots" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="local:EUI_Slot"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+        <ObjectDataProvider x:Key="e_ui_category" MethodName="GetValues" ObjectType="{x:Type core:Enum}">
+            <ObjectDataProvider.MethodParameters>
+                <x:Type Type="local:EUI_Category"/>
+            </ObjectDataProvider.MethodParameters>
+        </ObjectDataProvider>
+    </Page.Resources>
     <Grid>
         <Grid x:Name="ProgressGrid" Visibility="Hidden">
             <StackPanel x:Name="ProgressPanel">
 
             </StackPanel>
         </Grid>
-        <Grid x:Name="ExtendedOptionsGrid">
-            
+        <Grid x:Name="ExtendedOptions_EffectMover" Visibility="Hidden">
+            <DataGrid HorizontalScrollBarVisibility="Hidden" HeadersVisibility="Column"
+                              CanUserAddRows="True" CanUserDeleteRows="True"
+                              x:Name="EffectList" AutoGenerateColumns="False"
+                              CellStyle="{StaticResource DataGrid_Content_Centering}"
+                              ItemsSource="{Binding EffectsList}" Margin="10,10,10,221" BorderBrush="{x:Null}" Background="#FF1D2630">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF293642"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontFamily" Value="Arial"/>
+                        <Setter Property="BorderBrush" Value="#FF1B2E3E"/>
+                        <Setter Property="BorderThickness" Value="1 1 1 1"/>
+                        <Style.Triggers>
+                            <Trigger Property="DataGridCell.IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF293642" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+
+                    <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}" >
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontFamily" Value="Arial"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="BorderBrush" Value="#FF1B2E3E"/>
+                        <Setter Property="BorderThickness" Value="1 1 1 1"/>
+                        <Setter Property="BorderThickness" Value="1 1 1 1"/>
+                        <Setter Property="Margin" Value="-1,-1,0,0" />
+                        <Setter Property="Height" Value="28" />
+                        <Setter Property="Width" Value="auto"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    </Style>
+
+                </DataGrid.Resources>
+
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Alias" Binding="{Binding Alias}" Width="*"/>
+                    <DataGridComboBoxColumn Header="ui-slot" SelectedItemBinding="{Binding UI_Slot}" EditingElementStyle="{StaticResource EditingCombo}" ItemsSource="{Binding Source={StaticResource e_ui_slots}}" Width="100"/>
+                    <DataGridComboBoxColumn Header="ui-category" SelectedItemBinding="{Binding UI_Category}" EditingElementStyle="{StaticResource EditingCombo}" ItemsSource="{Binding Source={StaticResource e_ui_category}}" Width="125"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <Label Content="What is this?" Margin="0,274,10,178" Foreground="CornflowerBlue" FontWeight="Bold" FontSize="22"/>
+            <TextBlock Margin="10,312,10,10" Foreground="White" FontWeight="Normal" FontSize="14">
+                This allows you to move effect icons around to different buff bars or to change the priority.
+                <LineBreak/>
+                <Run FontWeight="Bold" Foreground="CornflowerBlue">ui-slot:</Run>
+                <LineBreak/>
+                <Run FontSize="12">None = Invisible</Run>
+                <LineBreak/>
+                <Run FontSize="12">Buff = Blue Bar</Run><LineBreak/>
+                <Run FontSize="12">Debuff = Red Bar</Run><LineBreak/>
+                <Run FontSize="12">System = Small icon bar (4-6 slots)</Run>
+                <LineBreak/>
+                <Run FontSize="12">Long-term = Premium Buff / Food buffs / Clan Bonus etc</Run><LineBreak/>
+                <Run FontSize="12">Buff Disable = Purple Bar</Run><LineBreak/>
+                <Run FontWeight="Bold" Foreground="CornflowerBlue">ui-category:</Run><LineBreak/><Run FontSize="12">This is the priority it has on the buff bar, it is in order after None.</Run>
+            </TextBlock>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="Close" Margin="582,450,10,14" Click="CloseEffectList" FontWeight="Bold" FontFamily="Segoe UI Semibold" RenderTransformOrigin="0.456,0.82"/>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="Save" Margin="509,450,83,14" Click="SaveEffectList" FontWeight="Bold" FontFamily="Segoe UI Semibold" RenderTransformOrigin="0.456,0.82"/>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="Effect List" Margin="509,419,10,45" Click="OpenEffectRecord" FontWeight="Bold" FontFamily="Segoe UI Semibold" RenderTransformOrigin="0.456,0.82"/>
+        </Grid>
+        <Grid x:Name="ExtendedOptionsGrid" Visibility="Hidden">
+            <DataGrid HorizontalScrollBarVisibility="Hidden" HeadersVisibility="Column"
+                              CanUserAddRows="True" CanUserDeleteRows="True"
+                              x:Name="ConsoleCmds" AutoGenerateColumns="False"
+                              CellStyle="{StaticResource DataGrid_Content_Centering}"
+                              ItemsSource="{Binding ConsoleCommands}" Margin="374,85,10,219" BorderBrush="{x:Null}" Background="#FF1D2630">
+                <DataGrid.Resources>
+                    <SolidColorBrush x:Key="{x:Static SystemColors.HighlightBrushKey}" Color="#FF293642"/>
+                    <Style TargetType="{x:Type DataGridCell}">
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontFamily" Value="Arial"/>
+                        <Setter Property="BorderBrush" Value="#FF1B2E3E"/>
+                        <Setter Property="BorderThickness" Value="1 1 1 1"/>
+                        <Style.Triggers>
+                            <Trigger Property="DataGridCell.IsSelected" Value="True">
+                                <Setter Property="Background" Value="#FF293642" />
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                    <Style BasedOn="{StaticResource {x:Type DataGridColumnHeader}}" TargetType="{x:Type DataGridColumnHeader}" >
+                        <Setter Property="Foreground" Value="White"/>
+                        <Setter Property="FontFamily" Value="Arial"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="BorderBrush" Value="#FF1B2E3E"/>
+                        <Setter Property="BorderThickness" Value="1 1 1 1"/>
+                        <Setter Property="BorderThickness" Value="1 1 1 1"/>
+                        <Setter Property="Margin" Value="-1,-1,0,0" />
+                        <Setter Property="Height" Value="28" />
+                        <Setter Property="Width" Value="auto"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                    </Style>
+                </DataGrid.Resources>
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Console Commands" Binding="{Binding command}" Width="*"/>
+                </DataGrid.Columns>
+            </DataGrid>
+            <TextBox TextAlignment="Center" VerticalContentAlignment="Center" x:Name="keyCode" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="391,58,198,412" KeyDown="keyCode_KeyDown"/>
+            <ScrollViewer Margin="10,0,297,9" Background="#FF181A1B">
+                <StackPanel CanVerticallyScroll="True">
+                    <Label x:Name="EffectOption_Label" Content="Self Effects" Foreground="White" FontWeight="Bold" FontSize="22" />
+                    <Separator Background="#FF2C3B56"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="175"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+                        <CheckBox x:Name="PlayerHighEmitter" Grid.Column="0" Grid.Row="0" Height="21" Content="High Emitter" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="High Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="High Emitter is generally most of the effects for skills"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PlayerMidEmitter" Content="Mid Emitter" Grid.Column="0" Grid.Row="1" Height="21"  Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Mid Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="Mid Emitter is effects mostly for Weapon Skins, heart Effects and others"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PlayerLowEmitter" Content="Low Emitter" Grid.Column="0" Grid.Row="2" Height="21"  Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Low Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="Low Emitter is semi-tied with Mid Emitter for weapon skin effects and low particle generation"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PlayerJewelEffect" Content="Jewel Effect" Grid.Column="0" Grid.Row="3" Height="21"  Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Jewel Effect"/></TextBlock>
+                                    <TextBlock><Run Text="Exact use of this is unknown but assume small effects"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PlayerImmuneEffect" Content="Immune Effect" Grid.Column="1" Grid.Row="0" Height="21"  Foreground="White" FontWeight="Bold"/>
+                        <CheckBox x:Name="PlayerCharLOD" Content="Character LOD" Grid.Column="1" Grid.Row="1" Height="21"  Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Character Level of Detail"/></TextBlock>
+                                    <TextBlock><Run Text="Exact effect is unknown but possibly tied to effect LOD"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PlayerPhysics" Content="Physics" Grid.Column="1" Grid.Row="2" Height="21"  Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Physics"/></TextBlock>
+                                    <TextBlock><Run Text="Controls whether physics are enabled for breast/hair/cloth"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PlayerParticleLight" Content="Particle Light" Grid.Column="1" Grid.Row="3" Height="21"  Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Particle Light"/></TextBlock>
+                                    <TextBlock><Run Text="Not exactly known but possibly tied to light generated by particles"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </Grid>
+                    <Separator Background="#FF2C3B56"/>
+                    <Label x:Name="EffectOption_Label_Copy" Content="Other Player Effects" Foreground="White" FontWeight="Bold" FontSize="22"/>
+                    <Separator Background="#FF2C3B56"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="175"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+                        <CheckBox x:Name="PcHighEmitter" Content="High Emitter" Grid.Column="0" Grid.Row="0" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="High Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="High Emitter is generally most of the effects for skills"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PcMidEmitter" Content="Mid Emitter" Grid.Column="0" Grid.Row="1" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Mid Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="Mid Emitter is effects mostly for Weapon Skins, heart Effects and others"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PcLowEmitter" Content="Low Emitter" Grid.Column="0" Grid.Row="2" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Low Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="Low Emitter is semi-tied with Mid Emitter for weapon skin effects and low particle generation"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PcJewelEffect" Content="Jewel Effect" Grid.Column="0" Grid.Row="3" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Jewel Effect"/></TextBlock>
+                                    <TextBlock><Run Text="Exact use of this is unknown but assume small effects"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PcImmuneEffect" Content="Immune Effect" Grid.Column="1" Grid.Row="0" Height="21" Foreground="White" FontWeight="Bold"/>
+                        <CheckBox x:Name="PcCharLOD" Content="Character LOD" Grid.Column="1" Grid.Row="1" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Character Level of Detail"/></TextBlock>
+                                    <TextBlock><Run Text="Exact effect is unknown but possibly tied to effect LOD"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PcPhysics" Content="Physics" Grid.Column="1" Grid.Row="2" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Physics"/></TextBlock>
+                                    <TextBlock><Run Text="Controls whether physics are enabled for breast/hair/cloth"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="PcParticleLight" Content="Particle Light" Grid.Column="1" Grid.Row="3" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Particle Light"/></TextBlock>
+                                    <TextBlock><Run Text="Not exactly known but possibly tied to light generated by particles"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for players other than you"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </Grid>
+                    <Separator Background="#FF2C3B56"/>
+                    <Label x:Name="EffectOption_Label_Copy1" Content="Boss Effects" Foreground="White" FontWeight="Bold" FontSize="22"/>
+                    <Separator Background="#FF2C3B56"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="175"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+                        <CheckBox x:Name="NpcHighEmitter" Content="High Emitter" Grid.Column="0" Grid.Row="0" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="High Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="High Emitter is generally most of the effects for skills"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="NpcMidEmitter" Content="Mid Emitter" Grid.Column="0" Grid.Row="1" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Mid Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="Mid Emitter is effects mostly for Weapon Skins, heart Effects and others"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="NpcLowEmitter" Content="Low Emitter" Grid.Column="0" Grid.Row="2" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Low Emitter"/></TextBlock>
+                                    <TextBlock><Run Text="Low Emitter is semi-tied with Mid Emitter for weapon skin effects and low particle generation"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="NpcJewelEffect" Content="Jewel Effect" Grid.Column="0" Grid.Row="3" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Jewel Effect"/></TextBlock>
+                                    <TextBlock><Run Text="Exact use of this is unknown but assume small effects"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="NpcImmuneEffect" Content="Immune Effect" Grid.Column="1" Grid.Row="0" Height="21" Foreground="White" FontWeight="Bold"/>
+                        <CheckBox x:Name="NpcCharLOD" Content="Character LOD" Grid.Column="1" Grid.Row="1" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Character Level of Detail"/></TextBlock>
+                                    <TextBlock><Run Text="Exact effect is unknown but possibly tied to effect LOD"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="NpcPhysics" Content="Physics" Grid.Column="1" Grid.Row="2" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Physics"/></TextBlock>
+                                    <TextBlock><Run Text="Controls whether physics are enabled for breast/hair/cloth"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                        <CheckBox x:Name="NpcParticleLight" Content="Particle Light" Grid.Column="1" Grid.Row="3" Height="21" Foreground="White" FontWeight="Bold">
+                            <CheckBox.ToolTip>
+                                <StackPanel>
+                                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Particle Light"/></TextBlock>
+                                    <TextBlock><Run Text="Not exactly known but possibly tied to light generated by particles"/></TextBlock>
+                                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                                    <TextBlock><Run Text="This is for Boss / NPC's"/></TextBlock>
+                                </StackPanel>
+                            </CheckBox.ToolTip>
+                        </CheckBox>
+                    </Grid>
+                    <Separator Background="#FF2C3B56"/>
+                    <Label Content="Background Effects" Foreground="White" FontWeight="Bold" FontSize="22"/>
+                    <Separator Background="#FF2C3B56"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="175"/>
+                            <ColumnDefinition Width="175"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="25"/>
+                            <RowDefinition Height="25"/>
+                        </Grid.RowDefinitions>
+                        <CheckBox x:Name="BackHighEmitter" Content="High Emitter" Grid.Column="0" Grid.Row="0" Height="21" Foreground="White" FontWeight="Bold"/>
+                        <CheckBox x:Name="BackMidEmitter" Content="Mid Emitter" Grid.Column="0" Grid.Row="1" Height="21" Foreground="White" FontWeight="Bold"/>
+                        <CheckBox x:Name="BackLowEmitter" Content="Low Emitter" Grid.Column="1" Grid.Row="0" Height="21" Foreground="White" FontWeight="Bold"/>
+                        <CheckBox x:Name="BackParticleLight" Content="Particle Light" Grid.Column="1" Grid.Row="1" Height="21" Foreground="White" FontWeight="Bold"/>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+            <Label x:Name="EffectOption_Label_Copy3" Content="Profile" Foreground="White" FontWeight="Bold" FontSize="14" Margin="396,4,210,460"/>
+
+            <CheckBox x:Name="showPhantom" Content="Show Phantom Effects" Margin="429,277,51,192" Foreground="White" FontWeight="Bold" RenderTransformOrigin="0.624,0.54">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Phantom Scripted Particle System"/></TextBlock>
+                        <TextBlock><Run Text="This will determine whether or not to use Phantom Particle System"/></TextBlock>
+                        <TextBlock><Run Text="Classes covered by this system include Astro weapon Orb and Blademaster 3rd spec swords"/></TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
+            <ComboBox x:Name="Active_Profile" HorizontalAlignment="Left" VerticalAlignment="Top" Width="176" Margin="453,8,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" SelectionChanged="Active_Profile_SelectedChanged" Height="22">
+                <ComboBoxItem>Main Profile</ComboBoxItem>
+                <ComboBoxItem>Profile 1</ComboBoxItem>
+                <ComboBoxItem>Profile 2</ComboBoxItem>
+                <ComboBoxItem>Profile 3</ComboBoxItem>
+                <ComboBoxItem>Profile 4</ComboBoxItem>
+                <ComboBoxItem>Profile 5</ComboBoxItem>
+            </ComboBox>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="Close" Margin="585,455,10,9" Click="CloseExtendedOptions" FontWeight="Bold" FontFamily="Segoe UI Semibold"/>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="Save Profile" Margin="489,455,82,9" Click="SaveCurrentProfile" FontWeight="Bold" FontFamily="Segoe UI Semibold"/>
+            <Label x:Name="EffectOption_Label_Copy4" Content="In-game Hotkey" Foreground="White" FontWeight="Bold" FontSize="14" Margin="383,30,144,431"/>
+            <CheckBox x:Name="bShift" Content="Shift" Margin="472,59,134,410" Foreground="White" FontWeight="Bold"/>
+            <CheckBox x:Name="bCtrl" Content="Ctrl" Margin="531,59,79,410" Foreground="White" FontWeight="Bold"/>
+            <CheckBox x:Name="bAlt" Content="Alt" Margin="586,59,15,410" Foreground="White" FontWeight="Bold"/>
+            <Label x:Name="EffectOption_Label_Copy2" Content="Damage Text Options" Foreground="White" FontWeight="Bold" FontSize="14" Margin="374,295,119,166"/>
+            <Separator Background="#FF2C3B56" Margin="368,316,31,162"/>
+            <TextBox TextAlignment="Center" VerticalContentAlignment="Center" x:Name="signalInfo_Scale" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="472,329,134,141"/>
+            <TextBox TextAlignment="Center" VerticalContentAlignment="Center" x:Name="signalInfo_Spacing" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="472,354,134,116"/>
+            <Label x:Name="EffectOption_Label_Copy5" Content="Font Scale:" Foreground="White" FontWeight="Bold" FontSize="14" Margin="374,324,198,138"/>
+            <Label x:Name="EffectOption_Label_Copy6" Content="Font Spacing: " Foreground="White" FontWeight="Bold" FontSize="14" Margin="374,349,180,111"/>
+            <CheckBox x:Name="sgt_hit_enemy" Content="Show small damage numbers" Margin="376,379,42,90" Foreground="White" FontWeight="Bold" RenderTransformOrigin="0.624,0.54">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Show small non-critical-hit damage numbers"/></TextBlock>
+                        <TextBlock><Run Text="This will determine whether or not to display the small non-critical-hit"/></TextBlock>
+                        <TextBlock><Run Text="damage numbers on-screen"/></TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
+            <CheckBox x:Name="sgt_crithit_enemy" Content="Show small crit damage numbers" Margin="376,402,42,67" Foreground="White" FontWeight="Bold" RenderTransformOrigin="0.624,0.54">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Show small critical-hit damage numbers"/></TextBlock>
+                        <TextBlock><Run Text="This will determine whether or not to display the small critical-hit"/></TextBlock>
+                        <TextBlock><Run Text="damage numbers on-screen"/></TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
+            <CheckBox x:Name="sgt_bighit_enemy" Content="Show non-crit damage numbers" Margin="376,425,42,44" Foreground="White" FontWeight="Bold" RenderTransformOrigin="0.624,0.54">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Show non-critical-hit damage numbers"/></TextBlock>
+                        <TextBlock><Run Text="This will determine whether or not to display the big non-critical-hit"/></TextBlock>
+                        <TextBlock><Run Text="damage numbers on-screen"/></TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
+            <Button Style="{StaticResource MainButtonStyle}"  Visibility="Visible" Content="Effect Mover" Margin="394,455,177,9" Click="OpenEffectMover" FontWeight="Bold" FontFamily="Segoe UI Semibold"/>
         </Grid>
         <Grid x:Name="MainGrid" Visibility="Visible">
             <Label x:Name="label_Copy2" Content="Animation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="211,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
@@ -62,18 +507,25 @@
             <toggle:HorizontalToggleSwitch Unchecked="handleToggleChange" Checked="handleToggleChange" x:Name="arc_anim_toggle" Margin="230,381,369,84" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="61" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6"/>
             <toggle:HorizontalToggleSwitch Visibility="Hidden" ToolTip="This removes sound, environmental and other misc effects shared by classes." x:Name="otherEffectsToggle" Margin="544,75,42,390" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="74" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6" Checked="handleToggleChange" Unchecked="handleToggleChange"/>
             <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Center" x:Name="label_Copy16" Text="Extended Options&#xA;" Margin="506,10,0,0" Height="45" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-            <Button Visibility="Hidden" Style="{StaticResource MainButtonStyle}" Content="Configure" Margin="526,60,30,402" FontWeight="Bold" Click="ExtendedOptions_Click"/>
-            <Label HorizontalContentAlignment="Center" x:Name="label_Copy17" Content="All Animations" Margin="506,181,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-            <Label HorizontalContentAlignment="Center" x:Name="label_Copy18" Content="All Effects" Margin="506,275,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <Button x:Name="ExtendedOptionsBtn" Visibility="Visible" Style="{StaticResource MainButtonStyle}" Content="Configure" Margin="526,60,30,402" FontWeight="Bold" Click="ExtendedOptions_Click" Background="#FF2D3F5D">
+                <Button.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Extended Options Plugin Configurator"/></TextBlock>
+                        <TextBlock><Run Text="The plugin must be installed first before you can open the configuration settings"/></TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                    </StackPanel>
+                </Button.ToolTip>
+            </Button>
+            <Label HorizontalContentAlignment="Center" x:Name="label_Copy17" Content="All Animations" Margin="506,103,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <Label HorizontalContentAlignment="Center" x:Name="label_Copy18" Content="All Effects" Margin="506,197,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
             <Separator Margin="0,35,163,451" Background="#FF2D415D" RenderTransformOrigin="0.5,0.445" MinHeight="5" Height="7.4" />
-            <Image Visibility="Hidden" x:Name="successStatePicture" Source="467303591695089664.png" Margin="582,411,0,0"/>
-            <Label Visibility="Hidden" HorizontalContentAlignment="Right" x:Name="classLabel" Content="Addons Applied!" Margin="494,386,0,61" Foreground="White" FontFamily="Arial" FontWeight="Bold" RenderTransformOrigin="0.5,0.5" FontSize="12" />
+
 
             <StackPanel Orientation="Horizontal" Margin="496,4,157,10">
                 <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="#FF2D415D" Width="2" Margin="2,34,2,-10"/>
             </StackPanel>
-            <Label HorizontalContentAlignment="Center" x:Name="label_Copy19" Content="All" Margin="506,360,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
-            <Button Style="{StaticResource MainButtonStyle}" x:Name="animations_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,212,34,247">
+            <Label HorizontalContentAlignment="Center" x:Name="label_Copy19" Content="All" Margin="506,282,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="animations_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,134,34,325">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
@@ -82,7 +534,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Style="{StaticResource MainButtonStyle}" x:Name="animations_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,212,85,247" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="animations_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,134,85,325" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
@@ -91,7 +543,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Style="{StaticResource MainButtonStyle}" x:Name="effects_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,305,34,154">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="effects_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,227,34,232">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
@@ -100,7 +552,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Style="{StaticResource MainButtonStyle}" x:Name="effects_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,305,85,154" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="effects_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,227,85,232" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
@@ -109,7 +561,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Style="{StaticResource MainButtonStyle}" x:Name="all_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,391,34,68">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="all_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Click="handleToggle" Margin="580,313,34,146">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
@@ -118,7 +570,7 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
-            <Button Style="{StaticResource MainButtonStyle}" x:Name="all_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,391,85,68" Click="handleToggle">
+            <Button Style="{StaticResource MainButtonStyle}" x:Name="all_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,313,85,146" Click="handleToggle">
                 <Button.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
@@ -127,6 +579,8 @@
                     </StackPanel>
                 </Button.ToolTip>
             </Button>
+            <Image Visibility="Hidden" x:Name="successStatePicture" Source="467303591695089664.png" Margin="582,411,0,0"/>
+            <Label Visibility="Hidden" HorizontalContentAlignment="Right" x:Name="classLabel" Content="Addons Applied!" Margin="494,386,0,61" Foreground="White" FontFamily="Arial" FontWeight="Bold" RenderTransformOrigin="0.5,0.5" FontSize="12" />
             <Label x:Name="label_Copy20" Content="Dual Blade" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="34,436,0,0" Height="36" Width="167" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
             <toggle:HorizontalToggleSwitch Unchecked="handleToggleChange" Checked="handleToggleChange" x:Name="dualblade_fx_toggle" Margin="396,441,203,24" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="61" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6"/>
             <toggle:HorizontalToggleSwitch Unchecked="handleToggleChange" Checked="handleToggleChange" x:Name="dualblade_anim_toggle" Margin="230,441,369,24" UncheckedBackground="#FF212B38" CheckedBackground="#FF2D415D" ThumbBrush="{x:Null}" ThumbSize="5" UncheckedForeground="White" Width="61" Elasticity="0" FontSize="14" BorderBrush="#FF3F6AA6"/>

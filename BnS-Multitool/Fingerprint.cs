@@ -16,7 +16,6 @@ namespace Security
 
         public static string Value()
         {
-            System.Diagnostics.Debug.WriteLine("Getting fingerprint");
             fingerPrint = string.Empty;
             if (string.IsNullOrEmpty(fingerPrint))
             {

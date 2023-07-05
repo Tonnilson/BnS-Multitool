@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<config>
+    <options>
+        <!-- Reload Config Keybind [CTRL + ALT + 9]-->
+        <option name="reloadKey" keyCode="39" bCtrl="1" bShift="0" bAlt="1" />
+        <!-- Profile 1 Keybind [CTRL + ALT + 1]-->
+        <option name="profile_1" keyCode="31" bCtrl="1" bShift="0" bAlt="1" />
+        <!-- Profile 2 Keybind [CTRL + ALT + 2]-->
+        <option name="profile_2" keyCode="32" bCtrl="1" bShift="0" bAlt="1" />
+        <!-- Profile 3 Keybind [CTRL + ALT + 3]-->
+        <option name="profile_3" keyCode="33" bCtrl="1" bShift="0" bAlt="1" />
+        <!-- Profile 4 Keybind [CTRL + ALT + 4]-->
+        <option name="profile_4" keyCode="34" bCtrl="1" bShift="0" bAlt="1" />
+        <!-- Profile 5 Keybind [CTRL + ALT + 5]-->
+        <option name="profile_5" keyCode="35" bCtrl="1" bShift="0" bAlt="1" />
+    </options>
+  <!-- profile_0 always runs on start / config reload -->
+  <profile_0>
+  <!-- 
+    Determines whether to use Phantom Weapon particle system, turning it back on will not always work immediately
+    This system covers (AFAIK):
+    Astromancer: Weapon Orb
+    3rd Spec BM: Swords
+  -->
+  <phantom enable="0" />
+    <console_cmds>
+      <!-- 
+        This is a list of commands to run based off profile
+        Below is an example to completely get rid of particle effects emitted by the  game engine.
+        <cmd run="FX.MaxCPUParticlesPerEmitter 0" />
+        <cmd run="FX.MaxNiagaraCPUParticlesPerEmitter 0" />
+      -->
+    </console_cmds>
+    <video_options>
+        <!-- 
+          HighEmitter is generally most of the big effects for skills
+          MidEmitter is the middle of generating FX's, weapon-skins, heart effects etc are tied to this
+          LowEmitter is semi-tied with MidEmitter and ties in with weapon skin effects and the remaining part(s) of skill effects
+          JewelEffect no idea what this really is, it can be a variety of small things
+          ImmuneEffect should be the resist / iframe effect but doesn't seem to tie into it too well.
+          CharLod I have no fucking idea what it really is
+          Physics is for boobs / hair / cloth abd not in that particular order
+          ParticleLight is another thing unknown of what exactly it does but i'm going to take a shot in the dark and say its light created by the particle
+
+          Fun Fact:
+          This is the same thing the in-game video options modify so if you change your video settings these get overwritten and
+          some of these settings are never modified by the video options but i'm giving you access to them.
+        -->
+        <!-- Player Effects -->
+        <option name="PlayerHighEmitter" enable="1" />
+        <option name="PlayerMidEmitter" enable="1" />
+        <option name="PlayerLowEmitter" enable="1" />
+        <option name="PlayerJewelEffect" enable="1" />
+        <option name="PlayerImmuneEffect" enable="1" />
+        <option name="PlayerCharLOD" enable="1" />
+        <option name="PlayerPhysics" enable="1" />
+        <option name="PlayerParticleLight" enable="1" />
+        <!-- Other Player Effects -->
+        <option name="PcHighEmitter" enable="0" />
+        <option name="PcMidEmitter" enable="0" />
+        <option name="PcLowEmitter" enable="0" />
+        <option name="PcJewelEffect" enable="0" />
+        <option name="PcImmuneEffect" enable="0" />
+        <option name="PcCharLOD" enable="0" />
+        <option name="PcPhysics" enable="0" />
+        <option name="PcParticleLight" enable="0" />
+        <!-- Boss Effects -->
+        <option name="NpcHighEmitter" enable="1" />
+        <option name="NpcMidEmitter" enable="1" />
+        <option name="NpcLowEmitter" enable="1" />
+        <option name="NpcJewelEffect" enable="0" />
+        <option name="NpcImmuneEffect" enable="0" />
+        <option name="NpcCharLOD" enable="0" />
+        <option name="NpcPhysics" enable="0" />
+        <option name="NpcParticleLight" enable="0" />
+        <!-- Background Effects -->
+        <option name="BackHighEmitter" enable="0" />
+        <option name="BackMidEmitter" enable="0" />
+        <option name="BackLowEmitter" enable="0" />
+        <option name="BackParticleLight" enable="0" />
+      </video_options>
+   </profile_0>
+   
+   <!-- Example Profile_1 to enable only your effects & reset global FX emitter values to default -->
+   <!-- You do not need to include phantom part as it turns on by default if entry not found -->
+   <profile_1>
+      <console_cmds>
+        <cmd run="FX.MaxCPUParticlesPerEmitter 1000" />
+        <cmd run="FX.MaxNiagaraCPUParticlesPerEmitter 1000000" />
+      </console_cmds>
+      <video_options>
+        <option name="PlayerHighEmitter" enable="1" />
+        <option name="PlayerMidEmitter" enable="1" />
+        <option name="PlayerLowEmitter" enable="1" />
+        <option name="PlayerJewelEffect" enable="1" />
+        <option name="PlayerImmuneEffect" enable="1" />
+        <option name="PlayerCharLOD" enable="0" />
+        <option name="PlayerPhysics" enable="0" />
+        <option name="PlayerParticleLight" enable="1" />
+      </video_options>
+   </profile_1>
+  <!-- Example Profile_2 to disable your effects -->
+    <profile_2>
+      <phantom enable="0" />
+      <console_cmds/>
+      <video_options>
+        <option name="PlayerHighEmitter" enable="0" />
+        <option name="PlayerMidEmitter" enable="0" />
+        <option name="PlayerLowEmitter" enable="0" />
+        <option name="PlayerJewelEffect" enable="0" />
+        <option name="PlayerImmuneEffect" enable="0" />
+        <option name="PlayerCharLOD" enable="0" />
+        <option name="PlayerPhysics" enable="0" />
+        <option name="PlayerParticleLight" enable="0" />
+      </video_options>
+   </profile_2>
+   <!-- Example Profile_3 Disabling your effects + setting the global emitter to 0 which nukes all effects on everything -->
+   <profile_3>
+      <phantom enable="0" />
+      <console_cmds>
+        <cmd run="FX.MaxCPUParticlesPerEmitter 0" />
+        <cmd run="FX.MaxNiagaraCPUParticlesPerEmitter 0" />
+      </console_cmds>
+      <video_options>
+        <option name="PlayerHighEmitter" enable="0" />
+        <option name="PlayerMidEmitter" enable="0" />
+        <option name="PlayerLowEmitter" enable="0" />
+        <option name="PlayerJewelEffect" enable="0" />
+        <option name="PlayerImmuneEffect" enable="0" />
+        <option name="PlayerCharLOD" enable="0" />
+        <option name="PlayerPhysics" enable="0" />
+        <option name="PlayerParticleLight" enable="0" />
+      </video_options>
+   </profile_3>
+</config>

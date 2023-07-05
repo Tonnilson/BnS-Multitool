@@ -19,7 +19,7 @@
             <GroupBox Header="Accounts" BorderThickness="0.2" HorizontalAlignment="Left" Height="111" VerticalAlignment="Top" Width="309" Margin="10,190,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
                     <Button Style="{StaticResource MainButtonStyle}" x:Name="LAUNCH_BTN" Content="Launch" Margin="5,37,200,33" Click="LaunchGameClientClick" Foreground="#FF00FF0B"/>
-                    <ComboBox x:Name="ACCOUNT_LIST_BOX" HorizontalAlignment="Left" VerticalAlignment="Top" Width="260" Margin="28,10,0,0" Foreground="White" Background="#FF263447" BorderBrush="#FF636363" SelectionChanged="ACCOUNT_LIST_BOX_SelectionChanged" MouseEnter="MouseEnterSetFocus" Height="22"/>
+                    <ComboBox x:Name="ACCOUNT_LIST_BOX" HorizontalAlignment="Left" VerticalAlignment="Top" Width="260" Margin="28,10,0,0" SelectionChanged="ACCOUNT_LIST_BOX_SelectionChanged" MouseEnter="MouseEnterSetFocus" Height="22"/>
                     <Button Style="{StaticResource MainButtonStyle}" x:Name="KILL_BTN" Content="Kill" Margin="102,37,119,33" Click="killGameProcess"/>
                     <Button Style="{StaticResource MainButtonStyle}" x:Name="DELETE_ACC" FontFamily="Segoe UI Symbol" Content="&#xe106;" Margin="5,10,272,58" Click="removeAccount" Foreground="#FFF00000"/>
 
@@ -45,9 +45,9 @@
                     <Button Style="{StaticResource MainButtonStyle}" x:Name="LOGINHELPER_INSTALL" FontFamily="Segoe UI Symbol" Width="76" Content="Install &#xE118;" Margin="211,84,10,10" Click="installLoginHelperClick"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Client Launch Options" BorderThickness="0.2" HorizontalAlignment="Left" Height="142" VerticalAlignment="Top" Width="309" Margin="341,306,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+            <GroupBox Header="Client Launch Options" BorderThickness="0.2" HorizontalAlignment="Left" Height="167" VerticalAlignment="Top" Width="309" Margin="341,281,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <CheckBox x:Name="USE_ALL_CORES" Content="Use all available cores" Background="White" Foreground="White" Click="LaunchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold" Margin="10,36,-10,64">
+                    <CheckBox x:Name="USE_ALL_CORES" Content="Use all available cores" Background="White" Foreground="White" Click="LaunchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold" Margin="10,32,-10,92">
                         <CheckBox.ToolTip>
                             <StackPanel>
                                 <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Use All Cores</TextBlock>
@@ -58,33 +58,36 @@
                             </StackPanel>
                         </CheckBox.ToolTip>
                     </CheckBox>
-                    <CheckBox x:Name="NOTEXTURE_STREAMING" Content="No Texture Streaming" Foreground="White" Click="LaunchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold" Margin="10,10,-10,90">
+                    <CheckBox x:Name="NOTEXTURE_STREAMING" Content="No Texture Streaming" Foreground="White" Click="LaunchInfoCheckStateChanged" FontFamily="Arial" FontWeight="Bold" Margin="10,6,-10,119">
                         <CheckBox.ToolTip>
                             <StackPanel>
                                 <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">No Texture Streaming</TextBlock>
                                 <TextBlock>
-                                       Disables texture streaming, highest quality textures are always loaded.
+                                       Disables texture streaming which means the highest quality textures are always loaded.
                                         <LineBreak/>
-                                        Recommended for 64-bit Client but not 32-bit client, could cause crashing on 32-bit.
+                                        <Run Foreground="Red" FontWeight="Bold">Will utilize more VRAM</Run>
                                 </TextBlock>
                                 <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                             </StackPanel>
                         </CheckBox.ToolTip>
                     </CheckBox>
-                    <Label Content="Launch Parameters" Foreground="White" FontSize="18" Margin="0,61,0,0" />
-                    <TextBox x:Name="cmdParams" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="4,91,3,6"/>
+                    <Label Content="Launch Parameters" Foreground="White" FontSize="16" Margin="0,50,-1,70" />
+                    <TextBox VerticalContentAlignment="Center" x:Name="cmdParams" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="4,77,3,46" TextChanged="ParamsChanged"/>
+                    <Label Content="Environment Variables" Foreground="White" FontSize="16" Margin="0,99,0,19" />
+                    <Button Style="{StaticResource MainButtonStyle}" Margin="182,103,93,23" Content="&#xE11B;" Click="OpenEnvarsInfo" FontFamily="Segoe UI Symbol"/>
+                    <TextBox VerticalContentAlignment="Center" x:Name="envars" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="4,125,3,-2" TextChanged="ParamsChanged"/>
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Active Processes" BorderThickness="0.2" HorizontalAlignment="Left" Height="200" VerticalAlignment="Top" Width="309" Margin="341,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+            <GroupBox Header="Active Processes" BorderThickness="0.2" HorizontalAlignment="Left" Height="175" VerticalAlignment="Top" Width="309" Margin="341,10,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-                    <ListBox Background="#FF1E2021" BorderBrush="{x:Null}" ItemsSource="{Binding ActiveClientList}" Foreground="White" FontFamily="Arial" FontWeight="Bold" x:Name="ProcessInfo" Margin="4,6,6,0" MouseDoubleClick="ActiveProcessesDblClick" Height="141" VerticalAlignment="Top">
+                    <ListBox Background="#FF1E2021" BorderBrush="{x:Null}" ItemsSource="{Binding ActiveClientList}" Foreground="White" FontFamily="Arial" FontWeight="Bold" x:Name="ProcessInfo" Margin="0,6,0,0" MouseDoubleClick="ActiveProcessesDblClick" Height="116" VerticalAlignment="Top" HorizontalAlignment="Center" Width="287">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding DisplayName}"/>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
-                    <Button Style="{StaticResource MainButtonStyle}" x:Name="KillAll_Btn" Margin="113,152,108,3" Width="76" Content="Kill All" Click="KillAllProcs"/>
+                    <Button Style="{StaticResource MainButtonStyle}" x:Name="KillAll_Btn" Margin="110,127,111,6" Width="76" Content="Kill All" Click="KillAllProcs"/>
                 </Grid>
             </GroupBox>
 
@@ -95,7 +98,7 @@
                     <Button Style="{StaticResource MainButtonStyle}" Content="QoL Options" Margin="35,61,214,93" />
                 </Grid>
             </GroupBox>
-            <GroupBox Header="Memory Cleaner" BorderThickness="0.2" HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="309" Margin="341,215,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
+            <GroupBox Header="Memory Cleaner" BorderThickness="0.2" HorizontalAlignment="Left" Height="86" VerticalAlignment="Top" Width="309" Margin="341,190,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
                     <Label Content="Cleans workingset (memory) of all BnS processes" Foreground="White" Margin="0,0,0,42"/>
                     <ComboBox x:Name="MemoryCleanerBox" HorizontalAlignment="Left" VerticalAlignment="Top" Width="173" Margin="19,28,0,0" Foreground="White" Background="Black" BorderBrush="#FF636363" MouseEnter="MouseEnterSetFocus" SelectionChanged="MemoryCleanerBox_SelectionChanged">
@@ -119,10 +122,9 @@
             </GroupBox>
             <GroupBox Header="Save Account" BorderThickness="0.2" HorizontalAlignment="Center" Height="175" VerticalAlignment="Top" Width="310" Margin="10,10,340,0" Foreground="White" FontFamily="Arial" FontWeight="Bold">
                 <Grid>
-
-                    <TextBox x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="231" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                    <PasswordBox x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,73,0,0" VerticalAlignment="Top" Width="231" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
-                    <TextBox x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="123" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <TextBox VerticalContentAlignment="Center" x:Name="BNS_USERNAME_BOX" HorizontalAlignment="Left" Height="23" Margin="24,24,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="231" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <PasswordBox VerticalContentAlignment="Center" x:Name="BNS_PASSWORD_BOX" HorizontalAlignment="Left" Height="23" Margin="24,73,0,0" VerticalAlignment="Top" Width="231" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
+                    <TextBox VerticalContentAlignment="Center" x:Name="BNS_PINCODE_BOX" HorizontalAlignment="Left" Height="23" Margin="24,121,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="123" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44"/>
                     <Label Content="Email" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,0,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
                     <Label Content="Password" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,49,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
                     <Label Content="Pin Code" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,97,0,0" Foreground="White" FontFamily="Arial" FontWeight="Bold"/>
@@ -513,6 +515,22 @@
                 And that's it, loginhelper will try to generate a TOTP pin-code when logging in and submit that, it may fail but most cases it works.
             </TextBlock>
             <Button Style="{StaticResource MainButtonStyle}" Content="OK GOT IT! GET ME OUT!" Margin="203,441,204,21" Click="ClosePincodeInfo" FontWeight="Bold" />
+        </Grid>
+        <Grid x:Name="EnvironmentVariablesInfo" Visibility="Hidden">
+            <Grid Background="Black" Opacity="0.85"/>
+            <TextBlock Foreground="White" Margin="10,10,10,10" TextWrapping="WrapWithOverflow">
+                <Run Foreground="Wheat" FontSize="18" FontWeight="Bold">Environment Variables</Run><LineBreak/>
+                This allows you to set environment variables specific to an account. As of right now this has no use but if a plugin comes out in the future and you need to set environment variables on the process you can use this to set them.
+                <LineBreak/><LineBreak/>
+                <Run Foreground="CornflowerBlue" FontSize="16" FontWeight="Bold">Usage:</Run><LineBreak/>
+                Environment variables are set by key=value followed by ; for telling it to end.
+                <LineBreak/>
+                <LineBreak/>
+                <Run Foreground="Wheat" FontWeight="Bold">Example:</Run><LineBreak/>
+                <Run FontWeight="Bold">BNS_PROFILE_USERNAME=myusername;BNS_PROFILE_PASSWORD=mypassword123</Run><LineBreak/><LineBreak/>
+                Failure to split it by ; will have unknown results and obviously won't work. It is not needed to put ; at the end, only when setting additional variables. If you are still confused then just stop bothering, this is not meant for you.
+            </TextBlock>
+            <Button Style="{StaticResource MainButtonStyle}" Content="OK GOT IT! GET ME OUT!" Margin="203,441,204,21" Click="CloseEnvarsInfo" FontWeight="Bold" />
         </Grid>
         <Border x:Name="ErrorPromptGrid" Visibility="Hidden" BorderThickness="1" BorderBrush="Black" Background="#E5000000" CornerRadius="75" Margin="99,127,35,178" Grid.ColumnSpan="2">
             <Grid>
