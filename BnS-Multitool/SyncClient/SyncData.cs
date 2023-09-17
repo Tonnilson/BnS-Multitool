@@ -1,79 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
-using System.Linq;
+using System.Windows;
 
 namespace BnS_Multitool
 {
-    public static class EnumHelper
-    {
-        public static string GetDescription<T>(this T e) where T : IConvertible
-        {
-            if (e is Enum)
-            {
-                Type type = e.GetType();
-                Array values = System.Enum.GetValues(type);
-
-                foreach (int val in values)
-                {
-                    if (val == e.ToInt32(CultureInfo.InvariantCulture))
-                    {
-                        var memInfo = type.GetMember(type.GetEnumName(val));
-                        var descriptionAttribute = memInfo[0]
-                            .GetCustomAttributes(typeof(DescriptionAttribute), false)
-                            .FirstOrDefault() as DescriptionAttribute;
-
-                        if (descriptionAttribute != null)
-                        {
-                            return descriptionAttribute.Description;
-                        }
-                    }
-                }
-            }
-
-            return null; // could also return string.Empty
-        }
-    }
-
     public class SyncData
     {
-        public enum CategoryType
-        {
-            [Description("Other")]
-            Other = 0,
-            [Description("Blademaster")]
-            BM = 1,
-            [Description("Kung Fu Master")]
-            KFM = 2,
-            [Description("Forcemaster")]
-            FM = 3,
-            [Description("Destroyer")]
-            DES = 4,
-            [Description("Assassin")]
-            SIN = 5,
-            [Description("Summoner")]
-            SUM = 6,
-            [Description("Blade dancer")]
-            BD = 7,
-            [Description("Warlock")]
-            WL = 8,
-            [Description("Soul Fighter")]
-            SF = 9,
-            [Description("Gunslinger")]
-            GUN = 10,
-            [Description("Warden")]
-            WAR = 11,
-            [Description("Archer")]
-            ARC = 12,
-            [Description("Astromancer")]
-            AST = 13,
-            [Description("Dualblade")]
-            DB = 14,
-            [Description("Bard")]
-            BRD = 15
-        }
-
         public class Discord_Refresh
         {
             public string access_token { get; set; }
@@ -95,7 +27,7 @@ namespace BnS_Multitool
             public int Version { get; set; }
             public string Name { get; set; }
             public string Type { get; set; }
-            public int Category { get; set; }
+            public Models.CategoryType Category { get; set; }
             public string Date { get; set; }
             public string Title { get; set; }
             public string Description { get; set; }
@@ -127,6 +59,25 @@ namespace BnS_Multitool
             public string response_msg { get; set; }
             public List<XML_VIEW_RESPONSE> xmls { get; set; }
             public XML_VIEW_RESPONSE xml { get; set; }
+        }
+
+        public class XML_View_List
+        {
+            public string Title { get; set; }
+            public string User { get; set; }
+            public string Date { get; set; }
+            public string Type { get; set; }
+            public int ID { get; set; }
+            public System.Windows.Media.Brush SyncColor { get; set; }
+            public long DiscordID { get; set; }
+            public int Category { get; set; }
+            public string CategoryText { get; set; }
+            public bool Synced { get; set; }
+            public int Downloads { get; set; }
+            public string Description { get; set; }
+            public string SyncButton { get; set; }
+            public string FileName { get; set; }
+            public Visibility CanRemove { get; set; }
         }
     }
 }

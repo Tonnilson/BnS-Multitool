@@ -1,0 +1,488 @@
+﻿<Window x:Class="BnS_Multitool.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BnS_Multitool.View"
+        xmlns:viewmodel="clr-namespace:BnS_Multitool.ViewModels"
+        xmlns:ext="clr-namespace:BnS_Multitool.Extensions"
+        xmlns:bindings="clr-namespace:BnS_Multitool.Models"
+        mc:Ignorable="d"
+        Title="BnS Multi Tool" Height="508" Width="863"
+        ResizeMode="CanMinimize"
+        WindowStyle="None"
+        AllowsTransparency="False"
+        Background="#FF151617"
+        WindowStartupLocation="CenterScreen"
+        WindowState="{Binding CurrentWindowState}"
+        Visibility="{Binding IsWindowVisible, Mode=TwoWay, Converter={StaticResource BooleanToVisibility}}"
+        ShowInTaskbar="{Binding ShowTaskbar}">
+    <Grid>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="200"/>
+                <ColumnDefinition />
+
+            </Grid.ColumnDefinitions>
+            <DockPanel LastChildFill="False" Opacity="0.95">
+                <StackPanel DockPanel.Dock="Left" Width="200" Background="#FF161a1f">
+                    <StackPanel>
+                        <Image x:Name="BANNER_ICON" Source="{Binding NaviHeaderIcon}" Height="85"/>
+                    </StackPanel>
+                    <StackPanel>
+                        <ListView Background="{x:Null}" Width="200" x:Name="MenuNavigation" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled" BorderThickness="0" BorderBrush="{x:Null}">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="{x:Type ListViewItem}">
+                                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                    <Style.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </Trigger>
+                                        <Trigger Property="IsSelected" Value="True">
+                                            <Setter Property="Background" Value="Transparent" />
+                                            <Setter Property="BorderThickness" Value="0" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="MainPage">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_MAIN_ICON" Source="{Binding NaviMainIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">News</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="60" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Launcher">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_LAUNCHER_ICON" Source="{Binding NaviPlayIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Play</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Patches">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_PATCHES_ICON" Source="{Binding NaviPatchesIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Patches</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Effects">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_EFFECTS_ICON" Source="{Binding NaviEffectsIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Effects</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Mods">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_MODS_ICON" Source="{Binding NaviModsIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Mods</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Plugins">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_MODPOLICE_ICON" Source="{Binding NaviPluginsIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">Plugins</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                            <ListViewItem>
+                                <StackPanel Orientation="Horizontal" Height="55" Width="190">
+                                    <Button Command="{Binding NavigateCommand}" CommandParameter="Updater">
+                                        <Button.Style>
+                                            <Style TargetType="{x:Type Button}">
+                                                <Setter Property="Background" Value="#161a1f"/>
+                                                <Setter Property="Template">
+                                                    <Setter.Value>
+                                                        <ControlTemplate TargetType="{x:Type Button}">
+                                                            <Border Background="{TemplateBinding Background}">
+                                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                            </Border>
+                                                        </ControlTemplate>
+                                                    </Setter.Value>
+                                                </Setter>
+                                                <Style.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter Property="Background" Value="#FF242E3C"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter Property="Foreground" Value="Gray"/>
+                                                        <Setter Property="Background" Value="#FF111417"/>
+                                                    </Trigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                        <StackPanel Orientation="Horizontal" Width="190">
+                                            <Grid Width="188" Height="60">
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="65"/>
+                                                    <ColumnDefinition/>
+                                                </Grid.ColumnDefinitions>
+                                                <Image Grid.Column="0" x:Name="MENU_BNSUPDATER_ICON" Source="{Binding NaviUpdaterIcon}" HorizontalAlignment="Left" VerticalAlignment="Center" Stretch="Fill" Height="55" Width="55"/>
+                                                <TextBlock Grid.Column="1" FontFamily="Arial" TextAlignment="Right" HorizontalAlignment="Right" VerticalAlignment="Center" FontSize="20" Foreground="{DynamicResource {x:Static SystemColors.ActiveCaptionBrushKey}}" FontWeight="Bold">BnS Updater</TextBlock>
+                                            </Grid>
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ListViewItem>
+                        </ListView>
+                    </StackPanel>
+                </StackPanel>
+            </DockPanel>
+            <Grid Grid.Column="1">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="25"/>
+                        <RowDefinition/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Title Bar -->
+                    <Grid Grid.Row="0" Background="#FF161a1f">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition/>
+                            <ColumnDefinition Width="150"/>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="25"/>
+                            <ColumnDefinition Width="25"/>
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="2" Command="{Binding ShowSettingsCommand}" BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe115; " FontSize="14"/>
+                        <Button Grid.Column="3" Command="{Binding MinimizeWindowCommand}" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe108; " BorderBrush="{x:Null}" FontSize="14"/>
+                        <Button Grid.Column="4" Command="{Binding CloseWindowCommand}" BorderThickness="1" Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" Content=" &#xe10a; " BorderBrush="{x:Null}" FontSize="14"/>
+                        <TextBlock Margin="200,0,0,0" VerticalAlignment="Center" Foreground="White" FontFamily="Arial" FontSize="16" HorizontalAlignment="Center" FontWeight="Bold" Text="{Binding VersionTitleBar}"/>
+                        <Button Grid.Column="1" Visibility="{Binding IsUpdateAvailable, Converter={StaticResource BooleanToVisibility}}" HorizontalAlignment="Right" VerticalAlignment="Center" x:Name="MT_UPDATE" Style="{StaticResource TitleBarButtons}" Content="&#xE118;Update Available " FontFamily="Segoe UI Symbol" FontSize="16"/>
+                    </Grid>
+                    <Grid Grid.Row="1" Height="492">
+                        <ContentControl Content="{Binding CurrentView}"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="1" Visibility="{Binding ShowError, Converter={StaticResource BooleanToVisibility}}">
+            <Grid Background="Black" Opacity="0.35"/>
+            <Grid Background="#FF161A1F" Width="500" Height="135" HorizontalAlignment="Center" VerticalAlignment="Center">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="125"/>
+                    <ColumnDefinition/>
+                </Grid.ColumnDefinitions>
+                <Image VerticalAlignment="Bottom" Source="{Binding ErrorPicture}"/>
+                <Grid Grid.Column="1">
+                    <TextBlock Padding="15 10 15 10" TextWrapping="WrapWithOverflow" Foreground="White" FontFamily="Verdana" FontSize="{Binding ErrorSize}" FontWeight="{Binding ErrorWeight}" Text="{Binding ErrorMessage}" />
+                    <Button Margin="0 0 10 10" HorizontalAlignment="Right" VerticalAlignment="Bottom" Style="{StaticResource MainButtonStyle}" Grid.Row="1" Width="75" Height="25" Content="OK" FontWeight="Bold" Command="{Binding CloseErrorPromptCommand}" FontFamily="Verdana"/>
+                </Grid>
+            </Grid>
+        </Grid>
+        <Grid Style="{StaticResource FadeInGrid90}" x:Name="SettingsDarken" Visibility="{Binding IsSettingsOpen, Converter={StaticResource BooleanToVisibility}}" Background="Black" Opacity="0.90"/>
+        <Grid Style="{StaticResource FadeInGridFast}" x:Name="SettingsMenu" Visibility="{Binding IsSettingsOpen, Converter={StaticResource BooleanToVisibility}}" Margin="170,10" Background="#FF292E38">
+            <Border BorderBrush="#FF454547" BorderThickness=".6" CornerRadius="5">
+                <Grid>
+                    <Label FontFamily="Segoe UI Symbol" Content="&#xe115; Settings" Margin="10,10,296,417" Foreground="White" FontSize="30"/>
+                    <Separator Background="#FF353D4C" Margin="0,64,0,395"/>
+                    <Label Background="#FF282C36" Margin="0,78,0,48"/>
+                    <Separator Background="#FF353D4C" Margin="3,434,-2,45"/>
+                    <Separator Background="#FF353D4C" Margin="0,188,1,291"/>
+                    <Label Content="Game Updater" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,86,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
+                    <Label Content="Updater threads" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,121,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxUpdaterThreads" HorizontalContentAlignment="Center" Margin="196,121,265,338" FontWeight="Bold" FontSize="14" SelectedIndex="{Binding UpdaterThreads}">
+                        <ComboBoxItem>1</ComboBoxItem>
+                        <ComboBoxItem>2</ComboBoxItem>
+                        <ComboBoxItem>3</ComboBoxItem>
+                        <ComboBoxItem>4</ComboBoxItem>
+                        <ComboBoxItem>5</ComboBoxItem>
+                        <ComboBoxItem>6</ComboBoxItem>
+                        <ComboBoxItem>7</ComboBoxItem>
+                        <ComboBoxItem>8</ComboBoxItem>
+                        <ComboBoxItem>9</ComboBoxItem>
+                        <ComboBoxItem>10</ComboBoxItem>
+                    </ComboBox>
+                    <TextBlock Text="Delta Patching" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="281,126,0,0" Foreground="#FFFCFCFC" FontSize="16" FontWeight="Bold" Height="22" Width="133"/>
+                    <CheckBox x:Name="DeltaPatching_Checkbox" IsChecked="{Binding IsDeltaPatchingEnabled}" Content="" Margin="419,127,75,338" Foreground="White" />
+                    <CheckBox x:Name="PingCheckTick" IsChecked="{Binding IsPingEnabled}" Content="" Margin="176,318,318,146" Foreground="White" />
+                    <Label Content="Starting new game" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,237,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold" Height="28" Width="147"/>
+                    <ComboBox x:Name="lstBoxNewGame" Margin="172,237,144,221" FontWeight="Bold"
+                              ItemsSource="{ext:EnumBindingSource bindings:EStartNewGame}"
+                              SelectedItem="{Binding CurrentNewGameOption}"/>
+                    <Label Content="When clicking [ - ]" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,276,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxLauncherX" Margin="172,276,144,180" FontWeight="Bold"
+                              ItemsSource="{ext:EnumBindingSource bindings:EMinimizeWindow}"
+                              SelectedItem="{Binding CurrentMinimizeOption}"/>
+                    <Label Content="Enable Ping Check" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,315,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="14" FontWeight="Bold"/>
+                    <Button Style="{StaticResource MainButtonStyle}" Width="auto" Height="30" Content="Remove Compatibility Options" FontWeight="Bold" Command="{Binding RemoveCompatOptionsCommand}" Margin="38,346,285,109" />
+                    <Button Style="{StaticResource MainButtonStyle}"  Content="Add FTH Exclusion" FontWeight="Bold" Command="{Binding FTHExclusionCommand}" Width="auto" Height="30" Margin="241,346,144,109">
+                        <Button.ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Add FTH Exclusion for BNSR</TextBlock>
+                                <TextBlock>
+                                       Adds exclusion for BNSR.exe to FTH
+                                        <LineBreak/>
+                                        FTH (Fault Tolerant Heap) is a subsystem introduced in Windows 7 that is responsible for monitoring application
+                                         <LineBreak/>
+                                          crashes and attempts to apply mitigations to prevent the application from crashing in the future
+                                          <LineBreak/>
+                                    <LineBreak/>
+                                           Normally it is not a problem but it has caused issues with BNS in the past from performance issues to game not launching.
+                                    <LineBreak/>
+                                    If you are having issues with the game launching even with normal nclauncher try this
+                                </TextBlock>
+                                <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
+                    <Button Style="{StaticResource MainButtonStyle}" Content="Clear FTH" FontWeight="Bold" Command="{Binding ClearFTHCommand}" Width="auto" Height="30" Margin="382,346,52,109">
+                        <Button.ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Clear FTH State for BNSR</TextBlock>
+                                <TextBlock>
+                                       Checks and clears the FTH state for BNSR, if you are having issues launching the game
+                                    <LineBreak/>
+                                    try this option first and see if the game launches, if it does you can think about adding
+                                    <LineBreak/>
+                                    an FTH exclusion if it continues to happen
+                                </TextBlock>
+                                <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                            </StackPanel>
+                        </Button.ToolTip>
+                    </Button>
+                    <TextBox Text="{Binding CurrentGamePath}" x:Name="BNS_LOCATION_BOX" HorizontalAlignment="Left" Height="26" Margin="38,406,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="353" Style="{StaticResource MainTextBox}"/>
+                    <Button Style="{StaticResource MainButtonStyle}" Width="auto" Height="30" Margin="396,446,10,10" Content="Close" FontWeight="Bold" Command="{Binding CloseSettingsCommand}" />
+                    <Label Content="General" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="28,197,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="22" FontWeight="Bold"/>
+                    <Button Style="{StaticResource MainButtonStyle}" Width="auto" Height="30" Margin="396,406,34,54" Content="Browse" FontWeight="Bold" Command="{Binding BrowseDirectoryCommand}" />
+                    <Button Style="{StaticResource MainButtonStyle}" Width="auto" Height="30" Margin="276,446,130,10" Content="Confirm" FontWeight="Bold" Command="{Binding SaveSettingsCommand}" />
+                    <Label Content="Blade &amp; Soul Location" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="35,377,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
+                    <Label Content="Theme:" Margin="309,39,48,389" Foreground="White" FontWeight="Bold" FontSize="18" />
+                    <ComboBox HorizontalContentAlignment="Center" x:Name="ICON_THEME_CB" Margin="382,47,10,417"  FontWeight="Bold"
+                              ItemsSource="{ext:EnumBindingSource bindings:EThemes}"
+                              SelectedItem="{Binding CurrentTheme}"/>
+                    <TextBlock HorizontalAlignment="Left" VerticalAlignment="Top" Margin="281,159,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold" Width="133" Height="21">
+                        <Run FontFamily="Arial" Text="Build # Relay "/><Run FontFamily="Segoe UI Symbol" Text="&#xE11B;"/>
+                        <TextBlock.ToolTip>
+                            <StackPanel>
+                                <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">NAEU Build Relay</TextBlock>
+                                <TextBlock>
+                                       This is for users who are having an issue establishing a connection with NCWest's main server
+                                    <LineBreak/>
+                                    This mirrors the current build as told by NCWest on my server for game updates
+                                </TextBlock>
+                                <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                            </StackPanel>
+                        </TextBlock.ToolTip>
+                    </TextBlock>
+                    <CheckBox x:Name="BuildRelay_Checkbox" IsChecked="{Binding IsRelayEnabled}" Content="" Margin="419,160,75,305" Foreground="White" />
+                    <Label Content="Download threads" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="38,155,0,0" Foreground="#FFFCFCFC" FontFamily="Arial" FontSize="16" FontWeight="Bold"/>
+                    <ComboBox x:Name="lstBoxUpdaterThreads_Copy" HorizontalContentAlignment="Center" Margin="196,155,265,305" FontWeight="Bold" FontSize="14" SelectedIndex="{Binding DownloadThreads}">
+                        <ComboBoxItem Content="1"/>
+                        <ComboBoxItem Content="2"/>
+                        <ComboBoxItem Content="3"/>
+                        <ComboBoxItem Content="4"/>
+                        <ComboBoxItem Content="5"/>
+                        <ComboBoxItem Content="6"/>
+                        <ComboBoxItem Content="7"/>
+                        <ComboBoxItem Content="8"/>
+                        <ComboBoxItem Content="9"/>
+                        <ComboBoxItem Content="10"/>
+                    </ComboBox>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</Window>

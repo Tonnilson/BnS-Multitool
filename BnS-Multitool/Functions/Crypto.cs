@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace BnS_Multitool.Functions
 {
-    static class Crypto
+    public static class Crypto
     {
         public sealed class Crc32 : HashAlgorithm
         {
@@ -213,28 +211,24 @@ namespace BnS_Multitool.Functions
                 return (crcout);
             }
         }
-        public static string SHA1_File(string filePath)
+        public static string SHA1_File(string filePath, ILogger? logger = null)
         {
             try
             {
-                using (FileStream fs = new FileStream(filePath, FileMode.Open))
-                using (BufferedStream bs = new BufferedStream(fs))
+                using (var sha1 = SHA1.Create())
                 {
-                    using (SHA1Managed sha1 = new SHA1Managed())
+                    using (var stream = File.OpenRead(filePath))
                     {
-                        byte[] hash = sha1.ComputeHash(bs);
-                        StringBuilder formatted = new StringBuilder(2 * hash.Length);
-                        foreach (byte b in hash)
-                        {
-                            formatted.AppendFormat("{0:x2}", b);
-                        }
-                        return formatted.ToString();
+                        var hash = sha1.ComputeHash(stream);
+                        return BitConverter.ToString(hash).Replace("-","").ToLowerInvariant();
                     }
                 }
             }
             catch (Exception ex)
             {
-                Logger.log.Error("Crypto::SHA1_File::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
+                if(logger != null)
+                    logger.LogError(ex, "Failed to compute hash");
+
                 return string.Empty;
             }
         }

@@ -1,5 +1,15 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="BnS_Multitool.Properties" GeneratedClassName="Settings">
   <Profiles />
-  <Settings />
+  <Settings>
+    <Setting Name="MainServerAddr" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">http://multitool.tonic.pw/</Value>
+    </Setting>
+    <Setting Name="discord_clientId" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">901679848022474752</Value>
+    </Setting>
+    <Setting Name="discord_secret" Type="System.String" Scope="Application">
+      <Value Profile="(Default)">Gq4mVqoDBrWN7oKV0jLzqtOMzsj65Bwk</Value>
+    </Setting>
+  </Settings>
 </SettingsFile>
