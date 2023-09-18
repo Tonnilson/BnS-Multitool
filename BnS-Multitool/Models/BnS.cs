@@ -3,23 +3,19 @@ using BnS_Multitool.NCServices;
 using Microsoft.Extensions.Logging;
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Markup;
 
 namespace BnS_Multitool.Models
 {
     /// <summary>
     /// BnS specific game stuff & service functionality
+    /// Most of these attributes are custom extensions found in AttributeExtensions.cs
     /// </summary>
-    // GameName, LoginAddr, CDN and IPAddress are custom attributes so you'll need the code from AttributeExtensions.cs
     public enum ERegion
     {
         [Description("NA")]
@@ -146,18 +142,18 @@ namespace BnS_Multitool.Models
 
         public void Initialize()
         {
-            // I was going to do something here.. I'll remember later... maybe.. hopefully?
             QueryServices();
         }
 
         private void QueryServices()
         {
-            _buildNumber = NCLauncherService<string>(BnS.ServiceRequest.Build).GetAwaiter().GetResult(); // Still using this because of build relay option
+            _buildNumber = NCLauncherService<string>(BnS.ServiceRequest.Build).GetAwaiter().GetResult(); // Still using this because of build relay option, need to get rid of this later
             _loginAvailable = GetGameInfoExeEnable(_settings.Account.REGION)?.ExeEnableFlag != 0 ? true : false;
             var cdn = GetGameInfoUpdateRequest(_settings.Account.REGION);
             RepositoryServerAddress = cdn.RepositoryServerAddress ?? _settings.Account.REGION.GetAttribute<CDNAttribute>().Name;
             _LastRegion = _settings.Account.REGION;
             _lastLookup = DateTime.Now.AddMinutes(1);
+            Disconnect();
         }
 
         public enum ServiceRequest
@@ -204,6 +200,7 @@ namespace BnS_Multitool.Models
             }
             catch (SocketException ex)
             {
+                _logger.LogError(ex, "Failed to create connection with NCServices");
                 if (_Socket != null)
                 {
                     _Socket.Close();
@@ -219,9 +216,9 @@ namespace BnS_Multitool.Models
             if (_Socket != null)
             {
                 try { _Socket.Shutdown(SocketShutdown.Both); }
-                catch (Exception)
+                catch (Exception ex)
                 {
-
+                    _logger.LogError(ex, "Failed to close socket for NCServices");
                 }
                 finally
                 {
@@ -282,6 +279,7 @@ namespace BnS_Multitool.Models
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Failed sending and receiving request from NCServices");
                 return null;
             }
         }

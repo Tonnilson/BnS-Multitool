@@ -1,9 +1,44 @@
 ﻿using BnS_Multitool.Extensions;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Threading.Tasks;
 
 namespace BnS_Multitool.Models
 {
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum EO_UI_Slot
+    {
+        [Description("None")]
+        None,
+        [Description("Buff")]
+        Buff,
+        [Description("Debuff")]
+        Debuff,
+        [Description("System")]
+        System,
+        [Description("Long-term")]
+        LongTerm,
+        [Description("Buff-Disabled")]
+        BuffDisabled
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum EO_Category
+    {
+        [Description("None")]
+        None,
+        [Description("Attraction")]
+        Attraction,
+        [Description("Item-event")]
+        ItemEvent,
+        [Description("Combat-common")]
+        CombatCommoon,
+        [Description("Combat-class")]
+        CombatClass,
+        [Description("Skill")]
+        Skill
+    }
+
     public enum EThemeIcons
     {
         [WorryTheme("/Images/BnS_LOGO.png")][AgonTheme("/Images/agon/ue4agonhigh.png")]

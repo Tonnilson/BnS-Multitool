@@ -25,4 +25,12 @@
     <DataTemplate DataType="{x:Type viewmodel:PatchesViewModel}">
         <view:PatchesView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodel:EffectsViewModel}">
+        <view:EffectsView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodel:ExtendedOptionsViewModel}">
+        <view:ExtendedOptionsView/>
+    </DataTemplate>
 </ResourceDictionary>

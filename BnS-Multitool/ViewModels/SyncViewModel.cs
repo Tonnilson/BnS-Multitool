@@ -119,9 +119,10 @@ namespace BnS_Multitool.ViewModels
         private bool showPublishBtn = false;
 
         [RelayCommand]
-        async Task UILoaded()
+        void UILoaded()
         {
-            await Task.Run(OnPageLoad);
+            // Hacky trick to not lock the UI thread, Even if I run it with Task.Run it locks, not sure why, if you know why let me know.
+            new System.Threading.Thread(async () => { System.Threading.Thread.CurrentThread.IsBackground = true; await OnPageLoad(); }).Start();
         }
 
         private async Task OnPageLoad()
@@ -264,6 +265,8 @@ namespace BnS_Multitool.ViewModels
 
                 _sync.Auth_Token = _settings.Sync.AUTH_KEY;
                 await AuthorizeDiscord();
+                ShowSyncAuth = false;
+                ShowSyncMain = true;
             }
         }
 
@@ -363,8 +366,11 @@ namespace BnS_Multitool.ViewModels
         {
             ShowSyncMain = false;
             SkipAuth = false;
+            ShowResyncBtn = false;
             AuthorizationCompleted = new TaskCompletionSource<bool>();
             await SetupAuthKey();
+            if (!SkipAuth)
+                await _settings.SaveAsync(Settings.CONFIG.Sync);
         }
 
         [ObservableProperty]

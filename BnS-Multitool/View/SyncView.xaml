@@ -210,9 +210,9 @@
         <Grid x:Name="SyncAuth" Visibility="{Binding ShowSyncAuth, Converter={StaticResource BooleanToVisibility}}">
             <Label HorizontalContentAlignment="Center" Content="Authorization Token" Foreground="White" FontWeight="Bold" FontSize="20" Margin="0,105,0,350"/>
             <TextBox Text="{Binding AuthToken}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" x:Name="AuthTokenBox" Background="#FF263447" Foreground="White" BorderBrush="#FF3D3B44" FontFamily="Arial" FontWeight="Bold" Margin="163,145,153,316" FontSize="16"/>
-            <Button Style="{StaticResource MainButtonStyle}" Content="Skip" Margin="163,179,400,280" FontWeight="Bold"/>
+            <Button Command="{Binding SkipAuthorzationCommand}" Style="{StaticResource MainButtonStyle}" Content="Skip" Margin="163,179,400,280" FontWeight="Bold"/>
             <Button Command="{Binding GetAuthTokenCommand}" Style="{StaticResource MainButtonStyle}" Content="Get Token" Margin="410,179,153,280" FontWeight="Bold"/>
-            <Button Style="{StaticResource MainButtonStyle}" Content="Authorize" Margin="265,179,255,280" FontWeight="Bold"/>
+            <Button Command="{Binding UseAuthorizationTokenCommand}" Style="{StaticResource MainButtonStyle}" Content="Authorize" Margin="265,179,255,280" FontWeight="Bold"/>
             <TextBlock TextAlignment="Center" TextWrapping="WrapWithOverflow" Foreground="White" FontWeight="Bold" Margin="163,215,153,105">
             Discord is used as the authorization, I only collect and save your username, avatar and unique id. None of your personal information is
             accessed or saved.
@@ -228,7 +228,7 @@
             </Ellipse.Fill>
         </Ellipse>
         <Label Content="{Binding DiscordUsername}" HorizontalContentAlignment="Right" x:Name="DiscordName" Foreground="White" FontWeight="Bold" Margin="479,5,40,457" FontSize="16" />
-        <Button Visibility="Hidden" x:Name="RestartSyncBtn" Content=" Authorize  &#xE117; " Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" FontWeight="Bold" Margin="562,10,10,450"/>
+        <Button Visibility="{Binding ShowResyncBtn, Converter={StaticResource BooleanToVisibility}}" Command="{Binding RestartSyncCommand}" x:Name="RestartSyncBtn" Content=" Authorize  &#xE117; " Style="{StaticResource TitleBarButtons}" FontFamily="Segoe UI Symbol" FontWeight="Bold" Margin="537,5,-11,443"/>
         <Grid Style="{StaticResource FadeInGrid}" Visibility="{Binding ShowProgressView, Converter={StaticResource BooleanToVisibility}}" x:Name="ProgressGrid" Grid.ColumnSpan="2">
             <Grid Background="Black" Opacity="0.9" />
             <Image

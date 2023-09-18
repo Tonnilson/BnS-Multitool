@@ -131,7 +131,7 @@ namespace BnS_Multitool.ViewModels
             if(CurrentView.GetType().Name == "MainPageViewModel")
                 WeakReferenceMessenger.Default.Send(new UnloadedMainPageVM(true));
 
-            // This is kind of bad but whatever
+            // This is kind of bad, needs to and hopefully will be replaced with navigationService
             switch(dest)
             {
                 case "MainPage":
@@ -152,10 +152,16 @@ namespace BnS_Multitool.ViewModels
                 case "Patches":
                     CurrentView = _serviceProvider.GetRequiredService<PatchesViewModel>();
                     break;
+                case "Effects":
+                    CurrentView = _serviceProvider.GetRequiredService<EffectsViewModel>();
+                    break;
+                case "ExtendedOptions":
+                    CurrentView = _serviceProvider.GetRequiredService<ExtendedOptionsViewModel>();
+                    break;
             }
 
-            GC.Collect();
-            GC.WaitForPendingFinalizers();
+            //GC.Collect();
+            //GC.WaitForPendingFinalizers();
         }
 
         public MainViewModel(Settings settings, NotifyIconService notifyService, MultiTool mt, ILogger<MainViewModel> logger, IServiceProvider serviceProvider, XmlModel xmlModel, MessageService ms)

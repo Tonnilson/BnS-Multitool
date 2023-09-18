@@ -12,6 +12,9 @@
     <Compile Update="View\EffectsView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\ExtendedOptionsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\FirstTimeView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -48,6 +51,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="View\EffectsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\ExtendedOptionsView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="View\FirstTimeView.xaml">

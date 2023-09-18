@@ -11,6 +11,7 @@ using BnS_Multitool.Services;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Reflection;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BnS_Multitool
 {
@@ -46,8 +47,12 @@ namespace BnS_Multitool
                 AddSingleton<PluginsViewModel>().
                 AddSingleton<PatchesView>().
                 AddSingleton<PatchesViewModel>().
+                AddSingleton<ExtendedOptionsView>().
+                AddSingleton<ExtendedOptionsViewModel>().
                 AddSingleton<SyncView>().
                 AddSingleton<SyncViewModel>().
+                AddSingleton<EffectsView>().
+                AddSingleton<EffectsViewModel>().
                 AddSingleton<MainPage>().
                 AddSingleton<XmlModel>().
                 AddSingleton<MainPageViewModel>().
@@ -107,16 +112,18 @@ namespace BnS_Multitool
 
         private async Task InitApp()
         {
-            // These assembly files are loaded in much later and will cause a quick stutter so lets load them at start to eliminate that problem
+            // These assembly files are loaded in much later and will cause a stutter so lets load them at start to eliminate that problem
             Assembly.Load("WatsonWebsocket");
             Assembly.Load("System.Net.WebSockets");
             Assembly.Load("System.Net.HttpListener");
             Assembly.Load("System.Reflection.Metadata");
             Assembly.Load("XamlAnimatedGif");
             Assembly.Load("PresentationFramework-SystemData");
+            Assembly.Load("PresentationFramework-SystemCore");
             Assembly.Load("Accessibility");
             Assembly.Load("Microsoft.Xaml.Behaviors");
             Assembly.Load("System.Diagnostics.StackTrace");
+            Assembly.Load("ToggleSwitch"); // This is subject to be removed later on
 
             await _serviceProvider.GetRequiredService<InitScreenViewModel>().InitializeAsync();
             await Current.Dispatcher.BeginInvoke(new Action(() =>

@@ -128,6 +128,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Reference Include="ToggleSwitch">
+      <HintPath>E:\Github\toggle-switch-control\WPF\ToggleSwitch\bin\Release\net7.0-windows\ToggleSwitch.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
     <Resource Include="Images\agon\agonCopium.png">
       <CopyToOutputDirectory></CopyToOutputDirectory>
     </Resource>
