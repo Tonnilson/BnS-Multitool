@@ -39,7 +39,13 @@
     <Compile Update="View\Plugins.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="View\QolView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="View\SyncView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\UpdaterView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -80,7 +86,13 @@
     <Page Update="View\Plugins.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="View\QolView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="View\SyncView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\UpdaterView.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

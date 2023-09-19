@@ -53,6 +53,10 @@ namespace BnS_Multitool
                 AddSingleton<SyncViewModel>().
                 AddSingleton<EffectsView>().
                 AddSingleton<EffectsViewModel>().
+                AddSingleton<QolView>().
+                AddSingleton<QolViewModel>().
+                AddSingleton<UpdaterView>().
+                AddSingleton<UpdaterViewModel>().
                 AddSingleton<MainPage>().
                 AddSingleton<XmlModel>().
                 AddSingleton<MainPageViewModel>().

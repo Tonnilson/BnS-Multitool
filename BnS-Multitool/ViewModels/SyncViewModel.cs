@@ -23,6 +23,8 @@ using System.IO;
 using System.Windows.Data;
 using Newtonsoft.Json.Linq;
 using System.ComponentModel.DataAnnotations;
+using CommunityToolkit.Mvvm.Messaging;
+using BnS_Multitool.Messages;
 
 namespace BnS_Multitool.ViewModels
 {
@@ -61,6 +63,12 @@ namespace BnS_Multitool.ViewModels
                 _settings.Sync.AUTH_KEY = packet.access_token;
                 _settings.Save(Settings.CONFIG.Sync);
                 AuthorizationCompleted.SetResult(true);
+
+                // Let the main window know to pull it's self back up to the foreground.
+                Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                {
+                    WeakReferenceMessenger.Default.Send(new ActivateWindowMessage(true));
+                }));
                 //MainWindow.mainWindow.Activate();
 
             }

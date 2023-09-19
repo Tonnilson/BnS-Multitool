@@ -73,6 +73,16 @@ namespace BnS_Multitool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
+        public static byte[] BnS_Multi_Tool_Updater {
+            get {
+                object obj = ResourceManager.GetObject("BnS_Multi_Tool_Updater", resourceCulture);
+                return ((byte[])(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Byte[].
+        /// </summary>
         public static byte[] class_removes {
             get {
                 object obj = ResourceManager.GetObject("class_removes", resourceCulture);

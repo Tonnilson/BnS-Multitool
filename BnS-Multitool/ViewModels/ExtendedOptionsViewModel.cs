@@ -2,7 +2,6 @@
 using BnS_Multitool.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -145,6 +144,9 @@ namespace BnS_Multitool.ViewModels
         [RelayCommand]
         async void UILoaded()
         {
+            if (_xmlModel.extended_options == null)
+                await _xmlModel.Load_ExtendedOptions_Async();
+
             RefreshView();
             await Task.CompletedTask;
         }

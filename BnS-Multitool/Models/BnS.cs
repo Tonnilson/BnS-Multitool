@@ -1,14 +1,19 @@
 ﻿using BnS_Multitool.Extensions;
+using BnS_Multitool.Functions;
 using BnS_Multitool.NCServices;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.XPath;
 
 namespace BnS_Multitool.Models
 {
@@ -140,6 +145,72 @@ namespace BnS_Multitool.Models
             _httpClient = http;
         }
 
+        public string GetLocalBuild()
+        {
+            if (_settings.System.BNS_DIR.IsNullOrEmpty()) return string.Empty;
+            string filePath = Path.Combine(_settings.System.BNS_DIR, $"VersionInfo_{_settings.Account.REGION.GetAttribute<GameIdAttribute>().Name}");
+            try
+            {
+                if (File.Exists($"{filePath}.ini"))
+                {
+                    var reader = new IniReader($"{filePath}.ini");
+                    return reader.Read("VersionInfo", "GlobalVersion");
+                } else
+                {
+                    System.Xml.Linq.XDocument versionInfo = System.Xml.Linq.XDocument.Load($"{filePath}.xml");
+                    var localInfo = versionInfo.XPathSelectElement("VersionInfo/version");
+                    if (localInfo == null) return string.Empty;
+                    return localInfo.Value;
+                }
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting local client version");
+                return string.Empty;
+            }
+        }
+
+        public void WriteLocalBuild(string versionNumber, bool isPurple = false)
+        {
+            if (_settings.System.BNS_DIR.IsNullOrEmpty()) return;
+            string filePath = Path.Combine(_settings.System.BNS_DIR, $"VersionInfo_{_settings.Account.REGION.GetAttribute<GameIdAttribute>().Name}");
+
+            try
+            {
+                if (isPurple)
+                {
+                    if (File.Exists($"{filePath}.xml"))
+                    {
+                        System.Xml.Linq.XDocument versionInfo = System.Xml.Linq.XDocument.Load($"{filePath}.xml");
+                        var localInfo = versionInfo.XPathSelectElement("VersionInfo/Version");
+                        localInfo.Value = versionNumber;
+                        versionInfo.Save($"{filePath}.xml");
+                    } else
+                    {
+                        using (System.Xml.XmlWriter writer = System.Xml.XmlWriter.Create($"{filePath}.xml"))
+                        {
+                            writer.WriteStartElement("VersionInfo");
+                            writer.WriteElementString("Version", versionNumber);
+                            writer.WriteElementString("LocalDownloadIndex", "0");
+                            writer.WriteElementString("Updated", "1");
+                            writer.WriteElementString("SelectedFolders", "");
+                            writer.WriteEndElement();
+                            writer.Flush();
+                        }
+                    }
+                } else
+                {
+                    if (!File.Exists($"{filePath}.ini"))
+                        File.Create($"{filePath}.ini").Dispose();
+
+                    var versionInfo = new IniReader($"{filePath}.ini");
+                    versionInfo.Write("VersionInfo", "GlobalVersion", versionNumber);
+                }
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error writing local build number");
+            }
+        }
+
         public void Initialize()
         {
             QueryServices();
@@ -147,10 +218,13 @@ namespace BnS_Multitool.Models
 
         private void QueryServices()
         {
-            _buildNumber = NCLauncherService<string>(BnS.ServiceRequest.Build).GetAwaiter().GetResult(); // Still using this because of build relay option, need to get rid of this later
+            _buildNumber = NCLauncherService<string>(ServiceRequest.Build).GetAwaiter().GetResult(); // Still using this because of build relay option, need to get rid of this later
             _loginAvailable = GetGameInfoExeEnable(_settings.Account.REGION)?.ExeEnableFlag != 0 ? true : false;
             var cdn = GetGameInfoUpdateRequest(_settings.Account.REGION);
             RepositoryServerAddress = cdn.RepositoryServerAddress ?? _settings.Account.REGION.GetAttribute<CDNAttribute>().Name;
+
+            var forwardInfo = GetVersionInfoForward(_settings.Account.REGION);
+            Debug.WriteLine($"Forward Version: {forwardInfo.ForwardVersion}");
             _LastRegion = _settings.Account.REGION;
             _lastLookup = DateTime.Now.AddMinutes(1);
             Disconnect();
@@ -164,6 +238,43 @@ namespace BnS_Multitool.Models
             Login,
             [DefaultValue((short)3)]
             CDN
+        }
+
+        public class PURPLE_FILE_INFO
+        {
+            public string? versionFormat;
+            public string? gameId;
+            public string? version;
+            public List<PURPLE_FILES_STRUCT> files;
+        }
+
+        public class PURPLE_FILES_STRUCT
+        {
+            public string path;
+            public string size;
+            public string hash;
+            public string patchType;
+            public string level;
+            public string hashCheck;
+            public string version;
+            public string entryType;
+            public PURPLE_ENCODED_INFO encodedInfo;
+            public PURPLE_ENCODED_INFO? deltaInfo;
+        }
+
+        public class PURPLE_ENCODED_INFO
+        {
+            public string path;
+            public string size;
+            public string hash;
+            public List<PURPLE_FILE_ENTRY>? separates;
+        }
+
+        public class PURPLE_FILE_ENTRY
+        {
+            public string path;
+            public string size;
+            public string hash;
         }
 
         public class BUILD_RELAY_RESPONSE
@@ -321,6 +432,16 @@ namespace BnS_Multitool.Models
             PacketPack pack = PacketPack.Factory((ushort)ServiceCommands.VersionInfoReleaseRequest, data);
             byte[] buffer = Serialize<VersionInfoReleaseRequest>(pack);
             VersionInfoReleaseAcknowledgement received = SocketSendReceive<VersionInfoReleaseAcknowledgement>(buffer, regionInfo);
+            return received;
+        }
+
+        public VersionInfoForwardAcknowledgement GetVersionInfoForward(ERegion regionInfo)
+        {
+            string gameId = regionInfo.GetAttribute<GameIdAttribute>().Name;
+            VersionInfoForwardRequest data = new VersionInfoForwardRequest { GameId = gameId };
+            PacketPack pack = PacketPack.Factory((ushort)ServiceCommands.VersionInfoForwardRequest, data);
+            byte[] buffer = Serialize<VersionInfoForwardRequest>(pack);
+            VersionInfoForwardAcknowledgement received = SocketSendReceive<VersionInfoForwardAcknowledgement>(buffer, regionInfo);
             return received;
         }
 

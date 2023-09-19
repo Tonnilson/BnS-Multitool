@@ -45,7 +45,7 @@
                     <Button Command="{Binding KillSelectedCommand}" Style="{StaticResource MainButtonStyle}" x:Name="KILL_BTN" Content="Kill" Margin="102,37,119,33"/>
                     <Button Command="{Binding DeleteAccountCommand}" Style="{StaticResource MainButtonStyle}" x:Name="DELETE_ACC" FontFamily="Segoe UI Symbol" Content="&#xe106;" Margin="5,10,272,58" Foreground="#FFF00000"/>
 
-                    <Button Style="{StaticResource MainButtonStyle}" x:Name="Options_Button" Content="QoL &amp; GCD" Margin="183,37,10,33"/>
+                    <Button Command="{Binding NavigateQoLCommand}" Style="{StaticResource MainButtonStyle}" x:Name="Options_Button" Content="QoL &amp; GCD" Margin="183,37,10,33"/>
                     <Label Content="LANG:" Foreground="White" Margin="13,63,237,4"/>
                     <ComboBox x:Name="LANGUAGE_BOX" HorizontalContentAlignment="Center" Margin="59,64,157,5"
                               ItemsSource="{ext:EnumBindingSource models:ELanguage}"

@@ -571,6 +571,9 @@ namespace BnS_Multitool.ViewModels
             }
         }
 
+        [RelayCommand]
+        void NavigateQoL() => WeakReferenceMessenger.Default.Send(new NavigateMessage("QoL"));
+
         private void KillProcessAndChildrens(int pid)
         {
             ManagementObjectSearcher processSearcher = new ManagementObjectSearcher

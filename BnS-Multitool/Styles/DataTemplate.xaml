@@ -33,4 +33,12 @@
     <DataTemplate DataType="{x:Type viewmodel:ExtendedOptionsViewModel}">
         <view:ExtendedOptionsView/>
     </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodel:QolViewModel}">
+        <view:QolView/>
+    </DataTemplate>
+
+    <DataTemplate DataType="{x:Type viewmodel:UpdaterViewModel}">
+        <view:UpdaterView/>
+    </DataTemplate>
 </ResourceDictionary>

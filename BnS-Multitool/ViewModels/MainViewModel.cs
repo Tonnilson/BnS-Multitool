@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Xml.Linq;
@@ -37,6 +41,12 @@ namespace BnS_Multitool.ViewModels
         private double errorSize = 14;
 
         [ObservableProperty]
+        private string pingLabel;
+
+        [ObservableProperty]
+        private string usersOnlineLabel;
+
+        [ObservableProperty]
         private string errorPicture = "/Images/worry/feelsworry.png";
 
         /// <summary>
@@ -55,7 +65,7 @@ namespace BnS_Multitool.ViewModels
         private bool isWindowVisible = true;
 
         [ObservableProperty]
-        private string versionTitleBar = "BnS Multi Tool: 5.0.0";
+        private string versionTitleBar = "Version: 5.0.0";
 
         private readonly Settings _settings;
         private readonly NotifyIconService _notifyService;
@@ -64,6 +74,9 @@ namespace BnS_Multitool.ViewModels
         private readonly IServiceProvider _serviceProvider;
         private readonly XmlModel _xmlModel;
         private readonly MessageService _message;
+        private readonly httpClient _httpClient;
+        private BackgroundWorker _pingWorker;
+        private readonly Timer _onlineUser;
 
         [RelayCommand]
         void CloseWindow()
@@ -124,12 +137,14 @@ namespace BnS_Multitool.ViewModels
         void Navigate(string dest)
         {
             // Make sure we're not trying to go to the same location
-            if (CurrentView.GetType().Name.Contains(dest))
+            if (CurrentView != null && CurrentView.GetType().Name.Contains(dest))
                 return;
 
             // Need to tell the MainPage VM that we're unloading, using the event does not operate how we want it to so this is needed.
-            if(CurrentView.GetType().Name == "MainPageViewModel")
-                WeakReferenceMessenger.Default.Send(new UnloadedMainPageVM(true));
+            /*
+            if(CurrentView != null && CurrentView.GetType().Name == "MainPageViewModel")
+                WeakReferenceMessenger.Default.Send(new ActivateWindowMessage(true));
+            */
 
             // This is kind of bad, needs to and hopefully will be replaced with navigationService
             switch(dest)
@@ -158,7 +173,19 @@ namespace BnS_Multitool.ViewModels
                 case "ExtendedOptions":
                     CurrentView = _serviceProvider.GetRequiredService<ExtendedOptionsViewModel>();
                     break;
+                case "QoL":
+                    CurrentView = _serviceProvider.GetRequiredService<QolViewModel>();
+                    break;
+                case "Updater":
+                    CurrentView = _serviceProvider.GetRequiredService<UpdaterViewModel>();
+                    break;
             }
+
+            if (dest != "QoL")
+                _xmlModel.qol = null;
+
+            if (dest != "ExtendedOptions")
+                _xmlModel.extended_options = null;
 
             //GC.Collect();
             //GC.WaitForPendingFinalizers();
@@ -173,7 +200,8 @@ namespace BnS_Multitool.ViewModels
             _logger = logger;
             _xmlModel = xmlModel;
             _message = ms;
-            VersionTitleBar = $"BnS Multi Tool: {_settings.VersionInfo()}";
+            _httpClient = _serviceProvider.GetRequiredService<httpClient>();
+            VersionTitleBar = $"Version: {_settings.VersionInfo()}";
             CurrentTheme = _settings.System.THEME;
             CurrentNewGameOption = _settings.System.NEW_GAME_OPTION;
             CurrentMinimizeOption = _settings.System.MINIMZE_ACTION;
@@ -190,6 +218,68 @@ namespace BnS_Multitool.ViewModels
             // Allows communications without coupling from other sources.
             WeakReferenceMessenger.Default.RegisterAll(this);
             _xmlModel = xmlModel;
+
+            _pingWorker = new BackgroundWorker();
+            _pingWorker.DoWork += PingWorker_DoWork;
+            _pingWorker.WorkerSupportsCancellation = true;
+            _onlineUser = new Timer(OnlineUsers_Tick, new AutoResetEvent(false), TimeSpan.FromMilliseconds(0), TimeSpan.FromMinutes(10));
+        }
+
+        private void PingWorker_DoWork(object? sender, DoWorkEventArgs e)
+        {
+            Stopwatch _sw = new Stopwatch();
+            Socket _pingSocket;
+            int ping = -1;
+
+            while (!_pingWorker.CancellationPending)
+            {
+                if (_settings.System.PING_CHECK)
+                {
+                    try
+                    {
+                        _pingSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+                        _pingSocket.Blocking = true;
+                        _pingSocket.ReceiveTimeout = 1500;
+                        _pingSocket.SendTimeout = 1500;
+                        _sw.Start();
+                        _pingSocket.Connect(_settings.Account.REGION.GetAttribute<GameIPAddressAttribute>().Name, 10100);
+                        _sw.Stop();
+                        _pingSocket.Close();
+                        ping = Convert.ToInt32(_sw.Elapsed.TotalMilliseconds);
+                    }
+                    catch { ping = -1; }
+                    finally { _sw.Reset(); }
+                    if (ping >= 0)
+                        PingLabel = $"Ping ({_settings.Account.REGION.GetDescription()}): {ping}ms";
+                    else
+                        PingLabel = "Ping: Error";
+                }
+                else
+                    PingLabel = "Ping: Turned Off";
+                Thread.Sleep(1000);
+            }
+        }
+
+        private void OnlineUsers_Tick(object? sender)
+        {
+            Debug.WriteLine("Running online Tick");
+            try
+            {
+                var response = _httpClient.DownloadString($"{Properties.Settings.Default.MainServerAddr}usersOnline.php?UID={_settings.System.FINGERPRINT}").GetAwaiter().GetResult();
+                int users = int.Parse(response);
+                UsersOnlineLabel = $"Users Online: {users:N0}";
+                var appVersion = _mt.VersionInfo().GetAwaiter().GetResult();
+                if (appVersion != null && appVersion.VERSION != _settings.VersionInfo())
+                {
+                    IsUpdateAvailable = true;
+                    _message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {appVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error with retrieving online users number");
+                UsersOnlineLabel = "Users Online: Error";
+            }
         }
 
         public async Task InitializeAsync()
@@ -204,7 +294,7 @@ namespace BnS_Multitool.ViewModels
                 {
                     // Update notification
                     IsUpdateAvailable = true;
-                    _message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {serverVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
+                    //_message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {serverVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
                 }
 
             }
@@ -214,8 +304,10 @@ namespace BnS_Multitool.ViewModels
                 _logger.LogError(ex, "Failed to retrieve info from main server");
             }
 
-            CurrentView = _serviceProvider.GetRequiredService<MainPageViewModel>();
+            Navigate("MainPage");
             //await _xmlModel.InitalizeAsync();
+
+            _pingWorker.RunWorkerAsync();
 
             try
             {
@@ -461,5 +553,13 @@ namespace BnS_Multitool.ViewModels
 
         void IRecipient<NavigateMessage>.Receive(NavigateMessage message) =>
             Navigate(message.Value);
+
+        [RelayCommand]
+        void UpdateClient()
+        {
+            File.WriteAllBytes(Path.Combine(Environment.CurrentDirectory, "BnS-Multi-Tool-Updater.exe"), Properties.Resources.BnS_Multi_Tool_Updater);
+            Process.Start(new ProcessStartInfo { FileName = "BnS-Multi-Tool-Updater.exe", Verb = "runas" });
+            Environment.Exit(0);
+        }
     }
 }

@@ -39,6 +39,46 @@ namespace BnS_Multitool.Models
         Skill
     }
 
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum QOL_GCD_MODE
+    {
+        [Description("Both")]
+        Both = 0,
+        [Description("GCD Only")]
+        GCDOnly = 1,
+        [Description("Recycle Only")]
+        RecycleOnly = 2,
+        [Description("None (Disabled)")]
+        None = 3
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum QOL_MODE
+    {
+        [Description("Offset")]
+        Offset = 0,
+        [Description("Static")]
+        Static = 1
+    }
+
+    [TypeConverter (typeof(EnumDescriptionTypeConverter))]
+    public enum QOL_YESNO
+    {
+        [Description("Yes")]
+        Yes = 1,
+        [Description("No")]
+        No = 0
+    }
+
+    [TypeConverter(typeof(EnumDescriptionTypeConverter))]
+    public enum QOL_AUTOBIAS
+    {
+        [Description("Yes")]
+        Yes = 0,
+        [Description("No")]
+        No = 1
+    }
+
     public enum EThemeIcons
     {
         [WorryTheme("/Images/BnS_LOGO.png")][AgonTheme("/Images/agon/ue4agonhigh.png")]

@@ -938,7 +938,7 @@
                                     </TransformGroup>
                                 </Rectangle.RenderTransform>
                             </Rectangle>
-                            <Image gif:AnimationBehavior.SourceUri="/Images/copium.gif" Stretch="Uniform" HorizontalAlignment="Right"/>
+                            <Image gif:AnimationBehavior.SourceUri="/Images/worry/copium.gif" Stretch="Uniform" HorizontalAlignment="Right"/>
                         </Grid>
                     </Grid>
                     <ControlTemplate.Triggers>

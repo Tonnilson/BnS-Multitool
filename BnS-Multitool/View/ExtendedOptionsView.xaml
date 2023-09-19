@@ -79,20 +79,20 @@
             </DataGrid>
             <Label Content="What is this?" Margin="0,270,10,182" Foreground="CornflowerBlue" FontWeight="Bold" FontSize="22"/>
             <TextBlock Margin="10,303,10,5" Foreground="White" FontWeight="Normal" FontSize="12" TextWrapping="WrapWithOverflow">
-        This allows you to move effect icons around to different buff bars or to change the priority.<LineBreak/>
-                Alias supports regular expressions  i.e: <Run FontWeight="Bold">^SoulslotEffect_.*</Run> will get all versions of soul both active and cooldown
-        <LineBreak/>
-        <Run FontWeight="Bold" Foreground="CornflowerBlue">ui-slot:</Run>
-        <LineBreak/>
-        <Run FontSize="12">None = Invisible</Run>
-        <LineBreak/>
-        <Run FontSize="12">Buff = Blue Bar</Run><LineBreak/>
-        <Run FontSize="12">Debuff = Red Bar</Run><LineBreak/>
-        <Run FontSize="10">System = Small icon bar (4-6 slots)</Run>
-        <LineBreak/>
-        <Run FontSize="12">Long-term = Premium Buff / Food buffs / Clan Bonus etc</Run><LineBreak/>
-        <Run FontSize="12">Buff Disable = Purple Bar</Run><LineBreak/>
-        <Run FontWeight="Bold" Foreground="CornflowerBlue">ui-category:</Run><LineBreak/><Run FontSize="12">This is the priority it has on the buff bar, it is in order after None.</Run>
+                This allows you to move effect icons around to different buff bars or to change the priority.<LineBreak/>
+                        Alias supports regular expressions  i.e: <Run FontWeight="Bold">^SoulslotEffect_.*</Run> will get all versions of soul both active and cooldown
+                <LineBreak/>
+                <Run FontWeight="Bold" Foreground="CornflowerBlue">ui-slot:</Run>
+                <LineBreak/>
+                <Run FontSize="12">None = Invisible</Run>
+                <LineBreak/>
+                <Run FontSize="12">Buff = Blue Bar</Run><LineBreak/>
+                <Run FontSize="12">Debuff = Red Bar</Run><LineBreak/>
+                <Run FontSize="10">System = Small icon bar (4-6 slots)</Run>
+                <LineBreak/>
+                <Run FontSize="12">Long-term = Premium Buff / Food buffs / Clan Bonus etc</Run><LineBreak/>
+                <Run FontSize="12">Buff Disable = Purple Bar</Run><LineBreak/>
+                <Run FontWeight="Bold" Foreground="CornflowerBlue">ui-category:</Run><LineBreak/><Run FontSize="12">This is the priority it has on the buff bar, it is in order after None.</Run>
             </TextBlock>
             <Button Style="{StaticResource MainButtonStyle}"  Command="{Binding CloseEffectsCommand}" Content="Close" Margin="582,450,10,14" FontWeight="Bold" FontFamily="Segoe UI Semibold" RenderTransformOrigin="0.456,0.82"/>
             <Button Style="{StaticResource MainButtonStyle}"  Command="{Binding SaveEffectsCommand}" Content="Save" Margin="509,450,83,14" FontWeight="Bold" FontFamily="Segoe UI Semibold" RenderTransformOrigin="0.456,0.82"/>
