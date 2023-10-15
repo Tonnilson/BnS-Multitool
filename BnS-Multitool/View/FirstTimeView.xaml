@@ -1,0 +1,283 @@
+﻿<Window x:Class="BnS_Multitool.View.FirstTimeView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:BnS_Multitool.View"
+        xmlns:viewmodel="clr-namespace:BnS_Multitool.ViewModels"
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        xmlns:ext="clr-namespace:BnS_Multitool.Extensions"
+        xmlns:models="clr-namespace:BnS_Multitool.Models"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="NoResize"
+        Background="{x:Null}"
+        WindowStartupLocation="CenterScreen"
+        Title="FirstTimeView" Height="300" Width="650">
+    <Window.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+                    Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="Unloaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+                    Storyboard.TargetProperty="Opacity" From="1.0" To="0.0" Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </Window.Triggers>
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction
+            CommandParameter="{Binding}"
+            Command="{Binding UILoadedCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Rectangle Stroke="#FF373738" StrokeThickness="1" Height="290" Width="640">
+            <Rectangle.Fill>
+                <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                    <GradientStop Color="#FF151617" Offset="1"/>
+                    <GradientStop Color="#FF232527" Offset="0"/>
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+            <Rectangle.Effect>
+                <DropShadowEffect Color="CornflowerBlue" BlurRadius="5" ShadowDepth="0" Direction="0"/>
+            </Rectangle.Effect>
+        </Rectangle>
+        <Grid Height="290" Width="640">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <TextBlock Grid.Row="0" Text="First Time Setup" Foreground="White" FontSize="20" HorizontalAlignment="Center" VerticalAlignment="Center" FontFamily="Arial"/>
+            <!-- Detected Regions Grid -->
+            <!-- <Grid Grid.Row="1" Visibility="{Binding ShowDetectedClients, Converter={StaticResource BooleanToVisibility}}"> -->
+            <Grid Grid.Row="1" Visibility="{Binding ShowDetectedClients, Converter={StaticResource BooleanToVisibility}}">
+                <TextBlock Padding="8" Text="Detected Clients" FontSize="20" FontWeight="bold" Foreground="AliceBlue"/>
+                <ListView 
+                    ItemsSource="{Binding ClientsCollection}"
+                    SelectedItem="{Binding SelectedClient}"
+                    ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                    Width="310"
+                    Height="210"
+                    Background="{x:Null}"
+                    BorderBrush="#FF161718"
+                    VerticalContentAlignment="Top"
+                    ScrollViewer.VerticalScrollBarVisibility="Auto"
+                    ScrollViewer.CanContentScroll="False" Margin="10,40,320,10">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="{x:Type ListViewItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <!-- Trun off default selection-->
+                                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                        <Border x:Name="Bd" BorderThickness="0,1,0,1" 
+                                            Background="{TemplateBinding Background}" 
+                                            Padding="{TemplateBinding Padding}" 
+                                            SnapsToDevicePixels="true">
+                                                                                <ContentPresenter 
+                                            HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" 
+                                            SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}" 
+                                            VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                                                            </Border>
+                                                                            <ControlTemplate.Triggers>
+                                                                                <Trigger Property="IsEnabled" Value="false">
+                                                                                    <Setter Property="Foreground"
+                                                    Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                            <Setter Property="BorderBrush" Value="#FF192830"/>
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="#FF192830" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Trigger>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="#FF192830" />
+                                    <Setter Property="BorderThickness" Value="0" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel VerticalAlignment="Top" Orientation="Vertical"/>
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <Grid>
+                                <StackPanel Orientation="Horizontal" Height="55">
+                                    <StackPanel Orientation="Vertical" Width="300">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Padding="5" Text="Region:" Foreground="White" TextWrapping="NoWrap" FontFamily="Arial" FontWeight="Bold" FontSize="20"/>
+                                            <TextBlock Padding="0" VerticalAlignment="Center" Text="{Binding Region}" Foreground="White" TextWrapping="NoWrap" FontFamily="Arial" FontWeight="Bold" FontSize="12"/>
+                                        </StackPanel>
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock HorizontalAlignment="Center" Padding="2" Text="{Binding GamePath}" FontSize="10" Foreground="Gray" />
+                                        </StackPanel>
+                                        <Separator/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+                <Grid Width="310" HorizontalAlignment="Right" Visibility="{Binding ShowClientOptions, Converter={StaticResource BooleanToVisibility}}" Margin="0,40,0,10">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="25" Visibility="{Binding ShowRegionSelector, Converter={StaticResource BooleanToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Region: " Foreground="AliceBlue" FontWeight="Bold" Width="100" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                                Height="22" Width="75" ItemsSource="{ext:EnumBindingSource models:ERegion}" SelectedItem="{Binding CurrentRegion}"/>
+                        </Grid>
+                        <Grid Height="25" Visibility="{Binding ShowLanguageSelector, Converter={StaticResource BooleanToVisibility}}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Language: " Foreground="AliceBlue" FontWeight="Bold" Width="100" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                                Height="22" Width="100" ItemsSource="{ext:EnumBindingSource models:ELanguage}" SelectedItem="{Binding CurrentLanguage}"/>
+                        </Grid>
+                        <Grid Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Updater Threads: " Foreground="AliceBlue" FontWeight="Bold" Width="100" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                                Height="22" Width="55" SelectedIndex="{Binding UpdaterThreads}">
+                                <ComboBoxItem>1</ComboBoxItem>
+                                <ComboBoxItem>2</ComboBoxItem>
+                                <ComboBoxItem>3</ComboBoxItem>
+                                <ComboBoxItem>4</ComboBoxItem>
+                                <ComboBoxItem>5</ComboBoxItem>
+                                <ComboBoxItem>6</ComboBoxItem>
+                                <ComboBoxItem>7</ComboBoxItem>
+                                <ComboBoxItem>8</ComboBoxItem>
+                                <ComboBoxItem>9</ComboBoxItem>
+                                <ComboBoxItem>10</ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                        <Grid Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Download Threads: " Foreground="AliceBlue" FontWeight="Bold" Width="110" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                                Height="22" Width="55" SelectedIndex="{Binding DownloadThreads}">
+                                <ComboBoxItem>1</ComboBoxItem>
+                                <ComboBoxItem>2</ComboBoxItem>
+                                <ComboBoxItem>3</ComboBoxItem>
+                                <ComboBoxItem>4</ComboBoxItem>
+                                <ComboBoxItem>5</ComboBoxItem>
+                                <ComboBoxItem>6</ComboBoxItem>
+                                <ComboBoxItem>7</ComboBoxItem>
+                                <ComboBoxItem>8</ComboBoxItem>
+                                <ComboBoxItem>9</ComboBoxItem>
+                                <ComboBoxItem>10</ComboBoxItem>
+                            </ComboBox>
+                            <Button Command="{Binding FinishSetupCommand}" Style="{StaticResource MainButtonStyle}" Height="25" Width="100" Content="Continue" FontWeight="Bold" Grid.ColumnSpan="2" Margin="104,77,106,-77" />
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+            <Grid Grid.Row="1" Visibility="{Binding ShowManualSetup, Converter={StaticResource BooleanToVisibility}}">
+                <TextBlock Text="No Detected Clients" Padding="8" FontSize="20" FontWeight="bold" Foreground="AliceBlue"/>
+                <TextBox Text="{Binding GameDirectory}" Style="{StaticResource MainTextBox}" Height="25" Width="300" FontSize="12" Margin="20,45,320,190"/>
+                <TextBlock FontSize="12" TextWrapping="WrapWithOverflow" Foreground="AliceBlue" Width="300" Height="140" Margin="10,105,330,5">
+                    Unable to find a preinstalled Blade and Soul Client
+                    <LineBreak/>
+                    If you do have the game installed you can browse and select the folder where the game is located i.e
+                    <LineBreak/>
+                   <Run FontWeight="Bold">C:\Program Files (x86)\NCSOFT\BnS_UE4</Run>
+                    <LineBreak/>
+                    <LineBreak/>
+                    Or if you intend to install the game with multi-tool just select a path you want the game to be installed at.
+                </TextBlock>
+                <Button Command="{Binding BrowseGameCommand}" Style="{StaticResource MainButtonStyle}" FontWeight="Bold" Height="25" Width="75" Content="Browse" Margin="245,75,320,160"/>
+                <Grid Width="310" HorizontalAlignment="Right" Margin="0,40,0,10">
+                    <StackPanel Orientation="Vertical">
+                        <Grid Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Region: " Foreground="AliceBlue" FontWeight="Bold" Width="100" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                Height="22" Width="75" ItemsSource="{ext:EnumBindingSource models:ERegion}" SelectedItem="{Binding CurrentRegion}"/>
+                        </Grid>
+                        <Grid Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Language: " Foreground="AliceBlue" FontWeight="Bold" Width="100" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                Height="22" Width="100" ItemsSource="{ext:EnumBindingSource models:ELanguage}" SelectedItem="{Binding CurrentLanguage}"/>
+                        </Grid>
+                        <Grid Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Updater Threads: " Foreground="AliceBlue" FontWeight="Bold" Width="100" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                Height="22" Width="55" SelectedIndex="{Binding UpdaterThreads}">
+                                <ComboBoxItem>1</ComboBoxItem>
+                                <ComboBoxItem>2</ComboBoxItem>
+                                <ComboBoxItem>3</ComboBoxItem>
+                                <ComboBoxItem>4</ComboBoxItem>
+                                <ComboBoxItem>5</ComboBoxItem>
+                                <ComboBoxItem>6</ComboBoxItem>
+                                <ComboBoxItem>7</ComboBoxItem>
+                                <ComboBoxItem>8</ComboBoxItem>
+                                <ComboBoxItem>9</ComboBoxItem>
+                                <ComboBoxItem>10</ComboBoxItem>
+                            </ComboBox>
+                        </Grid>
+                        <Grid Height="25">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition />
+                                <ColumnDefinition />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Download Threads: " Foreground="AliceBlue" FontWeight="Bold" Width="110" Height="20" />
+                            <ComboBox HorizontalAlignment="Left" Grid.Column="1" HorizontalContentAlignment="Center"
+                Height="22" Width="55" SelectedIndex="{Binding DownloadThreads}">
+                                <ComboBoxItem>1</ComboBoxItem>
+                                <ComboBoxItem>2</ComboBoxItem>
+                                <ComboBoxItem>3</ComboBoxItem>
+                                <ComboBoxItem>4</ComboBoxItem>
+                                <ComboBoxItem>5</ComboBoxItem>
+                                <ComboBoxItem>6</ComboBoxItem>
+                                <ComboBoxItem>7</ComboBoxItem>
+                                <ComboBoxItem>8</ComboBoxItem>
+                                <ComboBoxItem>9</ComboBoxItem>
+                                <ComboBoxItem>10</ComboBoxItem>
+                            </ComboBox>
+                            <Button Command="{Binding FinishSetupCommand}" Style="{StaticResource MainButtonStyle}" Height="25" Width="100" Content="Continue" FontWeight="Bold" Grid.ColumnSpan="2" Margin="104,77,106,-77" />
+                        </Grid>
+                    </StackPanel>
+                </Grid>
+            </Grid>
+        </Grid>
+    </Grid>
+</Window>

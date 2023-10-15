@@ -22,7 +22,7 @@ namespace BnS_Multitool.Properties {
     [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "17.0.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -36,7 +36,7 @@ namespace BnS_Multitool.Properties {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("BnS_Multitool.Properties.Resources", typeof(Resources).Assembly);
@@ -51,7 +51,7 @@ namespace BnS_Multitool.Properties {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -63,36 +63,17 @@ namespace BnS_Multitool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] _7za {
+        public static byte[] _7za {
             get {
-                object obj = ResourceManager.GetObject("_7za", resourceCulture);
+                object obj = ResourceManager.GetObject("7za", resourceCulture);
                 return ((byte[])(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
-        /// </summary>
-        internal static System.Drawing.Icon AppIcon {
-            get {
-                object obj = ResourceManager.GetObject("AppIcon", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to .
-        /// </summary>
-        internal static string AutoIdSearchNotSupported {
-            get {
-                return ResourceManager.GetString("AutoIdSearchNotSupported", resourceCulture);
             }
         }
         
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] BnS_Multi_Tool_Updater {
+        public static byte[] BnS_Multi_Tool_Updater {
             get {
                 object obj = ResourceManager.GetObject("BnS_Multi_Tool_Updater", resourceCulture);
                 return ((byte[])(obj));
@@ -102,7 +83,7 @@ namespace BnS_Multitool.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Byte[].
         /// </summary>
-        internal static byte[] class_removes {
+        public static byte[] class_removes {
             get {
                 object obj = ResourceManager.GetObject("class_removes", resourceCulture);
                 return ((byte[])(obj));
@@ -112,7 +93,7 @@ namespace BnS_Multitool.Properties {
         /// <summary>
         ///   Looks up a localized string similar to 901679848022474752.
         /// </summary>
-        internal static string discord_clientId {
+        public static string discord_clientId {
             get {
                 return ResourceManager.GetString("discord_clientId", resourceCulture);
             }
@@ -121,7 +102,7 @@ namespace BnS_Multitool.Properties {
         /// <summary>
         ///   Looks up a localized string similar to Gq4mVqoDBrWN7oKV0jLzqtOMzsj65Bwk.
         /// </summary>
-        internal static string discord_secret {
+        public static string discord_secret {
             get {
                 return ResourceManager.GetString("discord_secret", resourceCulture);
             }
@@ -139,64 +120,28 @@ namespace BnS_Multitool.Properties {
         ///        &lt;option name=&quot;profile_2&quot; keyCode=&quot;32&quot; bCtrl=&quot;1&quot; bShift=&quot;0&quot; bAlt=&quot;1&quot; /&gt;
         ///        &lt;!-- Profile 3 Keybind [CTRL + ALT + 3] [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string extended_options {
+        public static string extended_options {
             get {
                 return ResourceManager.GetString("extended_options", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-        ///&lt;patches&gt;
-        ///  &lt;!-- 修復 TW版hellokitty 無法進入冰庫懸浮/無法接任問題 --&gt;
-        ///  &lt;patch file=&quot;questdata.*.xml&quot;&gt;
-        ///    &lt;select-node query=&quot;//table/quest/acquisition/@preceding-quest-check&quot;&gt;
-        ///      &lt;remove /&gt;
-        ///    &lt;/select-node&gt;
-        ///  &lt;/patch&gt;
-        ///&lt;/patches&gt;.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static string hellokitty_tw_FixQuest {
+        public static System.Drawing.Icon favicon {
             get {
-                return ResourceManager.GetString("hellokitty_tw_FixQuest", resourceCulture);
+                object obj = ResourceManager.GetObject("favicon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to # target hp
-        ///UI.Gauge.CurMax
-        ///
-        ///# target hp %
-        ///UI.Gauge.Percent
-        ///
-        ///# target range
-        ///UI.Target.Distance
-        ///
-        ///# f8 lobby #
-        ///UI.ArenaLobbyDuel.RoomNumber.Link.Text
-        ///
-        ///# /invite
-        ///Usercommand.party-invite1
-        ///
-        ///# /join
-        ///Usercommand.party-suggest-join2
-        ///
-        ///# dps meter
-        ///UI.DamageMeter.DamagePerSecond
-        ///
-        ///# dps meter player name
-        ///UI.DamageMeter.Name.Player
-        ///UI.DamageMeter.Name.Pc
-        ///
-        ///# challengemode stuff
-        ///UI.ChallengeParty*
-        ///
-        ///# chat tab
-        ///UI.Hypertext.*.
+        ///   Looks up a localized string similar to https://multitool.tonic.pw/.
         /// </summary>
-        internal static string minimal {
+        public static string MainServerAddr {
             get {
-                return ResourceManager.GetString("minimal", resourceCulture);
+                return ResourceManager.GetString("MainServerAddr", resourceCulture);
             }
         }
         
@@ -213,7 +158,7 @@ namespace BnS_Multitool.Properties {
         ///		&lt;option name=&quot;useWindowClipboard&quot; enable=&quot;0&quot; /&gt;
         ///        &lt;option name=&quot;useDebug&quot; enable=&quot; [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string multitool_qol {
+        public static string multitool_qol {
             get {
                 return ResourceManager.GetString("multitool_qol", resourceCulture);
             }
@@ -235,112 +180,9 @@ namespace BnS_Multitool.Properties {
         ///      &lt;/select-node&gt;
         ///      &lt;!-- simple mode at [rest of string was truncated]&quot;;.
         /// </summary>
-        internal static string patches {
+        public static string patches {
             get {
                 return ResourceManager.GetString("patches", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to # include most UI text
-        ///-UI.MaxLevelGuide.*
-        ///-UI.Action.Credit*
-        ///UI.*
-        ///
-        ///# skill button text
-        ///Text_*
-        ///
-        ///# login keypad button
-        ///Text.Otp.*
-        ///
-        ///# crafting guild name
-        ///Craft.N.*
-        ///
-        ///# unity level
-        ///Name.AccountLevel_Name_0??
-        ///Name.AccountLevel_Name_1??
-        ///
-        ///# player name
-        ///Name.Pc.*
-        ///
-        ///# player class, etc
-        ///Name.job.*.style?
-        ///Name.job.*
-        ///Name.race.*
-        ///Name.sex.*
-        ///
-        ///# key name
-        ///Name.Key.*
-        ///Name.Slot.Key.*
-        ///#Name.KeyCommand.*
-        ///
-        ///# date/time
-        ///Name.Time.*
-        ///
-        ///# party member status
-        ///Name.Party.Status.*
-        ///Name.Team.Status.*
-        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string playable_kr {
-            get {
-                return ResourceManager.GetString("playable_kr", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to # include most UI text
-        ///-UI.MaxLevelGuide.*
-        ///-UI.Action.Credit*
-        ///UI.*
-        ///
-        ///# skill button text
-        ///Text_*
-        ///
-        ///# login keypad button
-        ///Text.Otp.*
-        ///
-        ///# crafting guild name
-        ///Craft.N.*
-        ///
-        ///# unity level
-        ///Name.AccountLevel_Name_0??
-        ///Name.AccountLevel_Name_1??
-        ///
-        ///# player name
-        ///Name.Pc.*
-        ///
-        ///# player class, etc
-        ///Name.job.*.style?
-        ///Name.job.*
-        ///Name.race.*
-        ///Name.sex.*
-        ///
-        ///# key name
-        ///Name.Key.*
-        ///Name.Slot.Key.*
-        ///#Name.KeyCommand.*
-        ///
-        ///# date/time
-        ///Name.Time.*
-        ///
-        ///# party member status
-        ///Name.Party.Status.*
-        ///Name.Team.Status.*
-        /// [rest of string was truncated]&quot;;.
-        /// </summary>
-        internal static string playable_ncwest {
-            get {
-                return ResourceManager.GetString("playable_ncwest", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to .
-        /// </summary>
-        internal static string translate {
-            get {
-                return ResourceManager.GetString("translate", resourceCulture);
             }
         }
     }

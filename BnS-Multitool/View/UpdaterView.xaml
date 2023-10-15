@@ -1,0 +1,64 @@
+﻿<UserControl x:Class="BnS_Multitool.View.UpdaterView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:toolkit="http://schemas.xceed.com/wpf/xaml/toolkit"
+             xmlns:gif="https://github.com/XamlAnimatedGif/XamlAnimatedGif"
+             mc:Ignorable="d" 
+             d:DesignHeight="490" d:DesignWidth="660">
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+            Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="Unloaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+            Storyboard.TargetProperty="Opacity" From="1.0" To="0.0" Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction
+            CommandParameter="{Binding}"
+            Command="{Binding UILoadedCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <Grid>
+        <Label HorizontalContentAlignment="Center" x:Name="currentVersionLabel" Content="{Binding OnlineBuildText}" Margin="370,54,165,399" Foreground="White" FontSize="20"/>
+        <Label x:Name="OnlineGameLbl" Content="&#xe12b; Online" Margin="330,10,110,418" Foreground="{Binding OnlineBuildColor}" FontFamily="Segoe UI Symbol" FontSize="36"/>
+        <Label x:Name="LocalGameLbl" Content="&#xe105; Local" Margin="141,10,351,418" Foreground="{Binding LocalBuildColor}" FontFamily="Segoe UI Symbol" FontSize="36"/>
+        <Label HorizontalContentAlignment="Center" x:Name="localVersionLabel" Content="{Binding LocalBuildText}" Margin="173,53,351,399" Foreground="White" FontSize="20"/>
+        <Button IsEnabled="{Binding ActionBtnEnabled}" Command="{Binding StartDownloadCommand}" Style="{StaticResource MainButtonStyle}" x:Name="DownloadBtn" Content="{Binding ActionBtnText}" Margin="259,96,253,361" FontFamily="Arial Black" FontSize="18" />
+        <toolkit:RichTextBox BorderThickness="0" Text="{Binding ThrownErrors}" FocusVisualStyle="{x:Null}" IsReadOnly="True" VerticalScrollBarVisibility="Visible" Foreground="#FFC5C5C5" FontFamily="Arial" FontWeight="Bold" FontSize="14" x:Name="ErrorLog" Margin="10,144,10,134" Background="{x:Null}" BorderBrush="{x:Null}">
+            <toolkit:RichTextBox.TextFormatter>
+                <toolkit:PlainTextFormatter />
+            </toolkit:RichTextBox.TextFormatter>
+        </toolkit:RichTextBox>
+        <Grid x:Name="ProgressGrid" Margin="10,213,10,10" Visibility="{Binding ShowProgressView, Converter={StaticResource BooleanToVisibility}}">
+            <Label Visibility="{Binding ShowDeltaPatch, Converter={StaticResource BooleanToVisibility}}" x:Name="DltPLbl" Content="&#xe167; Delta" Foreground="#FF3F6AA6" FontFamily="Segoe UI Symbol" FontSize="24" Margin="10,164,416,52" Background="{x:Null}"/>
+            <ProgressBar Style="{StaticResource ProgressBarStyle1}" Value="{Binding ProgressValue}" x:Name="currentProgress" Margin="10,204,10,6">
+                <ProgressBar.Triggers>
+                    <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                        <BeginStoryboard>
+                            <Storyboard>
+                                <DoubleAnimation Storyboard.TargetProperty="Value" To="{Binding ProgressValue, NotifyOnTargetUpdated=True}" Duration="0:0:0.400"/>
+                            </Storyboard>
+                        </BeginStoryboard>
+                    </EventTrigger>
+                </ProgressBar.Triggers>
+            </ProgressBar>
+            <TextBlock x:Name="ProgressBlock" TextAlignment="Center" TextWrapping="WrapWithOverflow" Text="{Binding ProgressBlock}" Foreground="White" Margin="46,182,59,62" FontWeight="Bold" FontFamily="Arial" FontSize="14"/>
+            <Label x:Name="PatchingLabel" HorizontalContentAlignment="Center" Content="{Binding PatchingLabel}" Foreground="#FFF3F3F3" Margin="225,220,242,21" FontWeight="Bold" FontFamily="Arial" FontSize="14" Background="{x:Null}" />
+        </Grid>
+    </Grid>
+</UserControl>

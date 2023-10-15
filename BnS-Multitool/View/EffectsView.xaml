@@ -1,0 +1,184 @@
+﻿<UserControl x:Class="BnS_Multitool.View.EffectsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:toggle="clr-namespace:ToggleSwitch;assembly=ToggleSwitch"
+            mc:Ignorable="d" 
+            d:DesignHeight="490" d:DesignWidth="660">
+    <UserControl.Triggers>
+        <EventTrigger RoutedEvent="Loaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+                Storyboard.TargetProperty="Opacity" From="0.0" To="1.0" Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+        <EventTrigger RoutedEvent="Unloaded">
+            <BeginStoryboard>
+                <Storyboard>
+                    <DoubleAnimation
+                Storyboard.TargetProperty="Opacity" From="1.0" To="0.0" Duration="0:0:0.3"/>
+                </Storyboard>
+            </BeginStoryboard>
+        </EventTrigger>
+    </UserControl.Triggers>
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction
+                CommandParameter="{Binding}"
+                Command="{Binding UILoadedCommand}"/>
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+    <UserControl.Resources>
+        <Style x:Key="ToggleStyle" TargetType="{x:Type toggle:HorizontalToggleSwitch}">
+            <Setter Property="UncheckedBackground" Value="#FF212B38"/>
+            <Setter Property="CheckedBackground" Value="#FF2D415D"/>
+            <Setter Property="ThumbSize" Value="5" />
+            <Setter Property="ThumbBrush" Value="{x:Null}"/>
+            <Setter Property="UncheckedForeground" Value="White"/>
+            <Setter Property="Width" Value="61"/>
+            <Setter Property="Elasticity" Value="0"/>
+            <Setter Property="BorderBrush" Value="#FF3F6AA6"/>
+            <Setter Property="FontSize" Value="14"/>
+        </Style>
+    </UserControl.Resources>
+    <Grid>
+        <Label x:Name="label_Copy2" Content="Animation" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="228,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+        <Label x:Name="label_Copy" Content="Effects" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="387,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+        <Label x:Name="label_Copy1" Content="Class" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="32,10,0,0" Height="36" Width="102" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+        <Separator Margin="0,35,163,451" Background="#FF2D415D" RenderTransformOrigin="0.5,0.445" MinHeight="5" Height="7.4" />
+        <StackPanel Orientation="Horizontal" Margin="496,4,157,10">
+        <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Background="#FF2D415D" Width="2" Margin="2,34,2,-10"/>
+        </StackPanel>
+        <Label HorizontalContentAlignment="Center" x:Name="label_Copy17" Content="All Animations" Margin="506,103,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label HorizontalContentAlignment="Center" x:Name="label_Copy18" Content="All Effects" Margin="506,197,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Label HorizontalContentAlignment="Center" x:Name="label_Copy19" Content="All" Margin="506,282,0,0" Height="29" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button Command="{Binding HandleTogglesCommand}" CommandParameter="anim_on" Style="{StaticResource MainButtonStyle}" x:Name="animations_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="580,134,34,325">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
+                    <TextBlock><Run Text="Turns on all animations"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button Command="{Binding HandleTogglesCommand}" CommandParameter="anim_off" Style="{StaticResource MainButtonStyle}" x:Name="animations_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,134,85,325">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
+                    <TextBlock><Run Text="Turns off all animations"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button Command="{Binding HandleTogglesCommand}" CommandParameter="fx_on" Style="{StaticResource MainButtonStyle}" x:Name="effects_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA"  Margin="580,227,34,232">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
+                    <TextBlock><Run Text="Turns on all effects"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button Command="{Binding HandleTogglesCommand}" CommandParameter="fx_off" Style="{StaticResource MainButtonStyle}" x:Name="effects_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,227,85,232">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
+                    <TextBlock><Run Text="Turns off all effects"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button Command="{Binding HandleTogglesCommand}" CommandParameter="all_on" Style="{StaticResource MainButtonStyle}" x:Name="all_on" FontFamily="Segoe UI Symbol" Content="&#xE10B; ON" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="580,313,34,146">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn on"/></TextBlock>
+                    <TextBlock><Run Text="Turns both animations and effects on"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button Command="{Binding HandleTogglesCommand}" CommandParameter="all_off" Style="{StaticResource MainButtonStyle}" x:Name="all_off" FontFamily="Segoe UI Symbol" Content="&#xE10A; OFF" BorderBrush="{x:Null}" Foreground="#FFDADADA" Margin="528,313,85,146">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Turn off"/></TextBlock>
+                    <TextBlock><Run Text="Turns both animations and effects off"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Center" x:Name="label_Copy16" Text="Extended Options&#xA;" Margin="506,10,0,0" Height="45" Width="144" FontFamily="Arial" FontSize="18" FontWeight="Bold" Background="{x:Null}" Foreground="White" VerticalAlignment="Top" HorizontalAlignment="Left"/>
+        <Button Command="{Binding NavigateExtendedOptionsCommand}" IsEnabled="{Binding ExtendedOptionsInstalled}" Style="{StaticResource MainButtonStyle}" Content="Configure" Margin="526,60,30,402" FontWeight="Bold">
+            <Button.ToolTip>
+                <StackPanel>
+                    <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Extended Options Plugin Configurator"/></TextBlock>
+                    <TextBlock><Run Text="The plugin must be installed first before you can open the configuration settings"/></TextBlock>
+                    <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                </StackPanel>
+            </Button.ToolTip>
+        </Button>
+        <Button Command="{Binding ApplyChangesCommand}" Style="{StaticResource MainButtonStyle}" Content="Apply Changes" Margin="526,389,30,73" FontWeight="Bold" />
+        <ListView ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                  ScrollViewer.CanContentScroll="True"
+                  ItemsSource="{Binding ClassToggleCollection}"
+                  Background="{x:Null}" BorderBrush="{x:Null}"
+                  Height="440" Width="480" Margin="10,47,170,3">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="{x:Type ListViewItem}">
+                    <Setter Property="Template">
+                        <Setter.Value>
+                            <ControlTemplate TargetType="{x:Type ListViewItem}">
+                                <Border BorderThickness="0,0,0,0.0" BorderBrush="Silver"
+                                        Background="{TemplateBinding Background}"
+                                        Padding="{TemplateBinding Padding}"
+                                        SnapsToDevicePixels="True">
+                                    <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                      SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"
+                                      VerticalAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                                </Border>
+                                <ControlTemplate.Triggers>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Foreground" Value="{DynamicResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                    </Trigger>
+                                </ControlTemplate.Triggers>
+                            </ControlTemplate>
+                        </Setter.Value>
+                    </Setter>
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                    <Setter Property="BorderBrush" Value="#FF192830"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FF192830"/>
+                            <Setter Property="BorderThickness" Value="0"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <StackPanel VerticalAlignment="Top" Orientation="Vertical"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <Grid Height="28">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="225"/>
+                                <ColumnDefinition Width="75"/>
+                                <ColumnDefinition Width="225"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0" Content="{Binding ClassName}" FontFamily="Arial" FontSize="16" FontWeight="Bold" Background="{x:Null}" Foreground="White"/>
+                            <toggle:HorizontalToggleSwitch Style="{StaticResource ToggleStyle}" IsChecked="{Binding AnimationChecked}" Grid.Column="1" />
+                            <toggle:HorizontalToggleSwitch Style="{StaticResource ToggleStyle}" IsChecked="{Binding EffectsChecked}" Grid.Column="2" />
+                        </Grid>
+                    </Grid>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+    </Grid>
+</UserControl>

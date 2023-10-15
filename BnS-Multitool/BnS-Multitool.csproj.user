@@ -1,16 +1,99 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <PublishUrlHistory>publish\</PublishUrlHistory>
-    <InstallUrlHistory />
-    <SupportUrlHistory />
-    <UpdateUrlHistory />
-    <BootstrapperUrlHistory />
-    <ErrorReportUrlHistory />
-    <FallbackCulture>en-US</FallbackCulture>
-    <VerifyUploadedFiles>false</VerifyUploadedFiles>
+    <_LastSelectedProfileId>F:\Studio Projects\BnS-Multitool\BnS-Multitool\Properties\PublishProfiles\FolderProfile.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
-  <PropertyGroup>
-    <EnableSecurityDebugging>false</EnableSecurityDebugging>
-  </PropertyGroup>
+  <ItemGroup>
+    <ApplicationDefinition Update="App.xaml">
+      <SubType>Designer</SubType>
+    </ApplicationDefinition>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="View\EffectsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\ExtendedOptionsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\FirstTimeView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\InitScreen.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Launcher.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\MainPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\MainWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\ModsView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\PatchesView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\Plugins.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\QolView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\SyncView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="View\UpdaterView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Update="Styles\DataTemplate.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Styles\MainStyle.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\EffectsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\ExtendedOptionsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\FirstTimeView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\InitScreen.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\Launcher.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\MainPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\ModsView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\PatchesView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\Plugins.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\QolView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\SyncView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="View\UpdaterView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
 </Project>
