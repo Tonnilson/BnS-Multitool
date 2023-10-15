@@ -137,7 +137,7 @@ namespace BnS_Multitool.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to http://multitool.tonic.pw/.
+        ///   Looks up a localized string similar to https://multitool.tonic.pw/.
         /// </summary>
         public static string MainServerAddr {
             get {

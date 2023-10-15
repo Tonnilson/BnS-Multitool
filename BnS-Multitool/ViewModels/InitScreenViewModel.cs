@@ -1,22 +1,14 @@
 ﻿using BnS_Multitool.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Win32;
 using Security;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using static BnS_Multitool.Models.Settings;
-using System.Windows.Controls;
 using System.Windows;
 using BnS_Multitool.Extensions;
 using BnS_Multitool.View;
-using System.Diagnostics;
 
 namespace BnS_Multitool.ViewModels
 {
@@ -39,15 +31,6 @@ namespace BnS_Multitool.ViewModels
         {
             if (!Directory.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS")))
                 Directory.CreateDirectory(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "BnS"));
-
-            CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name);
-            if (ci.NumberFormat.NumberDecimalSeparator != ".")
-            {
-                // Forcing use of decimal separator for numerical values
-                ci.NumberFormat.NumberDecimalSeparator = ".";
-                Thread.CurrentThread.CurrentCulture = ci;
-                Thread.CurrentThread.CurrentUICulture = ci;
-            }
 
             // This is a dummy element used to load some COM interfaces in so there is no stuttering later on when they do get loaded
             // Leaving in as a oh shit the routed event keyframe failed which probably won't happen
@@ -86,7 +69,14 @@ namespace BnS_Multitool.ViewModels
             var pluginData = _serviceProvider.GetRequiredService<PluginData>();
             var plugins = await pluginData.RetrieveOnlinePlugins();
             if (plugins != null)
+            {
                 pluginData.Plugins = plugins;
+                if (_settings.System.AUTO_UPDATE_PLUGINS)
+                {
+                    StatusText = "Checking plugins";
+                    await pluginData.UpdateInstalledPlugins();
+                }
+            }
 
             StatusText = "Initializing...";
             await _serviceProvider.GetRequiredService<MainViewModel>().InitializeAsync();
@@ -104,6 +94,14 @@ namespace BnS_Multitool.ViewModels
                 var _sync = _serviceProvider.GetRequiredService<SyncClient>();
                 try
                 {
+                    if (_settings.Sync.EXPIRES == null)
+                        throw new Exception();
+
+                    // Tokens last for 7 days, we want to refresh the token every 2 days or so
+                    var expireTime = _settings.Sync.EXPIRES - DateTime.Now;
+                    if (expireTime.Value.Days < 6)
+                        throw new Exception();
+                    
                     await _sync.AuthDiscordAsync();
                 } catch (Exception ex)
                 {
@@ -114,8 +112,10 @@ namespace BnS_Multitool.ViewModels
                         {
                             _settings.Sync.AUTH_REFRESH = refresh.refresh_token;
                             _settings.Sync.AUTH_KEY = refresh.access_token;
+                            _settings.Sync.EXPIRES = DateTime.Now.AddSeconds(refresh.expires_in);
                             _sync.Auth_Token = refresh.access_token;
                             await _sync.AuthDiscordAsync();
+                            await _settings.SaveAsync(CONFIG.Sync);
                         } else
                         {
                             StatusText = "New auth key needed";

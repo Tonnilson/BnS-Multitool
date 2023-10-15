@@ -17,6 +17,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Xml.Linq;
+using static BnS_Multitool.Functions.IO;
 
 namespace BnS_Multitool.ViewModels
 {
@@ -118,6 +119,13 @@ namespace BnS_Multitool.ViewModels
             string MANAGER_DIR = Path.Combine(BNSPatchPath, "manager");
             string PATCHES_DIR = Path.Combine(BNSPatchPath, "patches");
             string ADDONS_DIR = Path.Combine(BNSPatchPath, "addons");
+
+            if (!Directory.Exists(MANAGER_DIR))
+                Directory.CreateDirectory(MANAGER_DIR);
+            if (!Directory.Exists(PATCHES_DIR))
+                Directory.CreateDirectory(PATCHES_DIR);
+            if (!Directory.Exists (ADDONS_DIR))
+                Directory.CreateDirectory(ADDONS_DIR);
 
             try
             {
@@ -242,8 +250,44 @@ namespace BnS_Multitool.ViewModels
         {
             if (BNSPatchPath != _settings.System.BNSPATCH_DIRECTORY)
             {
+                try
+                {
+                    if (!Directory.Exists(BNSPatchPath))
+                        Directory.CreateDirectory(BNSPatchPath);
+
+                    string manager = Path.Combine(BNSPatchPath, "manager");
+                    string addons = Path.Combine(BNSPatchPath, "addons");
+                    string patches = Path.Combine(BNSPatchPath, "patches");
+
+                    if (!Directory.Exists(manager))
+                        Directory.CreateDirectory(manager);
+
+                    if (!Directory.Exists(patches))
+                        Directory.CreateDirectory(patches);
+
+                    if (!Directory.Exists(addons))
+                        Directory.CreateDirectory(addons);
+
+                    // Check if patches.xml exists if so move it otherwise create one
+                    if (!File.Exists(Path.Combine(BNSPatchPath, "patches.xml")))
+                    {
+                        if (File.Exists(Path.Combine(_settings.System.BNSPATCH_DIRECTORY, "patches.xml")))
+                            File.Copy(Path.Combine(_settings.System.BNSPATCH_DIRECTORY, "patches.xml"), Path.Combine(BNSPatchPath, "patches.xml"));
+                        else
+                            await File.WriteAllTextAsync(Path.Combine(BNSPatchPath, "patches.xml"), Properties.Resources.patches);
+                    }
+
+                    // Move manager
+                    if (Directory.Exists(manager))
+                        DirectoryCopy(Path.Combine(_settings.System.BNSPATCH_DIRECTORY, "manager"), manager, true);
+
+                } catch (Exception ex)
+                {
+
+                }
                 _settings.System.BNSPATCH_DIRECTORY = BNSPatchPath;
                 await _settings.SaveAsync(Settings.CONFIG.Settings);
+                await UpdateList();
             }
             ShowBNSPatchWindow = false;
         }

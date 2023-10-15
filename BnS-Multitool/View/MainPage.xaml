@@ -36,12 +36,13 @@
         </b:EventTrigger>
     </b:Interaction.Triggers>
     <Grid>
+        <!-- <Button Command="{Binding QuickPlayCommand}" Height="30" Width="100" FontWeight="Bold" Content="Quick Play" Style="{StaticResource ActionButtonStyle}" Margin="470,66,90,394"/> -->
         <Border BorderBrush="#FF343E4B" Margin="-2,-3,284,341" BorderThickness="0,2,2,2" />
         <Label Content="Made by Tonic#1356" FontFamily="Arial" FontWeight="Bold" FontSize="18" Margin="0,0,417,462" Foreground="#FF99B4D1"/>
         <TextBlock Foreground="#FFDAE1EA" TextWrapping="WrapWithOverflow" FontFamily="Arial" FontWeight="Bold" Margin="5,25,287,378">
             Started as an alternative for friends and turned into something more. Big thanks to Pilao and Hora for enabling this. Thanks to everyone else for their support
             <LineBreak/>
-            <LineBreak/>
+
             Supporting me through PayPal and Patreon goes towards operating costs for the server and domain used for multi-tool.
         </TextBlock>
         <Image x:Name="MAINPAGE_ABOUT_ICON" gif:AnimationBehavior.SourceUri="/Images/agon/agonHuggie.gif" Margin="2,100,603,343"/>
@@ -51,7 +52,7 @@
                 <toolkit:PlainTextFormatter />
             </toolkit:RichTextBox.TextFormatter>
         </toolkit:RichTextBox>
-        <Button HorizontalAlignment="Center" VerticalAlignment="Top" Width="82" Height="36"
+        <Button Command="{Binding OpenPayPalCommand}" HorizontalAlignment="Center" VerticalAlignment="Top" Width="82" Height="36"
                  Margin="0,108,0,0">
             <Button.Template>
                 <ControlTemplate>
@@ -59,7 +60,7 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Button HorizontalAlignment="Left" VerticalAlignment="Top" Width="106" Height="34"
+        <Button Command="{Binding OpenPatreonCommand}" HorizontalAlignment="Left" VerticalAlignment="Top" Width="106" Height="34"
                 Margin="178,108,0,0">
             <Button.Template>
                 <ControlTemplate>
@@ -67,7 +68,5 @@
                 </ControlTemplate>
             </Button.Template>
         </Button>
-        <Label x:Name="PingLabel" Content="{Binding PingStatus}" HorizontalAlignment="Left" Margin="391,10,0,0" VerticalAlignment="Top" Width="176" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
-        <Label x:Name="usersOnlineLbl" Content="{Binding UsersOnlineStatus}" HorizontalAlignment="Left" Margin="391,41,0,0" VerticalAlignment="Top" Width="259" Foreground="White" FontFamily="Arial" FontSize="18" FontWeight="Bold"/>
     </Grid>
 </UserControl>

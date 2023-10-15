@@ -107,12 +107,6 @@ namespace BnS_Multitool.ViewModels
             _message.MessageClosed.TrySetResult(true);
         }
 
-        [RelayCommand]
-        void OpenSettings()
-        {
-            MessagePrompt("Generic error message");
-        }
-
         public void MessagePrompt(string message, bool isError = false, bool bold = false)
         {
             ErrorMessage = message;
@@ -262,7 +256,6 @@ namespace BnS_Multitool.ViewModels
 
         private void OnlineUsers_Tick(object? sender)
         {
-            Debug.WriteLine("Running online Tick");
             try
             {
                 var response = _httpClient.DownloadString($"{Properties.Settings.Default.MainServerAddr}usersOnline.php?UID={_settings.System.FINGERPRINT}").GetAwaiter().GetResult();
@@ -272,7 +265,9 @@ namespace BnS_Multitool.ViewModels
                 if (appVersion != null && appVersion.VERSION != _settings.VersionInfo())
                 {
                     IsUpdateAvailable = true;
-                    _message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {appVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
+                    // TODO: Implement system for a one-time notification of update
+                    // Until such system is implemented leave this section commented out and the duplicate in InitializeAsync uncommented.
+                    //_message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {appVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
                 }
             }
             catch (Exception ex)
@@ -294,7 +289,7 @@ namespace BnS_Multitool.ViewModels
                 {
                     // Update notification
                     IsUpdateAvailable = true;
-                    //_message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {serverVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
+                    _message.Enqueue(new MessageService.MessagePrompt { Message = $"A new update is available!\rBe sure to read the change log for any important changes.\r\rNew: {serverVersion.VERSION}\rCurrent: {_settings.VersionInfo()}", IsError = false, UseBold = true });
                 }
 
             }

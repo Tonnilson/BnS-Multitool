@@ -46,31 +46,45 @@ namespace BnS_Multitool.Models
     public enum MemoryCleaner_Timers
     {
         [Description("OFF")]
+        [DefaultValue(0)]
         off,
+        [DefaultValue(1)]
         [Description("1 Minute")]
         one,
+        [DefaultValue(5)]
         [Description("5 Minutes")]
         five,
+        [DefaultValue(10)]
         [Description("10 Minutes")]
         ten,
+        [DefaultValue(15)]
         [Description("15 Minutes")]
         fifteen,
+        [DefaultValue(20)]
         [Description("20 Minutes")]
         twenty,
+        [DefaultValue(25)]
         [Description("25 Minutes")]
         twentyfive,
+        [DefaultValue(30)]
         [Description("30 Minutes")]
         thirty,
+        [DefaultValue(35)]
         [Description("35 Minutes")]
         thirtyfive,
+        [DefaultValue(40)]
         [Description("40 Minutes")]
         fourty,
+        [DefaultValue(45)]
         [Description("45 Minutes")]
         fourtyfive,
+        [DefaultValue(50)]
         [Description("50 Minutes")]
         fithty,
+        [DefaultValue(55)]
         [Description("55 Minutes")]
         fithyfive,
+        [DefaultValue(60)]
         [Description("60 Minutes")]
         sixty
     }
@@ -288,7 +302,7 @@ namespace BnS_Multitool.Models
                     USE_TEXTURE_STREAMING = false,
                     REGION = ERegion.NA,
                     LANGUAGE = ELanguage.EN,
-                    AUTPATCH_QOL = 0,
+                    AUTPATCH_QOL = false,
                     MEMORY_CLEANER = MemoryCleaner_Timers.off,
                     LAST_USED_ACCOUNT = -1,
                     Saved = new List<BNS_SAVED_ACCOUNTS_STRUCT> { }
@@ -334,7 +348,7 @@ namespace BnS_Multitool.Models
             }
         }
 
-        public struct SYSConfig
+        public class SYSConfig
         {
             public string VERSION { get; set; }
             public string BNSPATCH_DIRECTORY { get; set; }
@@ -343,8 +357,8 @@ namespace BnS_Multitool.Models
             public EThemes THEME { get; set; }
             public int ADDITIONAL_EFFECTS { get; set; }
             public bool AUTO_UPDATE_PLUGINS { get; set; }
-            public int UPDATER_THREADS { get; set; }
-            public int DOWNLOADER_THREADS { get; set; }
+            public int UPDATER_THREADS { get; set; } = 1;
+            public int DOWNLOADER_THREADS { get; set; } = 1;
             public EStartNewGame NEW_GAME_OPTION { get; set; }
             public EMinimizeWindow MINIMZE_ACTION { get; set; }
             public bool PING_CHECK { get; set; }
@@ -368,7 +382,7 @@ namespace BnS_Multitool.Models
             public ERegion REGION { get; set; }
             public ELanguage LANGUAGE { get; set; }
             public MemoryCleaner_Timers MEMORY_CLEANER { get; set; }
-            public int AUTPATCH_QOL { get; set; }
+            public bool AUTPATCH_QOL { get; set; }
             public List<BNS_SAVED_ACCOUNTS_STRUCT> Saved { get; set; }
             public int LAST_USED_ACCOUNT { get; set; }
         }
@@ -386,6 +400,7 @@ namespace BnS_Multitool.Models
         {
             public string AUTH_KEY { get; set; }
             public string AUTH_REFRESH { get; set; }
+            public DateTime? EXPIRES { get; set; }
             public List<Synced_Xmls> Synced { get; set; }
         }
 

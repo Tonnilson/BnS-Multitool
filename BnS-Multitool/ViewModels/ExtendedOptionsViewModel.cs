@@ -392,6 +392,6 @@ namespace BnS_Multitool.ViewModels
         }
 
         [RelayCommand]
-        void OpenEffectRecord() => Process.Start(new ProcessStartInfo(@"http://sync.bns.tools/discord_auth/?login") { UseShellExecute = true });
+        void OpenEffectRecord() => Process.Start(new ProcessStartInfo(@"http://multitool.tonic.pw/effect_list.php") { UseShellExecute = true });
     }
 }

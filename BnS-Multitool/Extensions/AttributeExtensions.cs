@@ -73,4 +73,10 @@ namespace BnS_Multitool.Extensions
         public string Path { get; private set; }
         public RegistryPathAttribute(string path) => Path = path;
     }
+    [AttributeUsage(AttributeTargets.All)]
+    public class IsPurpleAttribute : Attribute
+    {
+        public bool Value { get; private set; } = false;
+        public IsPurpleAttribute(bool value) => Value = value;
+    }
 }

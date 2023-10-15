@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.XPath;
@@ -24,6 +23,7 @@ namespace BnS_Multitool.Models
     public enum ERegion
     {
         [Description("NA")]
+        [IsPurple(false)]
         [Region("NCWest")]
         [GameId("BnS_UE4")]
         [RegistryPath("SOFTWARE\\Wow6432Node\\NCWest\\BnS_UE4\\")]
@@ -33,6 +33,7 @@ namespace BnS_Multitool.Models
         [GameIPAddress("18.235.123.165")]
         NA,
         [Description("EU")]
+        [IsPurple(false)]
         [Region("NCWest")]
         [GameId("BnS_UE4")]
         [RegistryPath("SOFTWARE\\Wow6432Node\\NCWest\\BnS_UE4\\")]
@@ -42,6 +43,7 @@ namespace BnS_Multitool.Models
         [GameIPAddress("3.75.38.202")]
         EU,
         [Description("TW")]
+        [IsPurple(true)]
         [Region("NCTaiwan")]
         [GameId("TWBNSUE4")]
         [RegistryPath("SOFTWARE\\Wow6432Node\\NCTaiwan\\TWBNS22\\")]
@@ -51,11 +53,12 @@ namespace BnS_Multitool.Models
         [GameIPAddress("210.242.83.163")]
         TW,
         [Description("JP")]
+        [IsPurple(true)]
         [Region("NCJapan")]
         [GameId("BNS_JPN_UE4")]
-        [RegistryPath("SOFTWARE\\Wow6432Node\\PlayNC\\BNS_JPN_UE4\\")]
+        [RegistryPath("SOFTWARE\\Wow6432Node\\plaync\\BNS_JPN_UE4\\")]
         [LauncherAddr("BnSUpdate.ncsoft.jp")]
-        [CDN("")]
+        [CDN("")] // Idk what this is but it'll be fetched from the upserv
         [GameIPAddress("106.186.46.101")]
         JP
     }
@@ -151,14 +154,19 @@ namespace BnS_Multitool.Models
             string filePath = Path.Combine(_settings.System.BNS_DIR, $"VersionInfo_{_settings.Account.REGION.GetAttribute<GameIdAttribute>().Name}");
             try
             {
-                if (File.Exists($"{filePath}.ini"))
+                if (!_settings.Account.REGION.GetAttribute<IsPurpleAttribute>().Value)
                 {
-                    var reader = new IniReader($"{filePath}.ini");
-                    return reader.Read("VersionInfo", "GlobalVersion");
+                    if (File.Exists($"{filePath}.ini"))
+                    {
+                        var reader = new IniReader($"{filePath}.ini");
+                        return reader.Read("VersionInfo", "GlobalVersion");
+                    }
+                    else
+                        return string.Empty;
                 } else
                 {
                     System.Xml.Linq.XDocument versionInfo = System.Xml.Linq.XDocument.Load($"{filePath}.xml");
-                    var localInfo = versionInfo.XPathSelectElement("VersionInfo/version");
+                    var localInfo = versionInfo.XPathSelectElement("VersionInfo/Version");
                     if (localInfo == null) return string.Empty;
                     return localInfo.Value;
                 }
@@ -173,7 +181,7 @@ namespace BnS_Multitool.Models
         {
             if (_settings.System.BNS_DIR.IsNullOrEmpty()) return;
             string filePath = Path.Combine(_settings.System.BNS_DIR, $"VersionInfo_{_settings.Account.REGION.GetAttribute<GameIdAttribute>().Name}");
-
+            isPurple = isPurple || _settings.Account.REGION.GetAttribute<IsPurpleAttribute>().Value;
             try
             {
                 if (isPurple)
@@ -219,12 +227,14 @@ namespace BnS_Multitool.Models
         private void QueryServices()
         {
             _buildNumber = NCLauncherService<string>(ServiceRequest.Build).GetAwaiter().GetResult(); // Still using this because of build relay option, need to get rid of this later
-            _loginAvailable = GetGameInfoExeEnable(_settings.Account.REGION)?.ExeEnableFlag != 0 ? true : false;
+            var login = GetGameInfoExeEnable(_settings.Account.REGION);
+            _loginAvailable = login != null ? (login?.ExeEnableFlag != 0 ? true : false) : true;
             var cdn = GetGameInfoUpdateRequest(_settings.Account.REGION);
-            RepositoryServerAddress = cdn.RepositoryServerAddress ?? _settings.Account.REGION.GetAttribute<CDNAttribute>().Name;
-
-            var forwardInfo = GetVersionInfoForward(_settings.Account.REGION);
-            Debug.WriteLine($"Forward Version: {forwardInfo.ForwardVersion}");
+            RepositoryServerAddress = cdn != null ? cdn.RepositoryServerAddress : _settings.Account.REGION.GetAttribute<CDNAttribute>().Name;
+            //RepositoryServerAddress = cdn.RepositoryServerAddress ?? _settings.Account.REGION.GetAttribute<CDNAttribute>().Name;
+            //Debug.WriteLine(_RepositoryServerAddress);
+            //var forwardInfo = GetVersionInfoForward(_settings.Account.REGION);
+            //Debug.WriteLine($"Forward Version: {forwardInfo.ForwardVersion}");
             _LastRegion = _settings.Account.REGION;
             _lastLookup = DateTime.Now.AddMinutes(1);
             Disconnect();

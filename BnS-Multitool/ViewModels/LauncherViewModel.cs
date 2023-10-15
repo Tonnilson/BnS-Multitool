@@ -18,10 +18,13 @@ using System.Management;
 using System.Threading.Tasks;
 using System.Windows;
 using static BnS_Multitool.Models.Settings;
+using System.Collections.Generic;
+using System.Windows.Threading;
+using static BnS_Multitool.Extensions.ProcessExtension;
 
 namespace BnS_Multitool.ViewModels
 {
-    public partial class LauncherViewModel : ObservableValidator
+    public partial class LauncherViewModel : ObservableValidator, IRecipient<LaunchMessage>
     {
         public class SESSION_LIST
         {
@@ -37,7 +40,7 @@ namespace BnS_Multitool.ViewModels
         private readonly MessageService _message;
         private readonly MultiTool _mt;
         private readonly PluginData _pluginData;
-        private bool _init = false;
+        private readonly DispatcherTimer _memoryCleaner = new DispatcherTimer();
 
         private BackgroundWorker _processMonitor = new BackgroundWorker();
 
@@ -56,6 +59,9 @@ namespace BnS_Multitool.ViewModels
             IsTextureStreamingEnabled = _settings.Account.USE_TEXTURE_STREAMING;
             AccountList = new ObservableCollection<BNS_SAVED_ACCOUNTS_STRUCT>(_settings.Account.Saved);
             AccountListSelected = _settings.Account.LAST_USED_ACCOUNT;
+            MemoryCleanerItem = _settings.Account.MEMORY_CLEANER;
+
+            WeakReferenceMessenger.Default.RegisterAll(this);
 
             if (AccountListSelected != -1)
             {
@@ -64,7 +70,39 @@ namespace BnS_Multitool.ViewModels
             }
 
             _processMonitor.DoWork += MonitorActiveProcesses;
-            _init = true;
+            _memoryCleaner.Tick += new EventHandler(MemoryCleanerThread);
+
+            if (_settings.Account.MEMORY_CLEANER != MemoryCleaner_Timers.off)
+            {
+                _memoryCleaner.IsEnabled = true;
+                _memoryCleaner.Interval = TimeSpan.FromMinutes((int)_settings.Account.MEMORY_CLEANER.GetDefaultValue());
+                _memoryCleaner.Start();
+            }
+        }
+
+        private void MemoryCleanerThread(object? sender, EventArgs e)
+        {
+            Process[] allProcs = Process.GetProcessesByName("BNSR");
+            if(allProcs.Count() > 0)
+            {
+                foreach (var proc in allProcs)
+                {
+                    try
+                    {
+                        EmptyWorkingSet(proc.Handle);
+                    }
+                    catch { }
+                }
+            }
+        }
+
+        [System.Runtime.InteropServices.DllImport("psapi.dll")]
+        public static extern int EmptyWorkingSet(IntPtr hwProc);
+
+        [RelayCommand]
+        void CleanMemory()
+        {
+            MemoryCleanerThread(null, null);
         }
 
         [RelayCommand]
@@ -79,31 +117,32 @@ namespace BnS_Multitool.ViewModels
             try
             {
                 var isLoginAvailable = _bns.LoginAvailable;
-                //var BuildNumber = _bns.GetVersionInfoRelease(_settings.Account.REGION)?.GlobalVersion.ToString();
-                //var isLoginAvailable = await _bns.NCLauncherService<bool>(BnS.ServiceRequest.Login);
+                // var BuildNumber = _bns.GetVersionInfoRelease(_settings.Account.REGION)?.GlobalVersion.ToString();
+                // var isLoginAvailable = await _bns.NCLauncherService<bool>(BnS.ServiceRequest.Login);
                 var BuildNumber = _bns.BuildNumber;
-                string localBuild = string.Empty;
+                string localBuild = _bns.GetLocalBuild();
 
-                var vInfo_path = Path.Combine(_settings.System.BNS_DIR, $"VersionInfo_{CurrentRegion.GetAttribute<GameIdAttribute>().Name}.ini");
-                if (!File.Exists(vInfo_path))
+                if (localBuild.IsNullOrEmpty())
                 {
                     _message.Enqueue(new MessageService.MessagePrompt { Message = "Cannot find the version file for game, did you select the correct directory for your game?", IsError = true });
                     return;
                 }
 
-                var reader = new IniReader(vInfo_path);
-                localBuild = reader.Read("VersionInfo", "GlobalVersion");
-
                 if (localBuild != BuildNumber || !isLoginAvailable)
                 {
+                    bool loginExcept = _settings.Account.REGION == ERegion.TW && localBuild == BuildNumber;
+                    if (loginExcept) goto PluginVersionCheck;
+
                     _message.Enqueue(new MessageService.MessagePrompt
                     {
-                        Message = string.Format("{0}{1}", !isLoginAvailable ? "The server is currently undergoing maintenance.\r" : "", localBuild != BuildNumber ? "A game update is available" : ""),
+                        Message = string.Format("{0}{1}", (!isLoginAvailable && _settings.Account.REGION != ERegion.TW) ? "The server is currently undergoing maintenance.\r" : "", localBuild != BuildNumber ? "A game update is available" : ""),
                         IsError = true,
                         UseBold = true
                     });
                 }
 
+                PluginVersionCheck:
+                await CheckOnlineVersion();
             }
             catch (Exception ex)
             {
@@ -158,6 +197,12 @@ namespace BnS_Multitool.ViewModels
         [ObservableProperty]
         private Visibility environmentVariableInfoVisibility = Visibility.Collapsed;
 
+        [ObservableProperty]
+        private bool showProgressView = false;
+
+        [ObservableProperty]
+        private string progressStatusText = "";
+
         partial void OnLaunchParamsChanged(string value)
         {
             if (AccountListSelected == -1) return;
@@ -199,23 +244,21 @@ namespace BnS_Multitool.ViewModels
             _settings.Account.LAST_USED_ACCOUNT = value;
             LaunchParams = AccountList[accountListSelected].PARAMS ?? string.Empty;
             EnvironmentParams = AccountList[accountListSelected].ENVARS ?? string.Empty;
-
-            if (_init)
-                _settings.Save(CONFIG.Account);
+            _settings.Save(CONFIG.Account);
         }
 
         partial void OnCurrentRegionChanged(ERegion value)
         {
             _settings.Account.REGION = value;
-            if (_init)
-                _settings.Save(CONFIG.Account);
+            _settings.Save(CONFIG.Account);
+
+            Task.Run(async() => await PageLoaded());
         }
 
         partial void OnCurrentLanguageChanged(ELanguage value)
         {
             _settings.Account.LANGUAGE = value;
-            if (_init)
-                _settings.Save(CONFIG.Account);
+            _settings.Save(CONFIG.Account);
         }
 
         partial void OnIsAllCoresEnabledChanged(bool value)
@@ -234,6 +277,17 @@ namespace BnS_Multitool.ViewModels
         {
             _settings.Account.MEMORY_CLEANER = value;
             _settings.Save(CONFIG.Account);
+
+            if (value == MemoryCleaner_Timers.off)
+            {
+                _memoryCleaner.IsEnabled = false;
+                _memoryCleaner.Stop();
+            } else
+            {
+                _memoryCleaner.IsEnabled = true;
+                _memoryCleaner.Interval = TimeSpan.FromMinutes((int)value.GetDefaultValue());
+                _memoryCleaner.Start();
+            }
         }
 
         [RelayCommand]
@@ -250,6 +304,7 @@ namespace BnS_Multitool.ViewModels
         [RelayCommand]
         void KillAllProcesses()
         {
+            //ActiveClientList.Clear();
             foreach (Process proc in Process.GetProcessesByName("BNSR"))
                 KillProcessAndChildrens(proc.Id);
         }
@@ -331,7 +386,16 @@ namespace BnS_Multitool.ViewModels
         [RelayCommand]
         async Task LaunchGame()
         {
-            var processCount = Process.GetProcessesByName("BNSR").Count();
+            int processCount = -1;
+            try
+            {
+                processCount = Process.GetProcessesByName("BNSR").Length;
+            } catch (Exception ex)
+            {
+                _message.Enqueue(new MessageService.MessagePrompt { Message = "Error getting process count, anti-virus related..? Aborting launch to prevent further problems", IsError = true, UseBold = true });
+                _logger.LogError(ex, "Error getting process count");
+                return;
+            }
 
             // Anti-cheat check (controlled by me)
             if (_mt.MT_Info.ANTI_CHEAT_ENABLED && CurrentRegion != ERegion.TW)
@@ -344,17 +408,17 @@ namespace BnS_Multitool.ViewModels
             {
                 _message.Enqueue(new MessageService.MessagePrompt { Message = "No account selected, select an account before attempting to launch a new client", IsError = true });
                 return;
-            } else if (processCount == 0 && _pluginData.IsPluginInstalled("loader3"))
+            } else if (processCount == 0 && !_pluginData.IsPluginInstalled("loader3"))
             {
                 _message.Enqueue(new MessageService.MessagePrompt { Message = "Loader3 is missing, you can click the install button below to get the required plugins", IsError = true, UseBold = true });
                 return;
             }
-            else if (processCount == 0 && _pluginData.IsPluginInstalled("loginhelper"))
+            else if (processCount == 0 && !_pluginData.IsPluginInstalled("loginhelper"))
             {
                 _message.Enqueue(new MessageService.MessagePrompt { Message = "LoginHelper is missing, you can click the install button below to get the required plugins", IsError = true, UseBold = true });
                 return;
             }
-            else if (processCount == 0 && _pluginData.IsPluginInstalled("bnsnogg"))
+            else if (processCount == 0 && !_pluginData.IsPluginInstalled("bnsnogg"))
             {
                 _message.Enqueue(new MessageService.MessagePrompt { Message = "GameGuard Bypass is missing, you can click the install button below to get the required plugins", IsError = true, UseBold = true });
                 return;
@@ -364,10 +428,19 @@ namespace BnS_Multitool.ViewModels
             try
             {
                 if (_settings.System.AUTO_UPDATE_PLUGINS && processCount == 0)
+                {
+                    ShowProgressView = true;
+                    ProgressStatusText = "Checking for plugin updates";
                     await _pluginData.UpdateInstalledPlugins();
-                else if (processCount == 0 && _settings.Account.AUTPATCH_QOL == 0)
+                    await Task.Delay(1500);
+                    ShowProgressView = false;
+                }
+                else if (processCount == 0 && !_settings.Account.AUTPATCH_QOL)
                 {
                     // Special condition for multitool_qol
+                    ShowProgressView = true;
+                    ProgressStatusText = "Checking for qol plugin update";
+                    await Task.Delay(200);
                     var plugins = await _pluginData.RetrieveOnlinePlugins();
                     if (plugins != null)
                         _pluginData.Plugins = plugins;
@@ -375,11 +448,15 @@ namespace BnS_Multitool.ViewModels
                     var qol_plugin = _pluginData.Plugins?.PluginInfo.FirstOrDefault(x => x.Name == "multitool_qol");
                     if (qol_plugin != null)
                         await _pluginData.InstallPlugin(qol_plugin);
+
+                    await Task.Delay(1500);
+                    ShowProgressView = false;
                 }
             } catch (Exception ex)
             {
                 _message.Enqueue(new MessageService.MessagePrompt { Message = $"Failed to update plugin(s)\r{ex.Message}", IsError = true });
                 _logger.LogError(ex, "Failed to update plugin(s)");
+                ShowProgressView = false;
             }
 
             // Continue launching
@@ -439,10 +516,10 @@ namespace BnS_Multitool.ViewModels
                 if (IsTextureStreamingEnabled) proc.StartInfo.ArgumentList.Add("-NOTEXTURESTREAMING");
 
                 // Region other than TW
-                if(CurrentRegion != ERegion.TW)
+                if(CurrentRegion != ERegion.TW && CurrentRegion != ERegion.JP)
                 {
                     proc.StartInfo.ArgumentList.Add($"-lang:{CurrentLanguage.GetDescription()}");
-                    proc.StartInfo.ArgumentList.Add($"-region:{CurrentRegion}");
+                    proc.StartInfo.ArgumentList.Add($"-region:{(int)CurrentRegion}");
                 }
 
                 // Finally add the additional params that a user may specify
@@ -505,8 +582,11 @@ namespace BnS_Multitool.ViewModels
                 switch(_settings.System.NEW_GAME_OPTION)
                 {
                     case EStartNewGame.Nothing: break;
+                    case EStartNewGame.MinimizeLauncher:
+                        Application.Current.MainWindow.WindowState = WindowState.Minimized;
+                        break;
                     case EStartNewGame.CloseLauncher:
-                        App.Current.Shutdown();
+                        Application.Current.Shutdown();
                         break;
                     default:
                         WeakReferenceMessenger.Default.Send(new NotifyIconMessage(true));
@@ -517,6 +597,9 @@ namespace BnS_Multitool.ViewModels
             {
                 _logger.LogError(ex, "Failed to launch new game client");
                 _message.Enqueue(new MessageService.MessagePrompt { Message = "Failed to launch game client\rCheck the logs for more information", IsError = true });
+            } finally
+            {
+                await Task.CompletedTask;
             }
 
         GarbageCollection:
@@ -532,18 +615,12 @@ namespace BnS_Multitool.ViewModels
                 {
                     foreach (var session in ActiveClientList.Select((item, index) => new { index, item }).ToList())
                     {
-                        Process? proc = null;
-                        try
-                        {
-                            proc = Process.GetProcessById(session.item.PROCESS.Id);
-                        }
-                        catch { }
-
-                        if (proc == null || proc.HasExited)
+                        if (!IsProcessAlive(session.item.PROCESS.Id))
                         {
                             App.Current.Dispatcher.BeginInvoke((Action)delegate
                             {
-                                ActiveClientList.RemoveAt(session.index);
+                                if (activeClientList.ElementAtOrDefault(session.index) != null)
+                                    ActiveClientList.RemoveAt(session.index);
                             });
                         }
                     }
@@ -569,6 +646,115 @@ namespace BnS_Multitool.ViewModels
                 ActiveClientList.RemoveAt(ActiveClientIndex);
                 ActiveClientIndex = -1;
             }
+        }
+
+        class requiredList
+        {
+            public string Name { get; set; }
+            public string Path { get; set; }
+            public string Hash { get; set; }
+        }
+
+        [ObservableProperty]
+        private string pluginInfoText;
+
+        private async Task CheckOnlineVersion()
+        {
+            var plugins = await _pluginData.RetrieveOnlinePlugins();
+            if (plugins == null)
+            {
+                _message.Enqueue(new MessageService.MessagePrompt { Message = "Failed to retrieve plugins from server", IsError = true, UseBold = true });
+                return;
+            }
+
+            _pluginData.Plugins = plugins;
+            var loader3 = plugins.PluginInfo.FirstOrDefault(x => x.Name.Equals("loader3"));
+            var bnsnogg = plugins.PluginInfo.FirstOrDefault(x => x.Name.Equals("bnsnogg"));
+            var loginhelper = plugins.PluginInfo.FirstOrDefault(x => x.Name.Equals("loginhelper"));
+
+            if (loader3 == null || bnsnogg == null || loginhelper == null)
+            {
+                _message.Enqueue(new MessageService.MessagePrompt { Message = "Error getting information about one of the plugins", IsError = true, UseBold = true });
+                return;
+            }
+
+            bool GameRunning = ActiveClientList.Count > 0 || Process.GetProcessesByName("BNSR").Length > 0;
+
+            var requiredList = new List<requiredList>
+            {
+                new requiredList { Name = "Loader3", Path = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, loader3.FilePath)), Hash = loader3.Hash},
+                new requiredList { Name = "GameGuard Bypass", Path = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, bnsnogg.FilePath)), Hash = bnsnogg.Hash},
+                new requiredList { Name = "LoginHelper", Path = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, loginhelper.FilePath)), Hash = loginhelper.Hash}
+            };
+
+            PluginInfoText = "";
+
+            foreach (var item in requiredList)
+            {
+                if (File.Exists(item.Path))
+                {
+                    if (Crypto.CRC32_File(item.Path) == item.Hash || GameRunning)
+                    {
+                        System.Windows.Documents.Run text = new System.Windows.Documents.Run("\uE10B");
+                        text.Foreground = System.Windows.Media.Brushes.Green;
+                        PluginInfoText += text.Text;
+                    }
+                    else
+                    {
+                        System.Windows.Documents.Run text = new System.Windows.Documents.Run("\uE118");
+                        text.Foreground = System.Windows.Media.Brushes.Yellow;
+
+                        PluginInfoText += text.Text;
+                    }
+                }
+                else
+                {
+                    System.Windows.Documents.Run text = new System.Windows.Documents.Run("\uE10A");
+                    text.Foreground = System.Windows.Media.Brushes.Red;
+                    PluginInfoText += text.Text;
+                }
+
+                System.Windows.Documents.Run name = new System.Windows.Documents.Run(" " + item.Name + "\r\n");
+                PluginInfoText += name.Text;
+            }
+        }
+
+        [RelayCommand]
+        async Task InstallRequired()
+        {
+            try
+            {
+                PluginInfoText = "";
+                //ProgressControl.updateProgressLabel("Checking for plugin updates");
+                var plugins = await _pluginData.RetrieveOnlinePlugins();
+                if (plugins != null)
+                {
+                    _pluginData.Plugins = plugins;
+                    foreach (var plugin in plugins.PluginInfo)
+                    {
+                        if (plugin.FullName.IsNullOrEmpty()) continue;
+                        var path = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, plugin.FilePath));
+                        if (!File.Exists(path)) continue;
+
+                        if (Crypto.CRC32_File(path) != plugin.Hash)
+                        {
+                            //ProgressControl.updateProgressLabel(string.Format("Updating {0}", plugin.Title));
+                            await _pluginData.InstallPlugin(plugin);
+                        }
+                    }
+                }
+
+                _message.Enqueue(new MessageService.MessagePrompt { Message = "Plugins installed or up-to-date", IsError = false, UseBold = true });
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error installing or updating required plugins");
+                _message.Enqueue(new MessageService.MessagePrompt { Message = "An error occured installing or updating required plugins", IsError = true, UseBold = false });
+            }
+
+            await Task.Delay(100);
+            await CheckOnlineVersion();
         }
 
         [RelayCommand]
@@ -597,5 +783,8 @@ namespace BnS_Multitool.ViewModels
                 //Logger.log.Error("Launcher::KillProcessAndChildrens::Type {0}\n{1}\n{2}", ex.GetType().Name, ex.ToString(), ex.StackTrace);
             }
         }
+
+        void IRecipient<LaunchMessage>.Receive(LaunchMessage message) =>
+            Task.Run(async () => await LaunchGame());
     }
 }

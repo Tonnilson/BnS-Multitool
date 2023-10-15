@@ -1,5 +1,6 @@
 ﻿using BnS_Multitool.Messages;
 using BnS_Multitool.Models;
+using BnS_Multitool.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -7,7 +8,9 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
+using System.Threading;
 using System.Windows;
 using System.Xml.Linq;
 using System.Xml.XPath;
@@ -18,27 +21,29 @@ namespace BnS_Multitool.ViewModels
     {
         private readonly Settings _settings;
         private readonly XmlModel _xmlModel;
+        private readonly MessageService _messageService;
         private readonly ILogger<QolViewModel> _logger;
 
         public class SkillData
         {
             public int skillID { get; set; }
             public float skillvalue { get; set; }
-            public QOL_MODE mode { get; set; }
-            public string description { get; set; }
+            public QOL_MODE mode { get; set; } = QOL_MODE.Offset;
+            public string? description { get; set; }
             public float recycleTime { get; set; }
-            public QOL_MODE recycleMode { get; set; }
-            public QOL_AUTOBIAS ignoreAutoBias { get; set; }
-            public QOL_YESNO useTalisman { get; set; }
+            public QOL_MODE recycleMode { get; set; } = QOL_MODE.Offset;
+            public QOL_AUTOBIAS ignoreAutoBias { get; set; } = QOL_AUTOBIAS.Yes;
+            public QOL_YESNO useTalisman { get; set; } = QOL_YESNO.No;
             public int rotate { get; set; }
             public int rotateDelay { get; set; }
         }
 
-        public QolViewModel(Settings settings, ILogger<QolViewModel> logger, XmlModel xmlModel)
+        public QolViewModel(Settings settings, ILogger<QolViewModel> logger, XmlModel xmlModel, MessageService messageService)
         {
             _settings = settings;
             _logger = logger;
             _xmlModel = xmlModel;
+            _messageService = messageService;
         }
 
         [ObservableProperty]
@@ -81,6 +86,12 @@ namespace BnS_Multitool.ViewModels
         private bool optionCameraLock;
 
         [ObservableProperty]
+        private bool optionTalismanOnlyonSkills = false;
+
+        [ObservableProperty]
+        private bool optionAutoTalisman;
+
+        [ObservableProperty]
         private string optionRangeValue = "30";
 
         [ObservableProperty]
@@ -109,66 +120,92 @@ namespace BnS_Multitool.ViewModels
         [RelayCommand]
         async void UILoaded()
         {
-            ShowMainView = true;
-            ShowGCDInfo = false;
-
-            if (_xmlModel.qol == null)
-                await _xmlModel.Load_QOL_Async();
-
-            List<SkillData> skillData = new List<SkillData>();
-            var nodes = _xmlModel.qol.Descendants("skill");
-
-            foreach (var node in nodes )
+            try
             {
-                skillData.Add(new SkillData()
+                ShowMainView = true;
+                ShowGCDInfo = false;
+
+                if (_xmlModel.qol == null)
+                    await _xmlModel.Load_QOL_Async();
+
+                List<SkillData> skillData = new List<SkillData>();
+                var nodes = _xmlModel.qol.Descendants("skill");
+
+                foreach (var node in nodes)
                 {
-                    skillID = int.Parse(node.Attribute("id").Value),
-                    skillvalue = float.Parse(node.Attribute("value").Value),
-                    mode = (QOL_MODE)int.Parse(node.Attribute("mode").Value),
-                    description = (node.Attribute("description") == null) ? string.Empty : node.Attribute("description").Value,
-                    recycleTime = float.Parse((node.Attribute("recycleTime") == null) ? "-0.015" : node.Attribute("recycleTime").Value),
-                    recycleMode = (QOL_MODE)int.Parse((node.Attribute("recycleMode") == null) ? "0" : node.Attribute("recycleMode").Value),
-                    ignoreAutoBias = (QOL_AUTOBIAS)int.Parse((node.Attribute("ignoreAutoBias") == null) ? "0" : node.Attribute("ignoreAutoBias").Value),
-                    useTalisman = (QOL_YESNO)int.Parse((node.Attribute("useTalisman") == null) ? "1" : node.Attribute("useTalisman").Value),
-                    rotate = int.Parse((node.Attribute("rotate") == null) ? "0" : node.Attribute("rotate").Value),
-                    rotateDelay = int.Parse((node.Attribute("rotateDelay") == null) ? "0" : node.Attribute("rotateDelay").Value)
-                });
-            }
+                    skillData.Add(new SkillData()
+                    {
+                        skillID = int.Parse(node.Attribute("id").Value),
+                        skillvalue = float.Parse(node.Attribute("value").Value),
+                        mode = (QOL_MODE)int.Parse(node.Attribute("mode").Value),
+                        description = (node.Attribute("description") == null) ? string.Empty : node.Attribute("description").Value,
+                        recycleTime = float.Parse((node.Attribute("recycleTime") == null) ? "-0.015" : node.Attribute("recycleTime").Value),
+                        recycleMode = (QOL_MODE)int.Parse((node.Attribute("recycleMode") == null) ? "0" : node.Attribute("recycleMode").Value),
+                        ignoreAutoBias = (QOL_AUTOBIAS)int.Parse((node.Attribute("ignoreAutoBias") == null) ? "0" : node.Attribute("ignoreAutoBias").Value),
+                        useTalisman = (QOL_YESNO)int.Parse((node.Attribute("useTalisman") == null) ? "0" : node.Attribute("useTalisman").Value),
+                        rotate = int.Parse((node.Attribute("rotate") == null) ? "0" : node.Attribute("rotate").Value),
+                        rotateDelay = int.Parse((node.Attribute("rotateDelay") == null) ? "0" : node.Attribute("rotateDelay").Value)
+                    });
+                }
 
-            // Auto Bait
-            OptionAutoBait = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useAutoBait']").Attribute("enable").Value == "1" ? true : false;
-            // Marketplace anywhere
-            OptionMPAnywhere = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useMarketplace']").Attribute("enable").Value == "1" ? true : false;
-            // Raise received items cap
-            OptionItemsCap = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useItemCap']").Attribute("enable").Value == "1" ? true : false;
-            // Auto combat anywhere
-            OptionAutoCombat = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("enable").Value == "1" ? true : false;
-            // Use custom range
-            OptionCustomRange = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("useRange").Value == "1" ? true : false;
-            // No camera lock
-            OptionCameraLock = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useNoCameraLock']").Attribute("enable").Value == "1" ? true : false;
-            // Infinite wall run
-            OptionWallRun = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useNoWallRunStamina']").Attribute("enable").Value == "1" ? true : false;
-            // enable clipboard
-            OptionClipboard = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useWindowClipboard']").Attribute("enable").Value == "1" ? true : false;
-            // Disable respawn on death
-            OptionACRespawn = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("TurnOffOnDeath").Value == "1" ? true : false;
-            // AC Range value
-            OptionRangeValue = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("range").Value;
+                // Auto Bait
+                OptionAutoBait = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useAutoBait']").Attribute("enable").Value == "1" ? true : false;
+                // Marketplace anywhere
+                OptionMPAnywhere = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useMarketplace']").Attribute("enable").Value == "1" ? true : false;
+                // Raise received items cap
+                OptionItemsCap = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useItemCap']").Attribute("enable").Value == "1" ? true : false;
+                // Auto combat anywhere
+                OptionAutoCombat = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("enable").Value == "1" ? true : false;
+                // Use custom range
+                OptionCustomRange = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("useRange").Value == "1" ? true : false;
+                // No camera lock
+                OptionCameraLock = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useNoCameraLock']").Attribute("enable").Value == "1" ? true : false;
+                // Infinite wall run
+                OptionWallRun = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useNoWallRunStamina']").Attribute("enable").Value == "1" ? true : false;
+                // enable clipboard
+                OptionClipboard = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useWindowClipboard']").Attribute("enable").Value == "1" ? true : false;
+                // Disable respawn on death
+                OptionACRespawn = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("TurnOffOnDeath").Value == "1" ? true : false;
+                // AC Range value
+                OptionRangeValue = _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("range").Value;
+                // Auto Talisman
+                if (_xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']") == null)
+                {
+                    _xmlModel.qol.Descendants("options").Last().Add(new XElement("option",
+                                                                                 new XAttribute("name", "autoTalisman"),
+                                                                                 new XAttribute("enable", "0"),
+                                                                                 new XAttribute("onlyOnSkills", "0")));
+                }
+                else
+                {
+                    OptionAutoTalisman = _xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']").Attribute("enable").Value == "1" ? true : false;
+                    if (_xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']").Attribute("onlyOnSkills") == null)
+                    {
+                        var node = _xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']");
+                        if (node.Attribute("onlyOnskills") == null)
+                            node.Add(new XAttribute("onlyOnSkills", "0"));
+                    }
+                    OptionTalismanOnlyonSkills = _xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']").Attribute("onlyOnSkills").Value == "1" ? true : false;
+                }
 
-            if (skillData.Count > 0)
+                if (skillData.Count > 0)
+                {
+                    await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
+                    {
+                        SkillCollection = new ObservableCollection<SkillData>(skillData);
+                    }));
+                }
+
+                GCD_MODE = (QOL_GCD_MODE)int.Parse(_xmlModel.qol.XPathSelectElement("config/gcd").Attribute("ignorePing").Value);
+
+                DebugModeEnabled = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useDebug']").Attribute("enable").Value == "1";
+                IsGCDEnabled = _xmlModel.qol.XPathSelectElement("config/gcd").Attribute("enable").Value == "1";
+                DisableQolUpdate = _settings.Account.AUTPATCH_QOL;
+            } catch (Exception ex)
             {
-                await Application.Current.Dispatcher.BeginInvoke(new Action(() =>
-                {
-                    SkillCollection = new ObservableCollection<SkillData>(skillData);
-                }));
+                _messageService.Enqueue(new MessageService.MessagePrompt { Message = "There was an error loading multitool_qol.xml, check logs for more information.", IsError = true, UseBold = false });
+                _logger.LogError(ex, "Error loading QOL");
             }
-
-            GCD_MODE = (QOL_GCD_MODE)int.Parse(_xmlModel.qol.XPathSelectElement("config/gcd").Attribute("ignorePing").Value);
-
-            DebugModeEnabled = _xmlModel.qol.XPathSelectElement("config/options/option[@name='useDebug']").Attribute("enable").Value == "1";
-            IsGCDEnabled = _xmlModel.qol.XPathSelectElement("config/gcd").Attribute("enable").Value == "1";
-            DisableQolUpdate = _settings.Account.AUTPATCH_QOL == 1 ? true : false;
         }
 
         [RelayCommand]
@@ -203,6 +240,8 @@ namespace BnS_Multitool.ViewModels
                 _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("enable").Value = OptionAutoCombat ? "1" : "0";
                 _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("useRange").Value = OptionCustomRange ? "1" : "0";
                 _xmlModel.qol.XPathSelectElement("config/options/option[@name='AutoCombat']").Attribute("range").Value = OptionRangeValue;
+                _xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']").Attribute("enable").Value = OptionAutoTalisman ? "1" : "0";
+                _xmlModel.qol.XPathSelectElement("config/options/option[@name='autoTalisman']").Attribute("onlyOnSkills").Value = OptionTalismanOnlyonSkills ? "1" : "0";
 
                 _xmlModel.qol.XPathSelectElement("config/options/option[@name='useNoCameraLock']").Attribute("enable").Value = OptionCameraLock ? "1" : "0";
                 _xmlModel.qol.XPathSelectElement("config/options/option[@name='useNoWallRunStamina']").Attribute("enable").Value = OptionWallRun ? "1" : "0";
@@ -213,11 +252,17 @@ namespace BnS_Multitool.ViewModels
                 _xmlModel.qol.XPathSelectElement("config/gcd").Attribute("ignorePing").Value = ((int)GCD_MODE).ToString();
                 _xmlModel.Save(XmlModel.XML.QOL);
 
-                if (DisableQolUpdate != (_settings.Account.AUTPATCH_QOL == 1 ? true : false))
+                if (DisableQolUpdate != _settings.Account.AUTPATCH_QOL)
+                {
+                    _settings.Account.AUTPATCH_QOL = DisableQolUpdate;
                     _settings.Save(Settings.CONFIG.Account);
+                }
+
+                _messageService.Enqueue(new MessageService.MessagePrompt { Message = "Settings saved!", UseBold = true, IsError = false });
 
             } catch (Exception ex)
             {
+                _messageService.Enqueue(new MessageService.MessagePrompt { Message = "There was an error saving multitool_qol.xml, check logs for more information.", IsError = true, UseBold = false });
                 _logger.LogError(ex, "Error saving QOL document");
             }
         }

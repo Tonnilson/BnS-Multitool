@@ -199,7 +199,7 @@
                     <DataGridTextColumn Header="Description" Binding="{Binding description}" Width="250"/>
                 </DataGrid.Columns>
             </DataGrid>
-            <CheckBox IsChecked="{Binding OptionAutoBait}" Height="21" Width="200" Content="All Fishing bait all" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="12,307,448,162">
+            <CheckBox IsChecked="{Binding OptionAutoBait}" Height="21" Width="200" Content="All Fishing bait auto" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="12,307,448,162">
                 <CheckBox.ToolTip>
                     <StackPanel>
                         <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">All Fishing bait auto</TextBlock>
@@ -269,10 +269,32 @@
             <CheckBox IsChecked="{Binding OptionClipboard}" Height="21" Width="200" Content="Enable Clipboard" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="245,307,215,162">
                 <CheckBox.ToolTip>
                     <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">All Fishing bait auto</TextBlock>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Enable Clipboard</TextBlock>
                         <TextBlock>
-                Turns all fishing bait into auto-bait.
+       Enables the ability to use windows Clipboard in-game so you can copy-paste outside of the game into the game.
                         </TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                        <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
+            <CheckBox IsChecked="{Binding OptionAutoTalisman}" Height="21" Width="200" Content="Enable Auto Talisman" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="450,307,10,162">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Auto Talismans</TextBlock>
+                        <TextBlock>
+                Will automatically use talisman on certain skills or while in a combat session after using it once.
+                        </TextBlock>
+                        <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
+                        <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
+                    </StackPanel>
+                </CheckBox.ToolTip>
+            </CheckBox>
+            <CheckBox IsChecked="{Binding OptionTalismanOnlyonSkills}" Height="21" Content="Only on Skills" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="483,333,10,136">
+                <CheckBox.ToolTip>
+                    <StackPanel>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5"><Run Text="Auto Talisman - Only on skills"/></TextBlock>
+                        <TextBlock><Run Text="Determines whether to only activate on skills."/></TextBlock>
                         <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                         <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
                     </StackPanel>
@@ -281,9 +303,9 @@
             <CheckBox IsChecked="{Binding OptionWallRun}" Height="21" Width="200" Content="Infinite Wall Run" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="245,333,215,136">
                 <CheckBox.ToolTip>
                     <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">All Fishing bait auto</TextBlock>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Infinite Wall Run</TextBlock>
                         <TextBlock>
-    Turns all fishing bait into auto-bait.
+       Removes stamina consumption while wall running.
                         </TextBlock>
                         <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                         <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
@@ -293,9 +315,13 @@
             <CheckBox IsChecked="{Binding OptionACRespawn}" Height="21" Content="Disable Auto Combat Respawn" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="245,359,206,110">
                 <CheckBox.ToolTip>
                     <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">All Fishing bait auto</TextBlock>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Disable Resurrection</TextBlock>
                         <TextBlock>
-    Turns all fishing bait into auto-bait.
+       Disables the auto-resurrection of Auto Combat so now when you die you will only auto-restore chi and not respawn.
+       <LineBreak/>
+        Can be changed while in-game with P config reload (Requires GCD to be ticked to Enabled!
+        <LineBreak/>
+       Don't ask me why people want this I won't understand
                         </TextBlock>
                         <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                         <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>
@@ -305,9 +331,11 @@
             <CheckBox IsChecked="{Binding OptionCameraLock}" Height="21" Content="No Camera Lock" FontFamily="Arial" FontWeight="Bold" Foreground="White" Margin="245,385,206,84">
                 <CheckBox.ToolTip>
                     <StackPanel>
-                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">All Fishing bait auto</TextBlock>
+                        <TextBlock FontWeight="Bold" FontSize="14" Margin="0,0,0,5">Remove Camera Lock</TextBlock>
                         <TextBlock>
-Turns all fishing bait into auto-bait.
+       Removes camera lock from skills that would otherwise lock your camera. Skills that lock your character in place are not effected by this.
+        <LineBreak/>
+        Example: Astromancer stormweaver spec skills (2/3/4) lock your camera, preventing you from turning.
                         </TextBlock>
                         <Border BorderBrush="Silver" BorderThickness="0,1,0,0" Margin="0,8" />
                         <TextBlock Text="Requires latest version of multitool_qol plugin" FontWeight="Bold"/>

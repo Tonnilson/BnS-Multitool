@@ -22,20 +22,20 @@ namespace BnS_Multitool.Models
 
         public class PluginInfo
         {
-            public string Name { get; set; }
-            public string Author { get; set; }
-            public string Title { get; set; }
-            public string Hash { get; set; }
-            public string FullName { get; set; }
-            public string MEGA { get; set; }
-            public string FilePath { get; set; }
+            public string? Name { get; set; }
+            public string? Author { get; set; }
+            public string? Title { get; set; }
+            public string? Hash { get; set; }
+            public string? FullName { get; set; }
+            public string? MEGA { get; set; }
+            public string? FilePath { get; set; }
             public long Date { get; set; }
-            public string Description { get; set; }
+            public string? Description { get; set; }
             public System.Windows.Media.Brush FontColor { get; set; }
-            public string DateLocal { get; set; }
-            public string[] Regions { get; set; }
-            public bool Hide { get; set; }
-            public bool Deprecated { get; set; }
+            public string? DateLocal { get; set; }
+            public string[]? Regions { get; set; }
+            public bool Hide { get; set; } = false;
+            public bool Deprecated { get; set; } = false;
         }
 
         public class AvailablePlugins
@@ -79,8 +79,8 @@ namespace BnS_Multitool.Models
             var plugin = Plugins.PluginInfo.FirstOrDefault(x => x.Name == pluginName);
             if (plugin == null) return false;
 
-            string luginPath = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, plugin.FilePath));
-            return File.Exists(luginPath = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, plugin.FilePath)));
+            string pluginPath = Path.GetFullPath(Path.Combine(_settings.System.BNS_DIR, plugin.FilePath));
+            return File.Exists(pluginPath);
         }
 
         public async Task<bool> InstallPlugin(PluginInfo plugin)
@@ -143,7 +143,7 @@ namespace BnS_Multitool.Models
                 // Special condition for multitool_qol since I moved it into the normal plugin system
                 if (plugin.Name == "multitool_qol")
                 {
-                    if (_settings.Account.AUTPATCH_QOL == 1) continue; // Skip
+                    if (_settings.Account.AUTPATCH_QOL) continue; // Skip
 
                     if (File.Exists(pluginPath))
                     {

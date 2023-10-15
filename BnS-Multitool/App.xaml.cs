@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Reflection;
 using CommunityToolkit.Mvvm.Input;
+using System.Globalization;
+using System.Threading;
 
 namespace BnS_Multitool
 {
@@ -104,6 +106,15 @@ namespace BnS_Multitool
             // Make the tooltip stay on screen till hover is over.
             ToolTipService.ShowDurationProperty.OverrideMetadata(
                 typeof(DependencyObject), new FrameworkPropertyMetadata(int.MaxValue));
+
+            CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name);
+            if (ci.NumberFormat.NumberDecimalSeparator != ".")
+            {
+                // Forcing use of decimal separator for numerical values
+                ci.NumberFormat.NumberDecimalSeparator = ".";
+                Thread.CurrentThread.CurrentCulture = ci;
+                Thread.CurrentThread.CurrentUICulture = ci;
+            }
 
             MainWindow = _serviceProvider.GetRequiredService<InitScreen>();
             MainWindow.Show();

@@ -1,16 +1,16 @@
-﻿using BnS_Multitool.Models;
-using BnS_Multitool.Services;
+﻿using BnS_Multitool.Messages;
+using BnS_Multitool.Models;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Extensions.Logging;
-using System;
+using CommunityToolkit.Mvvm.Messaging;
+using System.Diagnostics;
 
 namespace BnS_Multitool.ViewModels
 {
     public partial class MainPageViewModel : ObservableObject
     {
         [ObservableProperty]
-        private string changeLogSource = "Hello World";
+        private string changeLogSource = "Retreiving...";
 
         [ObservableProperty]
         private string pingStatus;
@@ -20,16 +20,10 @@ namespace BnS_Multitool.ViewModels
 
         public bool IsViewLoaded = false;
         private readonly MultiTool _mt;
-        private readonly Settings _settings;
-        private readonly httpClient _httpClient;
-        private readonly ILogger<MainPageViewModel> _logger;
 
-        public MainPageViewModel(MultiTool mt, Settings settings, httpClient http, ILogger<MainPageViewModel> logger)
+        public MainPageViewModel(MultiTool mt)
         {
             _mt = mt;
-            _settings = settings;
-            _httpClient = http;
-            _logger = logger;
         }
 
         [RelayCommand]
@@ -48,18 +42,13 @@ namespace BnS_Multitool.ViewModels
            //WeakReferenceMessenger.Default.Send(new ShowMessagePrompt(new MessagePrompt { Message = "Test from MainPageViewModel", IsError = true, UseBold = true }));
         }
 
-        private void OnlineUsers_Tick(object? sender)
-        {
-            try
-            {
-                var response = _httpClient.DownloadString($"{Properties.Settings.Default.MainServerAddr}usersOnline.php?UID={_settings.System.FINGERPRINT}").GetAwaiter().GetResult();
-                int users = int.Parse(response);
-                UsersOnlineStatus = $"Users Online: {users:N0}";
-            } catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error with retrieving online users number");
-                UsersOnlineStatus = "Users Online: Error";
-            }
-        }
+        [RelayCommand]
+        void QuickPlay() => WeakReferenceMessenger.Default.Send(new LaunchMessage(0));
+
+        [RelayCommand]
+        void OpenPayPal() => Process.Start(new ProcessStartInfo(@"https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=DZ8KL2ZDS44JC&source=url") { UseShellExecute = true });
+
+        [RelayCommand]
+        void OpenPatreon() => Process.Start(new ProcessStartInfo(@"https://patreon.com/tonnilson") { UseShellExecute = true });
     }
 }

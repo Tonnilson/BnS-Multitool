@@ -304,8 +304,10 @@ namespace BnS_Multitool.ViewModels
 
                         _settings.Sync.AUTH_REFRESH = refresh.refresh_token;
                         _settings.Sync.AUTH_KEY = refresh.access_token;
+                        _settings.Sync.EXPIRES = DateTime.Now.AddSeconds(refresh.expires_in);
                         _sync.Auth_Token = refresh.access_token;
                         await _sync.AuthDiscordAsync();
+                        await _settings.SaveAsync(Settings.CONFIG.Sync);
                     }
 
                     if (_sync.Authorized)

@@ -59,8 +59,8 @@ namespace BnS_Multitool.Models
 
     public class SyncClient
     {
-        public string PublishXML_URL { get { return "http://sync.bns.tools/publish/?action=publish"; } }
-        public string RemoveXML_URL { get { return "http://sync.bns.tools/removeXML"; } }
+        public string PublishXML_URL { get { return "https://sync.bns.tools/publish/?action=publish"; } }
+        public string RemoveXML_URL { get { return "https://sync.bns.tools/removeXML"; } }
         public string Auth_Token { get; set; }
         private bool authorized { get; set; }
 
@@ -161,7 +161,7 @@ namespace BnS_Multitool.Models
             foreach (string key in queryString.Keys)
                 postData += string.Format("{0}={1}&", key, queryString.Get(key));
 
-            string WEB_ADDR = string.Format("http://sync.bns.tools/xmls/?{0}", postData);
+            string WEB_ADDR = string.Format("https://sync.bns.tools/xmls/?{0}", postData);
             try
             {
                 var response = await _httpClient.DownloadString(WEB_ADDR);
@@ -253,7 +253,7 @@ namespace BnS_Multitool.Models
         /// <returns></returns>
         public async Task<string> Fetch_XMLAsync(int id, bool download = false)
         {
-            string WEB_ADDR = string.Format("http://sync.bns.tools/xmls/?id={0}&full{1}", id, download ? "&download" : string.Empty);
+            string WEB_ADDR = string.Format("https://sync.bns.tools/xmls/?id={0}&full{1}", id, download ? "&download" : string.Empty);
             string response = await _httpClient.DownloadString(WEB_ADDR);
             return response;
         }
@@ -314,7 +314,7 @@ namespace BnS_Multitool.Models
                     postData += string.Format("&{0}={1}", key, queryString.Get(key));
             }
 
-            string WEB_ADDR = string.Format("http://sync.bns.tools/publish/{0}", postData);
+            string WEB_ADDR = string.Format("https://sync.bns.tools/publish/{0}", postData);
             var response = await _httpClient.UploadFile(WEB_ADDR, this.File);
 
             return response;
@@ -347,11 +347,13 @@ namespace BnS_Multitool.Models
             if (_settings.Sync.AUTH_REFRESH == null)
                 return null;
 
-            NameValueCollection nvc = new NameValueCollection();
-            nvc.Add("client_id", Properties.Resources.discord_clientId);
-            nvc.Add("client_secret", Properties.Resources.discord_secret);
-            nvc.Add("refresh_token", _settings.Sync.AUTH_REFRESH);
-            nvc.Add("grant_type", "refresh_token");
+            NameValueCollection nvc = new NameValueCollection
+            {
+                { "client_id", Properties.Resources.discord_clientId },
+                { "client_secret", Properties.Resources.discord_secret },
+                { "refresh_token", _settings.Sync.AUTH_REFRESH },
+                { "grant_type", "refresh_token" }
+            };
 
             string postData = http_build_query(nvc);
 
